@@ -16,3 +16,5 @@ C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Infrastructure\obj\Debug\net
 C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Infrastructure\obj\Debug\net10.0\refint\YumeTrack.Infrastructure.dll
 C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Infrastructure\obj\Debug\net10.0\YumeTrack.Infrastructure.pdb
 C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Infrastructure\obj\Debug\net10.0\ref\YumeTrack.Infrastructure.dll
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Infrastructure\bin\Debug\net10.0\YumeTrack.Infrastructure.runtimeconfig.json
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Infrastructure\obj\Debug\net10.0\YumeTrack.Infrastructure.genruntimeconfig.cache

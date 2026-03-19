@@ -1,0 +1,19 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build
+bin/
+obj/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Config sensibles
+appsettings.Development.json
+.env
