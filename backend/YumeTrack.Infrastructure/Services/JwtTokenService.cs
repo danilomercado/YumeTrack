@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using YumeTrack.Application.Interfaces;
 using YumeTrack.Domain.Entities;
-using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
+
 namespace YumeTrack.Infrastructure.Services
 {
     public class JwtTokenService : IJwtTokenService

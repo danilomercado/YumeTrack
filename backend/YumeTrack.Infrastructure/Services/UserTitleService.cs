@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using YumeTrack.Application.DTOs.UserTitles;
 using YumeTrack.Application.Interfaces;
-using YumeTrack.Application.UserTitles;
 using YumeTrack.Domain.Entities;
 using YumeTrack.Infrastructure.Persistence;
 
@@ -20,12 +20,21 @@ namespace YumeTrack.Infrastructure.Services
 
         public async Task AddAsync(int userId, CreateUserTitleDto dto)
         {
+            // 🔴 1. Validar que el título exista
+            var titleExists = await _context.Titles
+                .AnyAsync(t => t.Id == dto.TitleId);
+
+            if (!titleExists)
+                throw new Exception("El título no existe en la base de datos.");
+
+            // 🔴 2. Validar duplicado (esto ya lo tenías bien)
             var exists = await _context.UserTitles
                 .AnyAsync(ut => ut.UserId == userId && ut.TitleId == dto.TitleId);
 
             if (exists)
                 throw new Exception("Ya tenes este título en tu lista.");
 
+            // 🔴 3. Crear
             var userTitle = new UserTitle
             {
                 UserId = userId,
