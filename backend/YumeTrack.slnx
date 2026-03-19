@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="YumeTrack.API/YumeTrack.API.csproj" />
+  <Project Path="YumeTrack.Application/YumeTrack.Application.csproj" />
+  <Project Path="YumeTrack.Domain/YumeTrack.Domain.csproj" />
+  <Project Path="YumeTrack.Infrastructure/YumeTrack.Infrastructure.csproj" />
+</Solution>

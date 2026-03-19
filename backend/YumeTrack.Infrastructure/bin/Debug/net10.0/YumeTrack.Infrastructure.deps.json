@@ -1,0 +1,56 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "YumeTrack.Infrastructure/1.0.0": {
+        "dependencies": {
+          "YumeTrack.Application": "1.0.0",
+          "YumeTrack.Domain": "1.0.0"
+        },
+        "runtime": {
+          "YumeTrack.Infrastructure.dll": {}
+        }
+      },
+      "YumeTrack.Application/1.0.0": {
+        "dependencies": {
+          "YumeTrack.Domain": "1.0.0"
+        },
+        "runtime": {
+          "YumeTrack.Application.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "YumeTrack.Domain/1.0.0": {
+        "runtime": {
+          "YumeTrack.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "YumeTrack.Infrastructure/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "YumeTrack.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "YumeTrack.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

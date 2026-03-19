@@ -1,0 +1,16 @@
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\bin\Debug\net10.0\YumeTrack.Application.deps.json
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\bin\Debug\net10.0\YumeTrack.Application.dll
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\bin\Debug\net10.0\YumeTrack.Application.pdb
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\bin\Debug\net10.0\YumeTrack.Domain.dll
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\bin\Debug\net10.0\YumeTrack.Domain.pdb
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\obj\Debug\net10.0\YumeTrack.Application.csproj.AssemblyReference.cache
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\obj\Debug\net10.0\YumeTrack.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\obj\Debug\net10.0\YumeTrack.Application.AssemblyInfoInputs.cache
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\obj\Debug\net10.0\YumeTrack.Application.AssemblyInfo.cs
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\obj\Debug\net10.0\YumeTrack.Application.csproj.CoreCompileInputs.cache
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\obj\Debug\net10.0\YumeTrack.Application.sourcelink.json
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\obj\Debug\net10.0\YumeTrac.34AAEE69.Up2Date
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\obj\Debug\net10.0\YumeTrack.Application.dll
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\obj\Debug\net10.0\refint\YumeTrack.Application.dll
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\obj\Debug\net10.0\YumeTrack.Application.pdb
+C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.Application\obj\Debug\net10.0\ref\YumeTrack.Application.dll
