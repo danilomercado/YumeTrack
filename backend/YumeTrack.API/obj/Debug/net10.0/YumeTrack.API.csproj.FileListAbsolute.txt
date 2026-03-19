@@ -170,4 +170,3 @@ C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.API\bin\Debug\net10.0\Npgsql
 C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.API\bin\Debug\net10.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.API\bin\Debug\net10.0\BCrypt.Net-Next.dll
 C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.API\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
-C:\Users\danilo\Desktop\YumeTrack\backend\YumeTrack.API\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt

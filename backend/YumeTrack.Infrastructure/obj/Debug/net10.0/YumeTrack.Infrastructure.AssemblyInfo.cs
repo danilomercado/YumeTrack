@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("YumeTrack.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e1fc805e10f9c090bf9927961ed3b79a018de1bc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cfa453d1385468b9efb443b041fc9d98f2c824c6")]
 [assembly: System.Reflection.AssemblyProductAttribute("YumeTrack.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("YumeTrack.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
