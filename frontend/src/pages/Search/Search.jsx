@@ -9,22 +9,22 @@ const Search = () => {
     {
       id: 1,
       title: "Hunter x Hunter",
-      image: "https://via.placeholder.com/300x420?text=Hunter+x+Hunter",
+      image: "https://placehold.co/300x420?text=Hunter+x+Hunter",
     },
     {
       id: 2,
       title: "Attack on Titan",
-      image: "https://via.placeholder.com/300x420?text=Attack+on+Titan",
+      image: "https://placehold.co/300x420?text=Attack+on+Titan",
     },
     {
       id: 3,
       title: "Death Note",
-      image: "https://via.placeholder.com/300x420?text=Death+Note",
+      image: "https://placehold.co/300x420?text=Death+Note",
     },
     {
       id: 4,
       title: "One Piece",
-      image: "https://via.placeholder.com/300x420?text=One+Piece",
+      image: "https://placehold.co/300x420?text=One+Piece",
     },
   ];
 

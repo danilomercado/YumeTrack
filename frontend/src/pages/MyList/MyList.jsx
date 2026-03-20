@@ -2,26 +2,26 @@ import React from "react";
 import TitleCard from "../../components/TitleCard/TitleCard";
 
 const MyList = () => {
-  const mockList = [
+  const mockTitles = [
     {
       id: 1,
-      title: "One Piece",
-      image: "https://via.placeholder.com/300x420?text=One+Piece",
+      title: "Hunter x Hunter",
+      image: "https://placehold.co/300x420?text=Hunter+x+Hunter",
     },
     {
       id: 2,
-      title: "Death Note",
-      image: "https://via.placeholder.com/300x420?text=Death+Note",
+      title: "Attack on Titan",
+      image: "https://placehold.co/300x420?text=Attack+on+Titan",
     },
     {
       id: 3,
-      title: "Naruto",
-      image: "https://via.placeholder.com/300x420?text=Naruto",
+      title: "Death Note",
+      image: "https://placehold.co/300x420?text=Death+Note",
     },
     {
       id: 4,
-      title: "Bleach",
-      image: "https://via.placeholder.com/300x420?text=Bleach",
+      title: "One Piece",
+      image: "https://placehold.co/300x420?text=One+Piece",
     },
   ];
 
@@ -36,7 +36,7 @@ const MyList = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {mockList.map((item) => (
+        {mockTitles.map((item) => (
           <TitleCard key={item.id} title={item.title} image={item.image} />
         ))}
       </div>

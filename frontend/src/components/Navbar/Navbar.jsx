@@ -1,9 +1,15 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 const Navbar = () => {
-  const { token, logout } = useAuth();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/80 backdrop-blur">
@@ -23,7 +29,7 @@ const Navbar = () => {
             Inicio
           </Link>
 
-          {!token && (
+          {!isAuthenticated && (
             <>
               <Link
                 to="/login"
@@ -41,7 +47,7 @@ const Navbar = () => {
             </>
           )}
 
-          {token && (
+          {isAuthenticated && (
             <>
               <Link
                 to="/search"
@@ -57,8 +63,14 @@ const Navbar = () => {
                 Mi lista
               </Link>
 
+              {user?.username && (
+                <span className="hidden rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-300 md:inline-block">
+                  {user.username}
+                </span>
+              )}
+
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:scale-[1.02]"
               >
                 Cerrar sesión
