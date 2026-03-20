@@ -1,6 +1,12 @@
 import React from "react";
 
-const TitleDetailModal = ({ title, isLoading, onClose, onAdd }) => {
+const TitleDetailModal = ({
+  title,
+  isLoading,
+  onClose,
+  onAdd,
+  isAdding = false,
+}) => {
   if (!title && !isLoading) return null;
 
   return (
@@ -78,10 +84,12 @@ const TitleDetailModal = ({ title, isLoading, onClose, onAdd }) => {
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => onAdd(title)}
-                  className="rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]"
+                  disabled={isAdding}
+                  className="mt-6 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Agregar a lista
+                  {isAdding ? "Agregando..." : "Agregar a lista"}
                 </button>
               </div>
             </div>
