@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using System.Text.Json;
 using YumeTrack.Application.DTOs.Kitsu;
 using YumeTrack.Application.Interfaces;
 
@@ -43,10 +36,24 @@ namespace YumeTrack.Infrastructure.Services
                     ? titleProp.GetString()
                     : "Sin título";
 
+                var synopsis = attributes.TryGetProperty("synopsis", out var synopsisProp)
+                    ? synopsisProp.GetString()
+                    : null;
+
                 var poster = attributes.TryGetProperty("posterImage", out var posterProp) &&
                              posterProp.TryGetProperty("medium", out var mediumProp)
                     ? mediumProp.GetString()
                     : null;
+
+                int? episodeCount = attributes.TryGetProperty("episodeCount", out var episodeProp) &&
+                                    episodeProp.ValueKind != JsonValueKind.Null
+                    ? episodeProp.GetInt32()
+                    : (int?)null;
+
+                int? chapterCount = attributes.TryGetProperty("chapterCount", out var chapterProp) &&
+                                    chapterProp.ValueKind != JsonValueKind.Null
+                    ? chapterProp.GetInt32()
+                    : (int?)null;
 
                 var id = int.TryParse(item.GetProperty("id").GetString(), out var parsedId)
                     ? parsedId
@@ -55,12 +62,67 @@ namespace YumeTrack.Infrastructure.Services
                 result.Add(new KitsuAnimeDto
                 {
                     Id = id,
-                    Title = title,
-                    PosterImage = poster
+                    Title = title ?? "Sin título",
+                    Synopsis = synopsis,
+                    PosterImage = poster,
+                    MediaType = "anime",
+                    EpisodeCount = episodeCount,
+                    ChapterCount = chapterCount
                 });
             }
 
             return result;
+        }
+
+        public async Task<KitsuAnimeDto?> GetAnimeByIdAsync(int id)
+        {
+            var response = await _httpClient.GetAsync($"anime/{id}");
+
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            using var doc = JsonDocument.Parse(json);
+
+            var data = doc.RootElement.GetProperty("data");
+
+            if (!data.TryGetProperty("attributes", out var attributes))
+                return null;
+
+            var title = attributes.TryGetProperty("canonicalTitle", out var titleProp)
+                ? titleProp.GetString()
+                : "Sin título";
+
+            var synopsis = attributes.TryGetProperty("synopsis", out var synopsisProp)
+                ? synopsisProp.GetString()
+                : null;
+
+            var poster = attributes.TryGetProperty("posterImage", out var posterProp) &&
+                         posterProp.TryGetProperty("medium", out var mediumProp)
+                ? mediumProp.GetString()
+                : null;
+
+            int? episodeCount = attributes.TryGetProperty("episodeCount", out var episodeProp) &&
+                                episodeProp.ValueKind != JsonValueKind.Null
+                ? episodeProp.GetInt32()
+                : (int?)null;
+
+            int? chapterCount = attributes.TryGetProperty("chapterCount", out var chapterProp) &&
+                                chapterProp.ValueKind != JsonValueKind.Null
+                ? chapterProp.GetInt32()
+                : (int?)null;
+
+            return new KitsuAnimeDto
+            {
+                Id = id,
+                Title = title ?? "Sin título",
+                Synopsis = synopsis,
+                PosterImage = poster,
+                MediaType = "anime",
+                EpisodeCount = episodeCount,
+                ChapterCount = chapterCount
+            };
         }
     }
 }

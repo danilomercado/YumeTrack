@@ -1,7 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using YumeTrack.Application.DTOs.UserTitles;
 using YumeTrack.Application.Interfaces;
 using YumeTrack.Domain.Entities;
@@ -12,36 +9,57 @@ namespace YumeTrack.Infrastructure.Services
     public class UserTitleService : IUserTitleService
     {
         private readonly AppDbContext _context;
+        private readonly IKitsuService _kitsuService;
 
-        public UserTitleService(AppDbContext context)
+        public UserTitleService(AppDbContext context, IKitsuService kitsuService)
         {
             _context = context;
+            _kitsuService = kitsuService;
         }
 
         public async Task AddAsync(int userId, CreateUserTitleDto dto)
         {
-            // 🔴 1. Validar que el título exista
-            var titleExists = await _context.Titles
-                .AnyAsync(t => t.Id == dto.TitleId);
+            var externalId = dto.KitsuId.ToString();
 
-            if (!titleExists)
-                throw new Exception("El título no existe en la base de datos.");
+            var title = await _context.Titles
+                .FirstOrDefaultAsync(t => t.ExternalId == externalId && t.Source == "kitsu");
 
-            // 🔴 2. Validar duplicado (esto ya lo tenías bien)
+            if (title == null)
+            {
+                var kitsuData = await _kitsuService.GetAnimeByIdAsync(dto.KitsuId);
+
+                if (kitsuData == null)
+                    throw new Exception("El anime no existe en Kitsu.");
+
+                title = new Title
+                {
+                    ExternalId = kitsuData.Id.ToString(),
+                    Source = "kitsu",
+                    CanonicalTitle = kitsuData.Title,
+                    Synopsis = kitsuData.Synopsis,
+                    PosterImageUrl = kitsuData.PosterImage,
+                    MediaType = kitsuData.MediaType,
+                    EpisodeCount = kitsuData.EpisodeCount,
+                    ChapterCount = kitsuData.ChapterCount
+                };
+
+                _context.Titles.Add(title);
+                await _context.SaveChangesAsync();
+            }
+
             var exists = await _context.UserTitles
-                .AnyAsync(ut => ut.UserId == userId && ut.TitleId == dto.TitleId);
+                .AnyAsync(ut => ut.UserId == userId && ut.TitleId == title.Id);
 
             if (exists)
-                throw new Exception("Ya tenes este título en tu lista.");
+                throw new Exception("Ya tenés este título en tu lista.");
 
-            // 🔴 3. Crear
             var userTitle = new UserTitle
             {
                 UserId = userId,
-                TitleId = dto.TitleId,
+                TitleId = title.Id,
                 Status = dto.Status,
                 Progress = 0,
-                IsFavorite = false,
+                IsFavorite = false
             };
 
             _context.UserTitles.Add(userTitle);
