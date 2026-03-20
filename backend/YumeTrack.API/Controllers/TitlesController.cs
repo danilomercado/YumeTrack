@@ -28,5 +28,11 @@ namespace YumeTrack.API.Controllers
 
             return Ok(anime);
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            var result = await _kitsuService.SearchTitlesAsync(query);
+            return Ok(result);
+        }
     }
 }

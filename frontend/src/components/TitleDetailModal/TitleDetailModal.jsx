@@ -1,128 +1,95 @@
-import React, { useEffect, useState } from "react";
-import SearchBar from "../../components/SearchBar/SearchBar";
-import TitleCard from "../../components/TitleCard/TitleCard";
-import TitleDetailModal from "../../components/TitleDetailModal/TitleDetailModal";
-import { searchTitlesRequest } from "../../services/searchService";
+import React from "react";
 
-const Search = () => {
-  const [query, setQuery] = useState("");
-  const [titles, setTitles] = useState([]);
-  const [selectedTitle, setSelectedTitle] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    const trimmedQuery = query.trim();
-
-    if (!trimmedQuery) {
-      setTitles([]);
-      setErrorMessage("");
-      return;
-    }
-
-    const timeoutId = setTimeout(async () => {
-      try {
-        setIsLoading(true);
-        setErrorMessage("");
-
-        const data = await searchTitlesRequest(trimmedQuery);
-        setTitles(data);
-      } catch (error) {
-        const backendMessage =
-          error.response?.data?.message ||
-          error.response?.data ||
-          "No se pudo realizar la búsqueda.";
-
-        setErrorMessage(
-          typeof backendMessage === "string"
-            ? backendMessage
-            : "No se pudo realizar la búsqueda.",
-        );
-
-        setTitles([]);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [query]);
-
-  const handleOpenDetail = (item) => {
-    setSelectedTitle(item);
-  };
-
-  const handleCloseDetail = () => {
-    setSelectedTitle(null);
-  };
-
-  const handleAddToList = (item) => {
-    console.log("Agregar a lista:", item);
-  };
+const TitleDetailModal = ({ title, isLoading, onClose, onAdd }) => {
+  if (!title && !isLoading) return null;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      <div className="mb-8">
-        <p className="text-sm uppercase tracking-[0.25em] text-violet-300">
-          Explorar
-        </p>
-        <h1 className="mt-2 text-4xl font-black">Buscar anime o manga</h1>
-        <p className="mt-3 text-zinc-400">
-          Encontrá títulos y agregalos a tu lista.
-        </p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6">
+      <div className="w-full max-w-4xl rounded-3xl border border-white/10 bg-zinc-900 p-6 text-white shadow-2xl">
+        {isLoading ? (
+          <div className="py-16 text-center text-zinc-300">
+            Cargando detalle...
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-[260px_1fr]">
+            <div>
+              <img
+                src={
+                  title?.posterImage ||
+                  "https://placehold.co/300x420?text=Sin+imagen"
+                }
+                alt={title?.title || "Sin título"}
+                className="h-full w-full rounded-2xl object-cover"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-3xl font-black">
+                    {title?.title || "Sin título"}
+                  </h2>
+
+                  <div className="mt-3 flex flex-wrap gap-2 text-sm text-zinc-300">
+                    {title?.mediaType && (
+                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                        {title.mediaType}
+                      </span>
+                    )}
+
+                    {title?.episodeCount != null && (
+                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                        Episodios: {title.episodeCount}
+                      </span>
+                    )}
+
+                    {title?.chapterCount != null && (
+                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                        Capítulos: {title.chapterCount}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  onClick={onClose}
+                  className="rounded-xl border border-white/10 px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/5"
+                >
+                  Cerrar
+                </button>
+              </div>
+
+              <div className="mt-6">
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-violet-300">
+                  Sinopsis
+                </h3>
+
+                <p className="max-h-[280px] overflow-y-auto pr-2 leading-7 text-zinc-300">
+                  {title?.synopsis || "Sin sinopsis disponible."}
+                </p>
+              </div>
+
+              <div className="mt-8 flex justify-end gap-3">
+                <button
+                  onClick={onClose}
+                  className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 transition hover:bg-white/5"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  onClick={() => onAdd(title)}
+                  className="rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]"
+                >
+                  Agregar a lista
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-      <SearchBar
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-      />
-
-      {errorMessage && (
-        <div className="mt-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-          {errorMessage}
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
-          Buscando títulos...
-        </div>
-      )}
-
-      {!isLoading && !errorMessage && query.trim() && titles.length === 0 && (
-        <div className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-400">
-          No se encontraron resultados.
-        </div>
-      )}
-
-      {!query.trim() && (
-        <div className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-400">
-          Escribí el nombre de un anime o manga para buscar.
-        </div>
-      )}
-
-      {titles.length > 0 && (
-        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {titles.map((item) => (
-            <TitleCard
-              key={item.id}
-              title={item.title}
-              image={item.posterImage}
-              buttonText="Agregar"
-              onCardClick={() => handleOpenDetail(item)}
-              onClickButton={() => handleAddToList(item)}
-            />
-          ))}
-        </div>
-      )}
-
-      <TitleDetailModal
-        title={selectedTitle}
-        onClose={handleCloseDetail}
-        onAdd={handleAddToList}
-      />
-    </main>
+    </div>
   );
 };
 
-export default Search;
+export default TitleDetailModal;

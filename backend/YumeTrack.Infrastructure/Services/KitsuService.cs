@@ -27,7 +27,7 @@ namespace YumeTrack.Infrastructure.Services
             return null;
         }
 
-        public async Task<List<TitleSearchResultDto>> SearchAnimeAsync(string query)
+        public async Task<List<TitleSearchResultDto>> SearchTitlesAsync(string query)
         {
             var response = await _httpClient.GetAsync($"anime?filter[text]={Uri.EscapeDataString(query)}");
 

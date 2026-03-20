@@ -5,7 +5,7 @@ namespace YumeTrack.Application.Interfaces
 {
     public interface IKitsuService
     {
-        Task<List<TitleSearchResultDto>> SearchAnimeAsync(string query);
+        Task<List<TitleSearchResultDto>> SearchTitlesAsync(string query);
         Task<KitsuAnimeDto?> GetAnimeByIdAsync(string id, CancellationToken cancellationToken = default);
     }
 }

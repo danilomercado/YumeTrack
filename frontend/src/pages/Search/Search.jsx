@@ -3,8 +3,8 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import TitleCard from "../../components/TitleCard/TitleCard";
 import TitleDetailModal from "../../components/TitleDetailModal/TitleDetailModal";
 import {
-  getTitleDetailRequest,
   searchTitlesRequest,
+  getTitleDetailRequest,
 } from "../../services/searchService";
 
 const Search = () => {
@@ -30,7 +30,7 @@ const Search = () => {
         setErrorMessage("");
 
         const data = await searchTitlesRequest(trimmedQuery);
-        setTitles(data);
+        setTitles(Array.isArray(data) ? data : []);
       } catch (error) {
         const backendMessage =
           error.response?.data?.message ||
@@ -59,6 +59,7 @@ const Search = () => {
       setSelectedTitle(detail);
     } catch (error) {
       console.error("Error al obtener detalle:", error);
+      setErrorMessage("No se pudo cargar el detalle del título.");
     } finally {
       setIsDetailLoading(false);
     }
@@ -128,16 +129,9 @@ const Search = () => {
         </div>
       )}
 
-      {isDetailLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <div className="rounded-2xl border border-white/10 bg-zinc-900 px-6 py-4 text-white">
-            Cargando detalle...
-          </div>
-        </div>
-      )}
-
       <TitleDetailModal
         title={selectedTitle}
+        isLoading={isDetailLoading}
         onClose={handleCloseDetail}
         onAdd={handleAddToList}
       />
