@@ -1,12 +1,16 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const AuthContext = createContext();
+
+const normalizeUser = (rawUser) => {
+  if (!rawUser) return null;
+
+  return {
+    id: rawUser.id ?? null,
+    userName: rawUser.userName ?? rawUser.username ?? rawUser.name ?? "",
+    email: rawUser.email ?? "",
+  };
+};
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
@@ -22,7 +26,8 @@ export const AuthProvider = ({ children }) => {
     }
 
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      setUser(normalizeUser(parsedUser));
     }
 
     setIsLoading(false);
@@ -30,15 +35,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = (authData) => {
     const newToken = authData.token;
-    const newUser = authData.user ?? null;
+
+    const newUser = {
+      userName: authData.userName,
+      email: authData.email,
+    };
 
     localStorage.setItem("token", newToken);
-
-    if (newUser) {
-      localStorage.setItem("user", JSON.stringify(newUser));
-    } else {
-      localStorage.removeItem("user");
-    }
+    localStorage.setItem("user", JSON.stringify(newUser));
 
     setToken(newToken);
     setUser(newUser);

@@ -7,6 +7,7 @@ import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import Search from "../pages/Search/Search";
 import MyList from "../pages/MyList/MyList";
+import Profile from "../pages/Profile/Profile";
 
 const AppRouter = () => {
   return (
@@ -32,6 +33,15 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <MyList />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />

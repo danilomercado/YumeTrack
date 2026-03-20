@@ -63,9 +63,16 @@ const Navbar = () => {
                 Mi lista
               </Link>
 
-              {user?.username && (
+              <Link
+                to="/profile"
+                className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
+              >
+                Perfil
+              </Link>
+
+              {user?.userName && (
                 <span className="hidden rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-300 md:inline-block">
-                  {user.username}
+                  {user.userName}
                 </span>
               )}
 
