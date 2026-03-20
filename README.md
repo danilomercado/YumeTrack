@@ -1,199 +1,169 @@
-# 🌙 YumeTrack
+🎌 YumeTrack
 
-Aplicación full stack para trackear anime y manga.
-Permite a los usuarios buscar títulos, guardarlos y gestionar su progreso, puntuación y favoritos.
+Aplicación web full stack para el seguimiento y gestión de anime y manga, inspirada en plataformas como AniList y MyAnimeList.
 
----
+🚀 Descripción
 
-## 🚀 Stack Tecnológico
+YumeTrack permite a los usuarios registrarse, iniciar sesión y gestionar su lista personal de anime y manga.
 
-### Frontend
+Incluye funcionalidades como:
 
-- React (Vite)
-- TailwindCSS
+estados (viendo, completado, en pausa, pendiente)
 
-### Backend
+progreso (episodios/capítulos)
 
-- ASP.NET Core Web API (.NET)
-- Clean Architecture
+puntuación
 
-### Base de Datos
+favoritos
 
-- SQL Server
-- Entity Framework Core
+El sistema integra la API de Kitsu para obtener información actualizada y un servicio de traducción automática para adaptar sinopsis al español.
 
-### API Externa
+🧱 Arquitectura
 
-- Kitsu API
+El proyecto sigue Clean Architecture, separando responsabilidades en:
 
----
+Domain
 
-## ✨ Features
+Application
 
-- 🔐 Autenticación con JWT
-- 🔎 Búsqueda de anime/manga
-- 📚 Lista personal (watchlist / reading list)
-- 📊 Seguimiento de progreso
-- ⭐ Sistema de puntuación
-- ❤️ Favoritos
-- 🌐 Preparado para deploy en la nube
+Infrastructure
 
----
+API
 
-## 📁 Estructura del Proyecto
+Esto permite un código mantenible, escalable y desacoplado.
 
-```
-/backend
-  /src
-    /Domain
-    /Application
-    /Infrastructure
-    /API
+⚙️ Tecnologías
+Frontend
 
-/frontend
-```
+React
 
----
+JavaScript
 
-## ⚙️ Configuración
+Tailwind CSS
 
-## 1. Clonar el repositorio
+Backend
 
-```bash
-git clone https://github.com/tu-usuario/yumetrack.git
-cd yumetrack
-```
+ASP.NET Core
 
----
+C#
 
-## 🔧 Backend (.NET)
+Entity Framework Core
 
-### 2. Ir al backend
+JWT Authentication
 
-```bash
+Base de datos
+
+SQL / PostgreSQL
+
+Integraciones
+
+Kitsu API (anime/manga)
+
+API de traducción (sinopsis en español)
+
+✨ Funcionalidades
+
+🔐 Registro e inicio de sesión con JWT
+
+🔎 Búsqueda de anime y manga
+
+🌐 Traducción automática de sinopsis
+
+📄 Visualización de detalles
+
+⭐ Gestión de lista personal
+
+🔄 CRUD completo de títulos
+
+🔗 Integración frontend-backend con APIs REST
+
+🛠️ Instalación y ejecución
+1. Clonar repositorio
+git clone https://github.com/TU-USUARIO/YumeTrack.git
+cd YumeTrack
+2. Backend (.NET)
 cd backend
-```
+dotnet restore
+dotnet build
+dotnet run
 
-### 3. Abrir la solución
+API disponible en:
 
-```bash
-start YumeTrack.sln
-```
-
----
-
-### 4. Configurar variables (user-secrets)
-
-```bash
-dotnet user-secrets init
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "TU_CONNECTION_STRING"
-dotnet user-secrets set "Jwt:Key" "TU_SECRET_KEY"
-```
-
----
-
-### 5. Aplicar migraciones
-
-```bash
-dotnet ef database update
-```
-
----
-
-### 6. Ejecutar API
-
-```bash
-dotnet run --project src/API
-```
-
-👉 API disponible en:
 https://localhost:5001
-
----
-
-## 🎨 Frontend (React)
-
-### 7. Ir al frontend
-
-```bash
-cd ../frontend
-```
-
-### 8. Instalar dependencias
-
-```bash
+3. Frontend (React)
+cd frontend
 npm install
-```
-
----
-
-### 9. Crear archivo .env
-
-```bash
-touch .env
-```
-
-Contenido:
-
-```env
-VITE_API_URL=https://localhost:5001
-```
-
----
-
-### 10. Ejecutar frontend
-
-```bash
 npm run dev
-```
 
-👉 App disponible en:
+App disponible en:
+
 http://localhost:5173
+🔐 Autenticación
 
----
+Se implementa autenticación mediante JWT:
 
-## 🔐 Variables de Entorno
+Login / Register
 
-### Backend (User Secrets / Producción)
+Protección de endpoints
 
-- ConnectionStrings
-- Jwt
+Gestión de sesión en frontend
 
-### Frontend (.env)
+📦 API Endpoints principales
+Auth
 
-- VITE_API_URL
+POST /api/Auth/register
 
----
+POST /api/Auth/login
 
-## ☁️ Deploy (visión general)
+Titles
 
-- Backend → Azure App Service / AWS
-- DB → Azure SQL / AWS RDS
-- Frontend → Vercel / Netlify
+GET /api/Titles/search
 
----
+GET /api/Titles/anime/{id}
 
-## 🧠 Buenas prácticas aplicadas
+GET /api/Titles/manga/{id}
 
-- Clean Architecture
-- Separación por capas
-- Configuración por entorno
-- Manejo de errores global
-- Código desacoplado
-- Uso de DTOs
+UserTitles
 
----
+POST /api/UserTitles
 
-## 📌 Roadmap
+GET /api/UserTitles
 
-- [ ] Sistema de reviews
-- [ ] Recomendaciones con IA
-- [ ] Calendario de emisiones
-- [ ] Noticias de anime
-- [ ] Social (seguir usuarios)
+PUT /api/UserTitles/{id}
 
----
+DELETE /api/UserTitles/{id}
 
-## 👨‍💻 Autor
+📌 Estado del proyecto
+
+🚧 En desarrollo activo
+
+Próximas mejoras:
+
+Perfil de usuario editable
+
+Catálogo completo sin búsqueda
+
+Sistema de foro/comunidad
+
+Recomendaciones personalizadas
+
+Mejoras de UI/UX
+
+📷 Preview
+
+(Agregar screenshots del proyecto acá)
+
+👨‍💻 Autor
 
 Danilo Mercado
+Full Stack Developer Jr.
+
+Rosario, Argentina
+
+LinkedIn: (agregar link)
+
+GitHub: (agregar link)
+
+📄 Licencia
+
+Este proyecto es de uso educativo y portfolio personal.
