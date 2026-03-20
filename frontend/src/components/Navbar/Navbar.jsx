@@ -1,6 +1,11 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+
+const navLinkClass = ({ isActive }) =>
+  `text-sm font-medium transition ${
+    isActive ? "text-white" : "text-zinc-400 hover:text-white"
+  }`;
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -13,78 +18,75 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Link
-          to="/"
-          className="bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-2xl font-extrabold text-transparent"
-        >
-          YumeTrack
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link to="/" className="text-2xl font-black tracking-tight text-white">
+          <span className="bg-gradient-to-r from-violet-400 to-pink-500 bg-clip-text text-transparent">
+            YumeTrack
+          </span>
         </Link>
 
-        <nav className="flex items-center gap-2 sm:gap-4">
-          <Link
-            to="/"
-            className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
-          >
-            Inicio
-          </Link>
-
-          {!isAuthenticated && (
-            <>
-              <Link
-                to="/login"
-                className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
-              >
-                Ingresar
-              </Link>
-
-              <Link
-                to="/register"
-                className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
-              >
-                Registrarse
-              </Link>
-            </>
-          )}
-
-          {isAuthenticated && (
-            <>
-              <Link
-                to="/search"
-                className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
-              >
+        {isAuthenticated ? (
+          <>
+            <nav className="hidden items-center gap-8 md:flex">
+              <NavLink to="/" className={navLinkClass}>
+                Inicio
+              </NavLink>
+              <NavLink to="/search" className={navLinkClass}>
                 Buscar
-              </Link>
-
-              <Link
-                to="/my-list"
-                className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
-              >
+              </NavLink>
+              <NavLink to="/catalog" className={navLinkClass}>
+                Catálogo
+              </NavLink>
+              <NavLink to="/my-list" className={navLinkClass}>
                 Mi lista
-              </Link>
+              </NavLink>
+            </nav>
 
-              <Link
+            <div className="flex items-center gap-3">
+              <NavLink
                 to="/profile"
-                className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
+                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
               >
-                Perfil
-              </Link>
-
-              {user?.userName && (
-                <span className="hidden rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-300 md:inline-block">
-                  {user.userName}
-                </span>
-              )}
+                {user?.userName || "Perfil"}
+              </NavLink>
 
               <button
+                type="button"
                 onClick={handleLogout}
-                className="rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:scale-[1.02]"
+                className="rounded-xl bg-gradient-to-r from-violet-600 to-pink-500 px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
               >
                 Cerrar sesión
               </button>
-            </>
-          )}
-        </nav>
+            </div>
+          </>
+        ) : (
+          <>
+            <nav className="hidden items-center gap-8 md:flex">
+              <NavLink to="/" className={navLinkClass}>
+                Inicio
+              </NavLink>
+              <NavLink to="/catalog" className={navLinkClass}>
+                Catálogo
+              </NavLink>
+            </nav>
+
+            <div className="flex items-center gap-3">
+              <NavLink
+                to="/login"
+                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+              >
+                Ingresar
+              </NavLink>
+
+              <NavLink
+                to="/register"
+                className="rounded-xl bg-gradient-to-r from-violet-600 to-pink-500 px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                Crear cuenta
+              </NavLink>
+            </div>
+          </>
+        )}
       </div>
     </header>
   );

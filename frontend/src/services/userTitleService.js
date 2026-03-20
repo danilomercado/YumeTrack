@@ -39,6 +39,7 @@ const handleJsonResponse = async (response, fallbackMessage) => {
 
 export const createUserTitleRequest = async ({
   kitsuId,
+  mediaType = "anime",
   status = USER_TITLE_STATUS.PLANNED,
   isFavorite = false,
 }) => {
@@ -47,6 +48,7 @@ export const createUserTitleRequest = async ({
     headers: getAuthHeaders(),
     body: JSON.stringify({
       kitsuId,
+      mediaType,
       status,
       isFavorite,
     }),

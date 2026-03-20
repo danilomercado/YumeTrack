@@ -8,6 +8,7 @@ import Register from "../pages/Register/Register";
 import Search from "../pages/Search/Search";
 import MyList from "../pages/MyList/MyList";
 import Profile from "../pages/Profile/Profile";
+import Catalog from "../pages/Catalog/Catalog";
 
 const AppRouter = () => {
   return (
@@ -24,6 +25,15 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <Search />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/catalog"
+          element={
+            <ProtectedRoute>
+              <Catalog />
             </ProtectedRoute>
           }
         />

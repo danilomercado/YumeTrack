@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import TitleCard from "../../components/TitleCard/TitleCard";
+import TitleGrid from "../../components/TitleGrid/TitleGrid";
 import TitleDetailModal from "../../components/TitleDetailModal/TitleDetailModal";
 import {
   searchTitlesRequest,
@@ -10,11 +10,16 @@ import {
   createUserTitleRequest,
   USER_TITLE_STATUS,
 } from "../../services/userTitleService";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Search = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [titles, setTitles] = useState([]);
   const [selectedTitle, setSelectedTitle] = useState(null);
+  const [titleDetail, setTitleDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -39,10 +44,7 @@ const Search = () => {
         setTitles(Array.isArray(data) ? data : []);
       } catch (error) {
         const backendMessage =
-          error.response?.data?.message ||
-          error.response?.data ||
-          error.message ||
-          "No se pudo realizar la búsqueda.";
+          error.message || "No se pudo realizar la búsqueda.";
 
         setErrorMessage(
           typeof backendMessage === "string"
@@ -72,10 +74,13 @@ const Search = () => {
 
   const handleOpenDetail = async (item) => {
     try {
+      setSelectedTitle(item);
+      setTitleDetail(null);
       setIsDetailLoading(true);
       setErrorMessage("");
-      const detail = await getTitleDetailRequest(item.id);
-      setSelectedTitle(detail);
+
+      const detail = await getTitleDetailRequest(item.id, item.mediaType);
+      setTitleDetail(detail);
     } catch (error) {
       console.error("Error al obtener detalle:", error);
       setErrorMessage("No se pudo cargar el detalle del título.");
@@ -86,13 +91,18 @@ const Search = () => {
 
   const handleCloseDetail = () => {
     setSelectedTitle(null);
+    setTitleDetail(null);
   };
 
   const handleAddToList = async (item, options = {}) => {
     const kitsuId = Number(item?.id);
 
     if (!kitsuId) {
-      setErrorMessage("No se pudo obtener el id del título.");
+      throw new Error("No se pudo obtener el id del título.");
+    }
+
+    if (!isAuthenticated) {
+      navigate("/login");
       return;
     }
 
@@ -107,11 +117,13 @@ const Search = () => {
 
       const response = await createUserTitleRequest({
         kitsuId,
+        mediaType: item.mediaType?.toLowerCase() || "anime",
         status: options.status ?? USER_TITLE_STATUS.PLANNED,
         isFavorite: options.isFavorite ?? false,
       });
 
       setSuccessMessage(response?.message || "Título agregado correctamente.");
+      return response;
     } catch (error) {
       const message =
         error.message || "No se pudo agregar el título a tu lista.";
@@ -122,8 +134,10 @@ const Search = () => {
         message.toLowerCase().includes("duplic")
       ) {
         setErrorMessage("Ese título ya está en tu lista.");
+        throw new Error("Ese título ya está en tu lista.");
       } else {
         setErrorMessage(message);
+        throw new Error(message);
       }
     } finally {
       setAddingMap((prev) => ({
@@ -181,29 +195,18 @@ const Search = () => {
       )}
 
       {titles.length > 0 && (
-        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {titles.map((item) => (
-            <TitleCard
-              key={item.id}
-              title={item.title}
-              image={item.posterImage}
-              buttonText={
-                addingMap[Number(item.id)] ? "Agregando..." : "Agregar"
-              }
-              onCardClick={() => handleOpenDetail(item)}
-              onClickButton={() => handleAddToList(item)}
-              buttonDisabled={!!addingMap[Number(item.id)]}
-            />
-          ))}
+        <div className="mt-8">
+          <TitleGrid titles={titles} onSelectTitle={handleOpenDetail} />
         </div>
       )}
 
       <TitleDetailModal
-        title={selectedTitle}
+        isOpen={!!selectedTitle}
+        title={titleDetail || selectedTitle}
         isLoading={isDetailLoading}
         onClose={handleCloseDetail}
         onAdd={handleAddToList}
-        isAdding={!!addingMap[Number(selectedTitle?.id)]}
+        isAdding={!!addingMap[Number((titleDetail || selectedTitle)?.id)]}
       />
     </main>
   );

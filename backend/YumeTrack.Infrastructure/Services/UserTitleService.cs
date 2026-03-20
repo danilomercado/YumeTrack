@@ -26,10 +26,14 @@ namespace YumeTrack.Infrastructure.Services
 
             if (title == null)
             {
-                var kitsuData = await _kitsuService.GetAnimeByIdAsync(externalId);
+                var mediaType = dto.MediaType?.Trim().ToLower();
+
+                var kitsuData = mediaType == "manga"
+                    ? await _kitsuService.GetMangaByIdAsync(externalId)
+                    : await _kitsuService.GetAnimeByIdAsync(externalId);
 
                 if (kitsuData == null)
-                    throw new InvalidOperationException("El anime no existe en Kitsu.");
+                    throw new InvalidOperationException("El título no existe en Kitsu.");
 
                 title = new Title
                 {

@@ -8,14 +8,20 @@ namespace YumeTrack.API.Controllers
     public class TitlesController : ControllerBase
     {
         private readonly IKitsuService _kitsuService;
-        private readonly ITranslationService _translationService;
 
-        public TitlesController(
-            IKitsuService kitsuService,
-            ITranslationService translationService)
+        public TitlesController(IKitsuService kitsuService)
         {
             _kitsuService = kitsuService;
-            _translationService = translationService;
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchTitles([FromQuery] string query, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest("El parámetro query es obligatorio.");
+
+            var results = await _kitsuService.SearchTitlesAsync(query);
+            return Ok(results);
         }
 
         [HttpGet("anime/{id}")]
@@ -28,11 +34,50 @@ namespace YumeTrack.API.Controllers
 
             return Ok(anime);
         }
-        [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string query)
+
+        [HttpGet("manga/{id}")]
+        public async Task<IActionResult> GetMangaById(string id, CancellationToken cancellationToken)
         {
-            var result = await _kitsuService.SearchTitlesAsync(query);
-            return Ok(result);
+            var manga = await _kitsuService.GetMangaByIdAsync(id, cancellationToken);
+
+            if (manga is null)
+                return NotFound();
+
+            return Ok(manga);
+        }
+
+        [HttpGet("trending")]
+        public async Task<IActionResult> GetTrending([FromQuery] int limit = 12, CancellationToken cancellationToken = default)
+        {
+            var results = await _kitsuService.GetTrendingAnimeAsync(limit, cancellationToken);
+            return Ok(results);
+        }
+
+        [HttpGet("trending-manga")]
+        public async Task<IActionResult> GetTrendingManga([FromQuery] int limit = 12, CancellationToken cancellationToken = default)
+        {
+            var results = await _kitsuService.GetTrendingMangaAsync(limit, cancellationToken);
+            return Ok(results);
+        }
+
+        [HttpGet("catalog")]
+        public async Task<IActionResult> GetCatalog(
+            [FromQuery] int limit = 20,
+            [FromQuery] int offset = 0,
+            CancellationToken cancellationToken = default)
+        {
+            var results = await _kitsuService.GetAnimeCatalogAsync(limit, offset, cancellationToken);
+            return Ok(results);
+        }
+
+        [HttpGet("catalog-manga")]
+        public async Task<IActionResult> GetMangaCatalog(
+            [FromQuery] int limit = 20,
+            [FromQuery] int offset = 0,
+            CancellationToken cancellationToken = default)
+        {
+            var results = await _kitsuService.GetMangaCatalogAsync(limit, offset, cancellationToken);
+            return Ok(results);
         }
     }
 }
