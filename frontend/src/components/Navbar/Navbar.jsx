@@ -20,7 +20,7 @@ const Navbar = () => {
             to="/"
             className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
           >
-            Home
+            Inicio
           </Link>
 
           {!token && (
@@ -29,14 +29,14 @@ const Navbar = () => {
                 to="/login"
                 className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
               >
-                Login
+                Ingresar
               </Link>
 
               <Link
                 to="/register"
                 className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
               >
-                Register
+                Registrarse
               </Link>
             </>
           )}
@@ -47,21 +47,21 @@ const Navbar = () => {
                 to="/search"
                 className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
               >
-                Search
+                Buscar
               </Link>
 
               <Link
                 to="/my-list"
                 className="rounded-lg px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-violet-300"
               >
-                My List
+                Mi lista
               </Link>
 
               <button
                 onClick={logout}
                 className="rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-2 text-sm font-semibold text-white transition hover:scale-[1.02]"
               >
-                Logout
+                Cerrar sesión
               </button>
             </>
           )}
