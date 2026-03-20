@@ -8,27 +8,25 @@ namespace YumeTrack.API.Controllers
     public class TitlesController : ControllerBase
     {
         private readonly IKitsuService _kitsuService;
+        private readonly ITranslationService _translationService;
 
-        public TitlesController(IKitsuService kitsuService)
+        public TitlesController(
+            IKitsuService kitsuService,
+            ITranslationService translationService)
         {
             _kitsuService = kitsuService;
+            _translationService = translationService;
         }
 
-        [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string query)
+        [HttpGet("anime/{id}")]
+        public async Task<IActionResult> GetAnimeById(string id, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(query))
-                return BadRequest("El parámetro 'query' es obligatorio.");
+            var anime = await _kitsuService.GetAnimeByIdAsync(id, cancellationToken);
 
-            try
-            {
-                var result = await _kitsuService.SearchAnimeAsync(query);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error buscando en Kitsu: {ex.Message}");
-            }
+            if (anime is null)
+                return NotFound();
+
+            return Ok(anime);
         }
     }
 }

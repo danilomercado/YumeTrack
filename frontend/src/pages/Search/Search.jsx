@@ -2,13 +2,17 @@ import React, { useEffect, useState } from "react";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import TitleCard from "../../components/TitleCard/TitleCard";
 import TitleDetailModal from "../../components/TitleDetailModal/TitleDetailModal";
-import { searchTitlesRequest } from "../../services/searchService";
+import {
+  getTitleDetailRequest,
+  searchTitlesRequest,
+} from "../../services/searchService";
 
 const Search = () => {
   const [query, setQuery] = useState("");
   const [titles, setTitles] = useState([]);
   const [selectedTitle, setSelectedTitle] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -48,8 +52,16 @@ const Search = () => {
     return () => clearTimeout(timeoutId);
   }, [query]);
 
-  const handleOpenDetail = (item) => {
-    setSelectedTitle(item);
+  const handleOpenDetail = async (item) => {
+    try {
+      setIsDetailLoading(true);
+      const detail = await getTitleDetailRequest(item.id);
+      setSelectedTitle(detail);
+    } catch (error) {
+      console.error("Error al obtener detalle:", error);
+    } finally {
+      setIsDetailLoading(false);
+    }
   };
 
   const handleCloseDetail = () => {
@@ -113,6 +125,14 @@ const Search = () => {
               onClickButton={() => handleAddToList(item)}
             />
           ))}
+        </div>
+      )}
+
+      {isDetailLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="rounded-2xl border border-white/10 bg-zinc-900 px-6 py-4 text-white">
+            Cargando detalle...
+          </div>
         </div>
       )}
 

@@ -10,7 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
@@ -21,7 +20,9 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -56,6 +57,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+builder.Services.AddHttpClient<ITranslationService, TranslationService>();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var jwtKey = builder.Configuration["JwtSettings:Key"]
@@ -93,7 +95,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<YumeTrack.API.Middlewares.ExceptionMiddleware>();
-
 
 app.UseHttpsRedirection();
 app.UseCors("FrontendPolicy");

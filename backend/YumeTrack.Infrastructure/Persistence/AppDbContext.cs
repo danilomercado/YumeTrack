@@ -11,6 +11,7 @@ namespace YumeTrack.Infrastructure.Persistence
         public DbSet<Title> Titles => Set<Title>();
         public DbSet<UserTitle> UserTitles => Set<UserTitle>();
 
+        public DbSet<MediaTranslation> MediaTranslations => Set<MediaTranslation>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -28,6 +29,8 @@ namespace YumeTrack.Infrastructure.Persistence
                 .HasOne(ut => ut.Title)
                 .WithMany(t => t.UserTitles)
                 .HasForeignKey(ut => ut.TitleId);
+
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
     }
 }
