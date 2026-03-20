@@ -80,6 +80,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<YumeTrack.API.Middlewares.ExceptionMiddleware>();
+
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

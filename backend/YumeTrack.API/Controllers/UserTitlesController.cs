@@ -18,38 +18,32 @@ namespace YumeTrack.API.Controllers
             _userTitleService = userTitleService;
         }
 
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(userIdClaim, out var userId))
+                throw new UnauthorizedAccessException("Token inválido.");
+
+            return userId;
+        }
+
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] CreateUserTitleDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = GetUserId();
 
-            if (!int.TryParse(userIdClaim, out var userId))
-                return Unauthorized("Token inválido.");
+            await _userTitleService.AddAsync(userId, dto);
 
-            try
-            {
-                await _userTitleService.AddAsync(userId, dto);
-                return Ok(new { message = "Título agregado correctamente." });
-            }
-            catch (Exception ex) when (ex.Message == "Ya tenés este título en tu lista.")
-            {
-                return Conflict(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return Ok(new { message = "Título agregado correctamente." });
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMyList()
+        public async Task<IActionResult> GetMyList([FromQuery] GetUserTitlesQueryDto filters)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = GetUserId();
 
-            if (!int.TryParse(userIdClaim, out var userId))
-                return Unauthorized("Token inválido.");
-
-            var list = await _userTitleService.GetUserListAsync(userId);
+            var list = await _userTitleService.GetUserListAsync(userId, filters);
 
             return Ok(list);
         }
@@ -57,14 +51,21 @@ namespace YumeTrack.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateUserTitleDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (!int.TryParse(userIdClaim, out var userId))
-                return Unauthorized("Token inválido.");
+            var userId = GetUserId();
 
             await _userTitleService.UpdateAsync(userId, id, dto);
 
             return Ok(new { message = "Título actualizado correctamente." });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = GetUserId();
+
+            await _userTitleService.DeleteAsync(userId, id);
+
+            return Ok(new { message = "Título eliminado correctamente." });
         }
     }
 }

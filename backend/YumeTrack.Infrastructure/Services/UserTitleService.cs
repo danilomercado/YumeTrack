@@ -29,7 +29,7 @@ namespace YumeTrack.Infrastructure.Services
                 var kitsuData = await _kitsuService.GetAnimeByIdAsync(dto.KitsuId);
 
                 if (kitsuData == null)
-                    throw new Exception("El anime no existe en Kitsu.");
+                    throw new InvalidOperationException("El anime no existe en Kitsu.");
 
                 title = new Title
                 {
@@ -51,7 +51,7 @@ namespace YumeTrack.Infrastructure.Services
                 .AnyAsync(ut => ut.UserId == userId && ut.TitleId == title.Id);
 
             if (exists)
-                throw new Exception("Ya tenés este título en tu lista.");
+                throw new InvalidOperationException("Ya tenés este título en tu lista.");
 
             var userTitle = new UserTitle
             {
@@ -59,29 +59,41 @@ namespace YumeTrack.Infrastructure.Services
                 TitleId = title.Id,
                 Status = dto.Status,
                 Progress = 0,
-                IsFavorite = false
+                IsFavorite = dto.IsFavorite
             };
 
             _context.UserTitles.Add(userTitle);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<object>> GetUserListAsync(int userId)
+        public async Task<List<UserTitleListItemDto>> GetUserListAsync(int userId, GetUserTitlesQueryDto filters)
         {
-            return await _context.UserTitles
+            var query = _context.UserTitles
                 .Where(ut => ut.UserId == userId)
                 .Include(ut => ut.Title)
-                .Select(ut => new
+                .AsQueryable();
+
+            if (filters.Status.HasValue)
+                query = query.Where(ut => ut.Status == filters.Status.Value);
+
+            if (filters.FavoritesOnly == true)
+                query = query.Where(ut => ut.IsFavorite);
+
+            return await query
+                .Select(ut => new UserTitleListItemDto
                 {
-                    ut.Id,
-                    ut.Status,
-                    ut.Progress,
-                    ut.Score,
-                    ut.IsFavorite,
-                    ut.Title.CanonicalTitle,
-                    ut.Title.PosterImageUrl
+                    Id = ut.Id,
+                    Status = ut.Status,
+                    Progress = ut.Progress,
+                    Score = ut.Score,
+                    IsFavorite = ut.IsFavorite,
+                    CanonicalTitle = ut.Title.CanonicalTitle,
+                    PosterImageUrl = ut.Title.PosterImageUrl,
+                    MediaType = ut.Title.MediaType,
+                    EpisodeCount = ut.Title.EpisodeCount,
+                    ChapterCount = ut.Title.ChapterCount
                 })
-                .ToListAsync<object>();
+                .ToListAsync();
         }
 
         public async Task UpdateAsync(int userId, int userTitleId, UpdateUserTitleDto dto)
@@ -89,8 +101,14 @@ namespace YumeTrack.Infrastructure.Services
             var userTitle = await _context.UserTitles
                 .FirstOrDefaultAsync(ut => ut.Id == userTitleId && ut.UserId == userId);
 
-            if (userTitle is null)
-                throw new Exception("No encontrado.");
+            if (userTitle == null)
+                throw new KeyNotFoundException("No encontrado.");
+
+            if (dto.Progress < 0)
+                throw new InvalidOperationException("El progreso no puede ser negativo.");
+
+            if (dto.Score.HasValue && (dto.Score < 0 || dto.Score > 10))
+                throw new InvalidOperationException("El score debe estar entre 0 y 10.");
 
             userTitle.Status = dto.Status;
             userTitle.Progress = dto.Progress;
@@ -98,6 +116,18 @@ namespace YumeTrack.Infrastructure.Services
             userTitle.IsFavorite = dto.IsFavorite;
             userTitle.UpdatedAt = DateTime.UtcNow;
 
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int userId, int userTitleId)
+        {
+            var userTitle = await _context.UserTitles
+                .FirstOrDefaultAsync(ut => ut.Id == userTitleId && ut.UserId == userId);
+
+            if (userTitle == null)
+                throw new KeyNotFoundException("No encontrado.");
+
+            _context.UserTitles.Remove(userTitle);
             await _context.SaveChangesAsync();
         }
     }

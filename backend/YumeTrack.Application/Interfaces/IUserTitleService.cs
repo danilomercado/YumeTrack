@@ -8,7 +8,8 @@ namespace YumeTrack.Application.Interfaces
     public interface IUserTitleService
     {
         Task AddAsync(int userId, CreateUserTitleDto dto);
-        Task<List<object>> GetUserListAsync(int userId);
-        Task UpdateAsync(int userId, int titleId, UpdateUserTitleDto dto);
+        Task<List<UserTitleListItemDto>> GetUserListAsync(int userId, GetUserTitlesQueryDto filters);
+        Task UpdateAsync(int userId, int userTitleId, UpdateUserTitleDto dto);
+        Task DeleteAsync(int userId, int userTitleId);
     }
 }
