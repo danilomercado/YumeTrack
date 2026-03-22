@@ -11,5 +11,6 @@ namespace YumeTrack.Application.DTOs.UserTitles
         public int Progress { get; set; }
         public int? Score { get; set; }
         public bool IsFavorite { get; set; }
+        public string? Notes { get; set; }
     }
 }

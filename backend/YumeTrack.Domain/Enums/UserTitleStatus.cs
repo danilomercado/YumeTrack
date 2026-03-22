@@ -8,8 +8,8 @@ namespace YumeTrack.Domain.Enums
     {
         Planned = 0,
         Watching = 1,
-        Reading = 2,
-        Completed = 3,
+        Completed = 2,
+        OnHold = 3,
         Dropped = 4,
     }
 }

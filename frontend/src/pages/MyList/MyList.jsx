@@ -23,29 +23,13 @@ const statusLabels = {
   [USER_TITLE_STATUS.DROPPED]: "Abandonado",
 };
 
-const getStatusBadgeClass = (status) => {
-  switch (Number(status)) {
-    case USER_TITLE_STATUS.PLANNED:
-      return "bg-zinc-700/70 text-zinc-200";
-    case USER_TITLE_STATUS.WATCHING:
-      return "bg-blue-500/20 text-blue-300";
-    case USER_TITLE_STATUS.COMPLETED:
-      return "bg-green-500/20 text-green-300";
-    case USER_TITLE_STATUS.ON_HOLD:
-      return "bg-yellow-500/20 text-yellow-300";
-    case USER_TITLE_STATUS.DROPPED:
-      return "bg-red-500/20 text-red-300";
-    default:
-      return "bg-zinc-700/70 text-zinc-200";
-  }
-};
-
 const normalizeItemForCompare = (item) => ({
   id: item.id,
   status: Number(item.status),
   progress: Number(item.progress ?? 0),
   score: item.score === "" || item.score === null ? null : Number(item.score),
   isFavorite: Boolean(item.isFavorite),
+  notes: (item.notes ?? "").trim(),
 });
 
 const MyList = () => {
@@ -126,7 +110,8 @@ const MyList = () => {
       currentNormalized.status !== originalNormalized.status ||
       currentNormalized.progress !== originalNormalized.progress ||
       currentNormalized.score !== originalNormalized.score ||
-      currentNormalized.isFavorite !== originalNormalized.isFavorite
+      currentNormalized.isFavorite !== originalNormalized.isFavorite ||
+      currentNormalized.notes !== originalNormalized.notes
     );
   };
 
@@ -142,6 +127,8 @@ const MyList = () => {
         score:
           item.score === "" || item.score === null ? null : Number(item.score),
         isFavorite: Boolean(item.isFavorite),
+        notes:
+          item.notes && item.notes.trim().length > 0 ? item.notes.trim() : null,
       };
 
       await updateUserTitleRequest(item.id, payload);
@@ -439,6 +426,29 @@ const MyList = () => {
                       </div>
                     </div>
 
+                    <div className="mt-4">
+                      <label className="mb-1 block text-sm text-zinc-400">
+                        Review
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={item.notes ?? ""}
+                        onChange={(event) =>
+                          handleFieldChange(
+                            item.id,
+                            "notes",
+                            event.target.value,
+                          )
+                        }
+                        maxLength={2000}
+                        placeholder="Escribí tu opinión sobre este título..."
+                        className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-white outline-none"
+                      />
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {(item.notes ?? "").length}/2000
+                      </p>
+                    </div>
+
                     <div className="mt-4 flex flex-wrap gap-3">
                       <button
                         type="button"
@@ -482,6 +492,23 @@ const MyList = () => {
       />
     </>
   );
+};
+
+const getStatusBadgeClass = (status) => {
+  switch (Number(status)) {
+    case USER_TITLE_STATUS.PLANNED:
+      return "bg-zinc-700/70 text-zinc-200";
+    case USER_TITLE_STATUS.WATCHING:
+      return "bg-blue-500/20 text-blue-300";
+    case USER_TITLE_STATUS.COMPLETED:
+      return "bg-green-500/20 text-green-300";
+    case USER_TITLE_STATUS.ON_HOLD:
+      return "bg-yellow-500/20 text-yellow-300";
+    case USER_TITLE_STATUS.DROPPED:
+      return "bg-red-500/20 text-red-300";
+    default:
+      return "bg-zinc-700/70 text-zinc-200";
+  }
 };
 
 export default MyList;

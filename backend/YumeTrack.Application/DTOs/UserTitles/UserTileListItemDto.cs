@@ -15,5 +15,6 @@ namespace YumeTrack.Application.DTOs.UserTitles
         public string MediaType { get; set; } = string.Empty;
         public int? EpisodeCount { get; set; }
         public int? ChapterCount { get; set; }
+        public string? Notes { get; set; }
     }
 }

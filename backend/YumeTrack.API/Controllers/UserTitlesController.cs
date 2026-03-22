@@ -31,11 +31,20 @@ namespace YumeTrack.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] CreateUserTitleDto dto)
         {
-            var userId = GetUserId();
+            try
+            {
+                var userId = GetUserId();
+                await _userTitleService.AddAsync(userId, dto);
 
-            await _userTitleService.AddAsync(userId, dto);
+                return Ok(new { message = "Título agregado correctamente." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (ex.Message.Contains("Ya tenés este título", StringComparison.OrdinalIgnoreCase))
+                    return Conflict(new { message = ex.Message });
 
-            return Ok(new { message = "Título agregado correctamente." });
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet]
@@ -51,21 +60,37 @@ namespace YumeTrack.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateUserTitleDto dto)
         {
-            var userId = GetUserId();
+            try
+            {
+                var userId = GetUserId();
+                await _userTitleService.UpdateAsync(userId, id, dto);
 
-            await _userTitleService.UpdateAsync(userId, id, dto);
-
-            return Ok(new { message = "Título actualizado correctamente." });
+                return Ok(new { message = "Título actualizado correctamente." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var userId = GetUserId();
+            try
+            {
+                var userId = GetUserId();
+                await _userTitleService.DeleteAsync(userId, id);
 
-            await _userTitleService.DeleteAsync(userId, id);
-
-            return Ok(new { message = "Título eliminado correctamente." });
+                return Ok(new { message = "Título eliminado correctamente." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
     }
 }

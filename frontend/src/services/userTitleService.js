@@ -41,7 +41,10 @@ export const createUserTitleRequest = async ({
   kitsuId,
   mediaType = "anime",
   status = USER_TITLE_STATUS.PLANNED,
+  progress = 0,
+  score = null,
   isFavorite = false,
+  notes = null,
 }) => {
   const response = await fetch(`${API_URL}/UserTitles`, {
     method: "POST",
@@ -50,7 +53,10 @@ export const createUserTitleRequest = async ({
       kitsuId,
       mediaType,
       status,
+      progress,
+      score,
       isFavorite,
+      notes,
     }),
   });
 
@@ -71,7 +77,7 @@ export const getUserTitlesRequest = async () => {
 
 export const updateUserTitleRequest = async (
   id,
-  { status, progress, score, isFavorite },
+  { status, progress, score, isFavorite, notes },
 ) => {
   const response = await fetch(`${API_URL}/UserTitles/${id}`, {
     method: "PUT",
@@ -81,6 +87,7 @@ export const updateUserTitleRequest = async (
       progress,
       score,
       isFavorite,
+      notes,
     }),
   });
 

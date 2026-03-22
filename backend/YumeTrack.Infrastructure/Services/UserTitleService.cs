@@ -19,6 +19,8 @@ namespace YumeTrack.Infrastructure.Services
 
         public async Task AddAsync(int userId, CreateUserTitleDto dto)
         {
+            ValidateInput(dto.Progress, dto.Score, dto.Notes);
+
             var externalId = dto.KitsuId.ToString();
 
             var title = await _context.Titles
@@ -26,7 +28,7 @@ namespace YumeTrack.Infrastructure.Services
 
             if (title == null)
             {
-                var mediaType = dto.MediaType?.Trim().ToLower();
+                var mediaType = dto.MediaType?.Trim().ToLowerInvariant();
 
                 var kitsuData = mediaType == "manga"
                     ? await _kitsuService.GetMangaByIdAsync(externalId)
@@ -62,8 +64,11 @@ namespace YumeTrack.Infrastructure.Services
                 UserId = userId,
                 TitleId = title.Id,
                 Status = dto.Status,
-                Progress = 0,
-                IsFavorite = dto.IsFavorite
+                Progress = dto.Progress,
+                Score = dto.Score,
+                IsFavorite = dto.IsFavorite,
+                Notes = NormalizeNotes(dto.Notes),
+                UpdatedAt = DateTime.UtcNow
             };
 
             _context.UserTitles.Add(userTitle);
@@ -84,6 +89,7 @@ namespace YumeTrack.Infrastructure.Services
                 query = query.Where(ut => ut.IsFavorite);
 
             return await query
+                .OrderByDescending(ut => ut.UpdatedAt)
                 .Select(ut => new UserTitleListItemDto
                 {
                     Id = ut.Id,
@@ -91,6 +97,7 @@ namespace YumeTrack.Infrastructure.Services
                     Progress = ut.Progress,
                     Score = ut.Score,
                     IsFavorite = ut.IsFavorite,
+                    Notes = ut.Notes,
                     CanonicalTitle = ut.Title.CanonicalTitle,
                     PosterImageUrl = ut.Title.PosterImageUrl,
                     MediaType = ut.Title.MediaType,
@@ -102,22 +109,19 @@ namespace YumeTrack.Infrastructure.Services
 
         public async Task UpdateAsync(int userId, int userTitleId, UpdateUserTitleDto dto)
         {
+            ValidateInput(dto.Progress, dto.Score, dto.Notes);
+
             var userTitle = await _context.UserTitles
                 .FirstOrDefaultAsync(ut => ut.Id == userTitleId && ut.UserId == userId);
 
             if (userTitle == null)
                 throw new KeyNotFoundException("No encontrado.");
 
-            if (dto.Progress < 0)
-                throw new InvalidOperationException("El progreso no puede ser negativo.");
-
-            if (dto.Score.HasValue && (dto.Score < 0 || dto.Score > 10))
-                throw new InvalidOperationException("El score debe estar entre 0 y 10.");
-
             userTitle.Status = dto.Status;
             userTitle.Progress = dto.Progress;
             userTitle.Score = dto.Score;
             userTitle.IsFavorite = dto.IsFavorite;
+            userTitle.Notes = NormalizeNotes(dto.Notes);
             userTitle.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -133,6 +137,26 @@ namespace YumeTrack.Infrastructure.Services
 
             _context.UserTitles.Remove(userTitle);
             await _context.SaveChangesAsync();
+        }
+
+        private static void ValidateInput(int progress, int? score, string? notes)
+        {
+            if (progress < 0)
+                throw new InvalidOperationException("El progreso no puede ser negativo.");
+
+            if (score.HasValue && (score < 0 || score > 10))
+                throw new InvalidOperationException("El score debe estar entre 0 y 10.");
+
+            if (!string.IsNullOrWhiteSpace(notes) && notes.Trim().Length > 2000)
+                throw new InvalidOperationException("La review no puede superar los 2000 caracteres.");
+        }
+
+        private static string? NormalizeNotes(string? notes)
+        {
+            if (string.IsNullOrWhiteSpace(notes))
+                return null;
+
+            return notes.Trim();
         }
     }
 }
