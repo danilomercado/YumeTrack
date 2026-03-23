@@ -156,6 +156,7 @@ const Profile = () => {
 
     try {
       setFollowActionLoadingId(targetUserId);
+      setErrorMessage("");
 
       if (targetUser.isFollowing) {
         await unfollowUserRequest(targetUserId);
@@ -165,6 +166,15 @@ const Profile = () => {
             u.id === targetUserId ? { ...u, isFollowing: false } : u,
           ),
         );
+
+        setProfile((prev) =>
+          prev
+            ? {
+                ...prev,
+                followingCount: Math.max(0, (prev.followingCount || 0) - 1),
+              }
+            : prev,
+        );
       } else {
         await followUserRequest(targetUserId);
 
@@ -173,9 +183,45 @@ const Profile = () => {
             u.id === targetUserId ? { ...u, isFollowing: true } : u,
           ),
         );
+
+        setProfile((prev) =>
+          prev
+            ? {
+                ...prev,
+                followingCount: (prev.followingCount || 0) + 1,
+              }
+            : prev,
+        );
       }
     } catch (error) {
-      setErrorMessage(error.message || "No se pudo actualizar el follow.");
+      const message = error.message || "No se pudo actualizar el follow.";
+
+      // Si el backend dice que ya lo seguís, corregimos el estado local
+      if (message.toLowerCase().includes("ya estás siguiendo")) {
+        setFollowUsers((prev) =>
+          prev.map((u) =>
+            u.id === targetUserId ? { ...u, isFollowing: true } : u,
+          ),
+        );
+
+        setErrorMessage("");
+      }
+      // Si el backend dice que no existe el follow al dejar de seguir,
+      // también corregimos el estado local
+      else if (
+        message.toLowerCase().includes("no encontrado") ||
+        message.toLowerCase().includes("no existe")
+      ) {
+        setFollowUsers((prev) =>
+          prev.map((u) =>
+            u.id === targetUserId ? { ...u, isFollowing: false } : u,
+          ),
+        );
+
+        setErrorMessage("");
+      } else {
+        setErrorMessage(message);
+      }
     } finally {
       setFollowActionLoadingId(null);
     }
@@ -438,21 +484,18 @@ const Profile = () => {
                 {followModalTitle}
               </h3>
               <button
-                type="button"
                 onClick={() => setFollowModalOpen(false)}
-                className="rounded-lg px-3 py-1 text-sm text-zinc-300 transition hover:bg-white/10 hover:text-white"
+                className="text-zinc-400 hover:text-white"
               >
-                Cerrar
+                ✕
               </button>
             </div>
 
             <div className="max-h-[65vh] overflow-y-auto p-4">
               {followModalLoading ? (
-                <p className="text-sm text-zinc-400">Cargando...</p>
+                <p className="text-zinc-400 text-sm">Cargando...</p>
               ) : followUsers.length === 0 ? (
-                <p className="text-sm text-zinc-400">
-                  No hay usuarios para mostrar.
-                </p>
+                <p className="text-zinc-400 text-sm">No hay usuarios.</p>
               ) : (
                 <div className="space-y-3">
                   {followUsers.map((followUser) => {
@@ -476,25 +519,22 @@ const Profile = () => {
                           <p className="truncate font-semibold text-white">
                             {followUser.userName}
                           </p>
-                          <p className="mt-1 line-clamp-2 text-sm text-zinc-400">
-                            {followUser.bio?.trim()
-                              ? followUser.bio
-                              : "Sin biografía."}
+                          <p className="mt-1 text-sm text-zinc-400">
+                            {followUser.bio || "Sin biografía"}
                           </p>
                         </Link>
 
                         {!isOwnUser && (
                           <button
-                            type="button"
                             onClick={() =>
                               handleToggleFollowUser(followUser.id)
                             }
                             disabled={isLoadingButton}
-                            className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                            className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold ${
                               followUser.isFollowing
-                                ? "border border-white/10 bg-white/5 text-white hover:bg-white/10"
-                                : "bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:opacity-90"
-                            } disabled:cursor-not-allowed disabled:opacity-60`}
+                                ? "border border-white/10 bg-white/5 text-white"
+                                : "bg-gradient-to-r from-violet-600 to-pink-500 text-white"
+                            }`}
                           >
                             {isLoadingButton
                               ? "..."

@@ -14,6 +14,8 @@ namespace YumeTrack.Infrastructure.Persistence
         public DbSet<UserTitle> UserTitles => Set<UserTitle>();
         public DbSet<MediaTranslation> MediaTranslations => Set<MediaTranslation>();
         public DbSet<UserFollow> UserFollows => Set<UserFollow>();
+        public DbSet<Notification> Notifications => Set<Notification>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -154,6 +156,21 @@ namespace YumeTrack.Infrastructure.Persistence
 
                 entity.HasIndex(f => new { f.FollowerId, f.FollowingId })
                     .IsUnique();
+            });
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(n => n.Id);
+
+                entity.HasOne(n => n.User)
+                    .WithMany()
+                    .HasForeignKey(n => n.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(n => n.ActorUser)
+                    .WithMany()
+                    .HasForeignKey(n => n.ActorUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

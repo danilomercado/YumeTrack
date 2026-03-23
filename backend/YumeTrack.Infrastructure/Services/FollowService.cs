@@ -39,7 +39,26 @@ namespace YumeTrack.Infrastructure.Services
             };
 
             _context.UserFollows.Add(follow);
-            await _context.SaveChangesAsync();
+
+            var notification = new Notification
+            {
+                UserId = followingId,
+                ActorUserId = followerId,
+                Type = "follow",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Notifications.Add(notification);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new InvalidOperationException("No se pudo completar el follow: " + ex.InnerException?.Message ?? ex.Message);
+            }
         }
 
         public async Task UnfollowAsync(int followerId, int followingId)

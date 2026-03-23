@@ -34,11 +34,20 @@ namespace YumeTrack.API.Controllers
             {
                 var currentUserId = GetUserId();
                 await _followService.FollowAsync(currentUserId, userId);
-                return Ok(new { Message = "Ahora seguís a este usuario." });
+
+                return Ok(new { message = "Ahora seguís a este usuario." });
             }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Error interno al seguir usuario.",
+                    detail = ex.Message
+                });
             }
         }
 

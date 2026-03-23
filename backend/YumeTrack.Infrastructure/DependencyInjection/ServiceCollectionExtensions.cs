@@ -18,12 +18,14 @@ namespace YumeTrack.Infrastructure.DependencyInjection
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserTitleService, UserTitleService>();
             services.AddScoped<FollowService>();
+            services.AddScoped<NotificationService>();
 
             services.AddHttpClient<ITranslationService, TranslationService>();
             services.AddHttpClient<IKitsuService, KitsuService>(client =>
             {
                 client.BaseAddress = new Uri("https://kitsu.io/api/edge/");
             });
+
 
             return services;
         }
