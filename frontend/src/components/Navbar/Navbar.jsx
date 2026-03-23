@@ -129,9 +129,15 @@ const Navbar = () => {
                   ) : (
                     <div className="space-y-3 max-h-80 overflow-y-auto">
                       {notifications.map((n) => (
-                        <div
+                        <Link
                           key={n.id}
-                          className="rounded-xl border border-white/10 bg-black/20 p-3"
+                          to={
+                            n.type === "follow"
+                              ? `/profile/${n.actorUserName}`
+                              : "#"
+                          }
+                          onClick={() => setOpen(false)}
+                          className="block rounded-xl border border-white/10 bg-black/20 p-3 transition hover:border-violet-500/40 hover:bg-black/30"
                         >
                           {n.type === "follow" && (
                             <p className="text-sm text-white">
@@ -141,7 +147,7 @@ const Navbar = () => {
                               te siguió
                             </p>
                           )}
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   )}
