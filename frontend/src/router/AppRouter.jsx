@@ -9,6 +9,7 @@ import Search from "../pages/Search/Search";
 import MyList from "../pages/MyList/MyList";
 import Profile from "../pages/Profile/Profile";
 import Catalog from "../pages/Catalog/Catalog";
+import PublicProfile from "../pages/PublicProfile/PublicProfile";
 
 const AppRouter = () => {
   return (
@@ -19,6 +20,7 @@ const AppRouter = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/profile/:username" element={<PublicProfile />} />
 
         <Route
           path="/search"

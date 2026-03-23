@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using YumeTrack.Application.DTOs.UserTitles;
 using YumeTrack.Application.Interfaces;
 using YumeTrack.Domain.Entities;
@@ -104,6 +105,62 @@ namespace YumeTrack.Infrastructure.Services
                     EpisodeCount = ut.Title.EpisodeCount,
                     ChapterCount = ut.Title.ChapterCount
                 })
+                .ToListAsync();
+        }
+
+        public async Task<PublicUserProfileDto?> GetPublicProfileByUsernameAsync(string username)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserName.ToLower() == username.ToLower());
+
+            if (user == null)
+                return null;
+
+            var titles = await _context.UserTitles
+                .Where(ut => ut.UserId == user.Id)
+                .Include(ut => ut.Title)
+                .OrderByDescending(ut => ut.UpdatedAt)
+                .Select(ut => new UserTitleListItemDto
+                {
+                    Id = ut.Id,
+                    Status = ut.Status,
+                    Progress = ut.Progress,
+                    Score = ut.Score,
+                    IsFavorite = ut.IsFavorite,
+                    Notes = ut.Notes,
+                    CanonicalTitle = ut.Title.CanonicalTitle,
+                    PosterImageUrl = ut.Title.PosterImageUrl,
+                    MediaType = ut.Title.MediaType,
+                    EpisodeCount = ut.Title.EpisodeCount,
+                    ChapterCount = ut.Title.ChapterCount
+                })
+                .ToListAsync ();
+            return new PublicUserProfileDto
+            {
+                UserName = user.UserName,
+                CreateAdt = user.CreatedAt,
+                TotalTitles = titles.Count,
+                FavoriteCount = titles.Count(t => t.IsFavorite),
+                Titles = titles
+            };
+        }
+
+        public async Task<List<PublicUserSearchItemDto>> SearchUserAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return new List<PublicUserSearchItemDto>();
+
+            query = query.Trim().ToLower();
+
+            return await _context.Users
+                .Where(u => u.UserName.ToLower().Contains(query))
+                .OrderBy(u => u.UserName)
+                .Select(u => new PublicUserSearchItemDto
+                {
+                    UserName = u.UserName,
+                    TotalTitles = u.UserTitles.Count
+                })
+                .Take(8)
                 .ToListAsync();
         }
 

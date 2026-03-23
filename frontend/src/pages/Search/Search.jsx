@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import TitleGrid from "../../components/TitleGrid/TitleGrid";
 import TitleDetailModal from "../../components/TitleDetailModal/TitleDetailModal";
@@ -11,13 +12,15 @@ import {
   USER_TITLE_STATUS,
 } from "../../services/userTitleService";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { searchUsersRequest } from "../../services/publicService";
 
 const Search = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
   const [query, setQuery] = useState("");
   const [titles, setTitles] = useState([]);
+  const [users, setUsers] = useState([]);
   const [selectedTitle, setSelectedTitle] = useState(null);
   const [titleDetail, setTitleDetail] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +34,7 @@ const Search = () => {
 
     if (!trimmedQuery) {
       setTitles([]);
+      setUsers([]);
       setErrorMessage("");
       return;
     }
@@ -40,8 +44,13 @@ const Search = () => {
         setIsLoading(true);
         setErrorMessage("");
 
-        const data = await searchTitlesRequest(trimmedQuery);
-        setTitles(Array.isArray(data) ? data : []);
+        const [titlesData, usersData] = await Promise.all([
+          searchTitlesRequest(trimmedQuery),
+          searchUsersRequest(trimmedQuery),
+        ]);
+
+        setTitles(Array.isArray(titlesData) ? titlesData : []);
+        setUsers(Array.isArray(usersData) ? usersData : []);
       } catch (error) {
         const backendMessage =
           error.message || "No se pudo realizar la búsqueda.";
@@ -53,6 +62,7 @@ const Search = () => {
         );
 
         setTitles([]);
+        setUsers([]);
       } finally {
         setIsLoading(false);
       }
@@ -147,15 +157,24 @@ const Search = () => {
     }
   };
 
+  const showEmptyState =
+    !isLoading &&
+    !errorMessage &&
+    query.trim() &&
+    titles.length === 0 &&
+    users.length === 0;
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <div className="mb-8">
         <p className="text-sm uppercase tracking-[0.25em] text-violet-300">
           Explorar
         </p>
-        <h1 className="mt-2 text-4xl font-black">Buscar anime o manga</h1>
+        <h1 className="mt-2 text-4xl font-black">
+          Buscar anime, manga o usuarios
+        </h1>
         <p className="mt-3 text-zinc-400">
-          Encontrá títulos y agregalos a tu lista.
+          Encontrá personas y títulos para descubrir más dentro de YumeTrack.
         </p>
       </div>
 
@@ -178,11 +197,11 @@ const Search = () => {
 
       {isLoading && (
         <div className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
-          Buscando títulos...
+          Buscando usuarios y títulos...
         </div>
       )}
 
-      {!isLoading && !errorMessage && query.trim() && titles.length === 0 && (
+      {showEmptyState && (
         <div className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-400">
           No se encontraron resultados.
         </div>
@@ -190,14 +209,57 @@ const Search = () => {
 
       {!query.trim() && (
         <div className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-400">
-          Escribí el nombre de un anime o manga para buscar.
+          Escribí el nombre de un anime, manga o usuario para buscar.
         </div>
       )}
 
+      {users.length > 0 && (
+        <section className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white">Usuarios</h2>
+            <span className="text-sm text-zinc-400">
+              {users.length} resultados
+            </span>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {users.map((user) => (
+              <Link
+                key={user.userName}
+                to={`/profile/${user.userName}`}
+                className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4 transition hover:-translate-y-1 hover:border-violet-500/40"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-violet-500 to-pink-500 text-lg font-bold text-white">
+                    {user.userName?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-white">
+                      {user.userName}
+                    </p>
+                    <p className="text-sm text-zinc-400">
+                      {user.totalTitles} títulos en su lista
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {titles.length > 0 && (
-        <div className="mt-8">
+        <section className="mt-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white">Anime y manga</h2>
+            <span className="text-sm text-zinc-400">
+              {titles.length} resultados
+            </span>
+          </div>
+
           <TitleGrid titles={titles} onSelectTitle={handleOpenDetail} />
-        </div>
+        </section>
       )}
 
       <TitleDetailModal

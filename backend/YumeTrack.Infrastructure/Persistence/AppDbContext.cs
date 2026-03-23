@@ -30,6 +30,10 @@ namespace YumeTrack.Infrastructure.Persistence
                 .WithMany(t => t.UserTitles)
                 .HasForeignKey(ut => ut.TitleId);
 
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.UserName)
+                .IsUnique();
+
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
     }
