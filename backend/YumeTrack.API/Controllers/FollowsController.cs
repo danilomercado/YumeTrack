@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using YumeTrack.Application.DTOs.Users;
 using YumeTrack.Infrastructure.Services;
 
 namespace YumeTrack.API.Controllers
@@ -47,6 +48,22 @@ namespace YumeTrack.API.Controllers
             var currentUserId = GetUserId();
             await _followService.UnfollowAsync(currentUserId, userId);
             return Ok(new { Message = "Dejaste de seguir a este usuario." });
+        }
+
+        [HttpGet("followers")]
+        public async Task<IActionResult> GetFollowers()
+        {
+            var currentUserId = GetUserId();
+            var users = await _followService.GetFollowersAsync(currentUserId);
+            return Ok(users);
+        }
+
+        [HttpGet("following")]
+        public async Task<IActionResult> GetFollowing()
+        {
+            var currentUserId = GetUserId();
+            var users = await _followService.GetFollowingAsync(currentUserId);
+            return Ok(users);
         }
     }
 }

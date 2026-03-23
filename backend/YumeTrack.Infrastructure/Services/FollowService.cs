@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using YumeTrack.Infrastructure.Persistence;
+using YumeTrack.Application.DTOs.Users;
 using YumeTrack.Domain.Entities;
+using YumeTrack.Infrastructure.Persistence;
 
 namespace YumeTrack.Infrastructure.Services
 {
@@ -18,16 +19,23 @@ namespace YumeTrack.Infrastructure.Services
             if (followerId == followingId)
                 throw new InvalidOperationException("No podés seguirte a vos mismo.");
 
-            var exists = await _context.UserFollows
+            var targetUserExists = await _context.Users
+                .AnyAsync(u => u.Id == followingId);
+
+            if (!targetUserExists)
+                throw new InvalidOperationException("El usuario no existe.");
+
+            var alreadyExists = await _context.UserFollows
                 .AnyAsync(f => f.FollowerId == followerId && f.FollowingId == followingId);
 
-            if (exists)
+            if (alreadyExists)
                 throw new InvalidOperationException("Ya estás siguiendo a este usuario.");
 
             var follow = new UserFollow
             {
                 FollowerId = followerId,
-                FollowingId = followingId
+                FollowingId = followingId,
+                CreatedAt = DateTime.UtcNow
             };
 
             _context.UserFollows.Add(follow);
@@ -46,22 +54,45 @@ namespace YumeTrack.Infrastructure.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> IsFollowingAsync(int followerId, int followingId)
+        public async Task<List<FollowUserDto>> GetFollowersAsync(int currentUserId)
         {
-            return await _context.UserFollows
-                .AnyAsync(f => f.FollowerId == followerId && f.FollowingId == followingId);
+            var users = await _context.UserFollows
+                .Where(f => f.FollowingId == currentUserId)
+                .Select(f => f.Follower)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var userIds = users.Select(u => u.Id).ToList();
+
+            var followingIds = await _context.UserFollows
+                .Where(f => f.FollowerId == currentUserId && userIds.Contains(f.FollowingId))
+                .Select(f => f.FollowingId)
+                .ToListAsync();
+
+            return users.Select(u => new FollowUserDto
+            {
+                Id = u.Id,
+                UserName = u.UserName,
+                Bio = u.Bio,
+                IsFollowing = followingIds.Contains(u.Id)
+            }).ToList();
         }
 
-        public async Task<int> GetFollowersCountAsync(int userId)
+        public async Task<List<FollowUserDto>> GetFollowingAsync(int currentUserId)
         {
-            return await _context.UserFollows
-                .CountAsync(f => f.FollowingId == userId);
-        }
+            var users = await _context.UserFollows
+                .Where(f => f.FollowerId == currentUserId)
+                .Select(f => f.Following)
+                .AsNoTracking()
+                .ToListAsync();
 
-        public async Task<int> GetFollowingCountAsync(int userId)
-        {
-            return await _context.UserFollows
-                .CountAsync(f => f.FollowerId == userId);
+            return users.Select(u => new FollowUserDto
+            {
+                Id = u.Id,
+                UserName = u.UserName,
+                Bio = u.Bio,
+                IsFollowing = true
+            }).ToList();
         }
     }
 }

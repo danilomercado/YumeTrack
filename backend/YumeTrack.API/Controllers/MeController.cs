@@ -32,14 +32,23 @@ namespace YumeTrack.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMyProfile()
         {
-            var userId = GetUserId();
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(userIdClaim, out var userId))
+                return Unauthorized();
 
             var user = await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
-                return NotFound(new { message = "Usuario no encontrado." });
+                return NotFound();
+
+            var followersCount = await _context.UserFollows
+                .CountAsync(f => f.FollowingId == userId);
+
+            var followingCount = await _context.UserFollows
+                .CountAsync(f => f.FollowerId == userId);
 
             var dto = new MyProfileDto
             {
@@ -47,7 +56,9 @@ namespace YumeTrack.API.Controllers
                 UserName = user.UserName,
                 Email = user.Email,
                 Bio = user.Bio,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                FollowersCount = followersCount,
+                FollowingCount = followingCount
             };
 
             return Ok(dto);

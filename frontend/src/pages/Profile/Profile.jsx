@@ -3,9 +3,15 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getUserTitlesRequest } from "../../services/userTitleService";
 import {
+  getFollowersRequest,
+  getFollowingRequest,
   getMyProfileRequest,
   updateMyProfileRequest,
 } from "../../services/userService";
+import {
+  followUserRequest,
+  unfollowUserRequest,
+} from "../../services/followService";
 
 const STATUS_LABELS = {
   0: "Planificados",
@@ -26,6 +32,11 @@ const Profile = () => {
   const [isSavingBio, setIsSavingBio] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [followModalOpen, setFollowModalOpen] = useState(false);
+  const [followModalTitle, setFollowModalTitle] = useState("");
+  const [followUsers, setFollowUsers] = useState([]);
+  const [followModalLoading, setFollowModalLoading] = useState(false);
+  const [followActionLoadingId, setFollowActionLoadingId] = useState(null);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -103,7 +114,72 @@ const Profile = () => {
       setIsSavingBio(false);
     }
   };
+  const loadFollowers = async () => {
+    try {
+      setFollowModalTitle("Seguidores");
+      setFollowModalOpen(true);
+      setFollowModalLoading(true);
 
+      const data = await getFollowersRequest();
+      setFollowUsers(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setErrorMessage(error.message || "No se pudieron cargar los seguidores.");
+      setFollowUsers([]);
+    } finally {
+      setFollowModalLoading(false);
+    }
+  };
+
+  const loadFollowing = async () => {
+    try {
+      setFollowModalTitle("Siguiendo");
+      setFollowModalOpen(true);
+      setFollowModalLoading(true);
+
+      const data = await getFollowingRequest();
+      setFollowUsers(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setErrorMessage(
+        error.message || "No se pudieron cargar los usuarios seguidos.",
+      );
+      setFollowUsers([]);
+    } finally {
+      setFollowModalLoading(false);
+    }
+  };
+
+  const handleToggleFollowUser = async (targetUserId) => {
+    if (!targetUserId || followActionLoadingId) return;
+
+    const targetUser = followUsers.find((u) => u.id === targetUserId);
+    if (!targetUser) return;
+
+    try {
+      setFollowActionLoadingId(targetUserId);
+
+      if (targetUser.isFollowing) {
+        await unfollowUserRequest(targetUserId);
+
+        setFollowUsers((prev) =>
+          prev.map((u) =>
+            u.id === targetUserId ? { ...u, isFollowing: false } : u,
+          ),
+        );
+      } else {
+        await followUserRequest(targetUserId);
+
+        setFollowUsers((prev) =>
+          prev.map((u) =>
+            u.id === targetUserId ? { ...u, isFollowing: true } : u,
+          ),
+        );
+      }
+    } catch (error) {
+      setErrorMessage(error.message || "No se pudo actualizar el follow.");
+    } finally {
+      setFollowActionLoadingId(null);
+    }
+  };
   if (isLoading) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10 text-white">
@@ -161,6 +237,16 @@ const Profile = () => {
             <div className="flex flex-wrap gap-3">
               <ProfileStat label="Títulos" value={total} />
               <ProfileStat label="Favoritos" value={favorites} />
+              <ProfileStat
+                label="Seguidores"
+                value={profile?.followersCount || 0}
+                onClick={loadFollowers}
+              />
+              <ProfileStat
+                label="Siguiendo"
+                value={profile?.followingCount || 0}
+                onClick={loadFollowing}
+              />
             </div>
           </div>
 
@@ -344,16 +430,113 @@ const Profile = () => {
           )}
         </div>
       </section>
+      {followModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="max-h-[80vh] w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+              <h3 className="text-lg font-bold text-white">
+                {followModalTitle}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setFollowModalOpen(false)}
+                className="rounded-lg px-3 py-1 text-sm text-zinc-300 transition hover:bg-white/10 hover:text-white"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <div className="max-h-[65vh] overflow-y-auto p-4">
+              {followModalLoading ? (
+                <p className="text-sm text-zinc-400">Cargando...</p>
+              ) : followUsers.length === 0 ? (
+                <p className="text-sm text-zinc-400">
+                  No hay usuarios para mostrar.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {followUsers.map((followUser) => {
+                    const isOwnUser =
+                      followUser.userName?.trim().toLowerCase() ===
+                      user?.userName?.trim().toLowerCase();
+
+                    const isLoadingButton =
+                      followActionLoadingId === followUser.id;
+
+                    return (
+                      <div
+                        key={followUser.id}
+                        className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 p-4"
+                      >
+                        <Link
+                          to={`/profile/${followUser.userName}`}
+                          onClick={() => setFollowModalOpen(false)}
+                          className="min-w-0 flex-1"
+                        >
+                          <p className="truncate font-semibold text-white">
+                            {followUser.userName}
+                          </p>
+                          <p className="mt-1 line-clamp-2 text-sm text-zinc-400">
+                            {followUser.bio?.trim()
+                              ? followUser.bio
+                              : "Sin biografía."}
+                          </p>
+                        </Link>
+
+                        {!isOwnUser && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleToggleFollowUser(followUser.id)
+                            }
+                            disabled={isLoadingButton}
+                            className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                              followUser.isFollowing
+                                ? "border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                                : "bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:opacity-90"
+                            } disabled:cursor-not-allowed disabled:opacity-60`}
+                          >
+                            {isLoadingButton
+                              ? "..."
+                              : followUser.isFollowing
+                                ? "Siguiendo"
+                                : "Seguir"}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
 
-const ProfileStat = ({ label, value }) => (
-  <div className="min-w-[120px] rounded-2xl border border-white/10 bg-zinc-950/70 px-4 py-3 shadow-inner">
-    <p className="text-2xl font-black text-white">{value}</p>
-    <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">{label}</p>
-  </div>
-);
+const ProfileStat = ({ label, value, onClick }) => {
+  const isClickable = typeof onClick === "function";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={!isClickable}
+      className={`min-w-[120px] rounded-2xl border border-white/10 bg-zinc-950/70 px-4 py-3 text-left shadow-inner transition ${
+        isClickable
+          ? "cursor-pointer hover:border-violet-500/40 hover:bg-zinc-900"
+          : "cursor-default"
+      }`}
+    >
+      <p className="text-2xl font-black text-white">{value}</p>
+      <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">
+        {label}
+      </p>
+    </button>
+  );
+};
 
 const SmallStat = ({ label, value }) => (
   <div className="rounded-xl border border-white/10 bg-black/20 p-3">
