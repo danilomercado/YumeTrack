@@ -20,7 +20,6 @@ const AppRouter = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/profile/:username" element={<PublicProfile />} />
 
         <Route
           path="/search"
@@ -57,6 +56,8 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/profile/:username" element={<PublicProfile />} />
       </Routes>
     </>
   );

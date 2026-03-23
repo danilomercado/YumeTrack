@@ -4,16 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YumeTrack.Application.DTOs.UserTitles
+namespace YumeTrack.Application.DTOs.Users
 {
-    public class PublicUserProfileDto
+    public class MyProfileDto
     {
+        public int Id { get; set; }
         public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         public string? Bio { get; set; }
         public DateTime CreatedAt { get; set; }
-        public int TotalTitles { get; set; }
-        public int FavoritesCount { get; set; }
-        public List<UserTitleListItemDto> Titles { get; set; } = new();
-
     }
 }

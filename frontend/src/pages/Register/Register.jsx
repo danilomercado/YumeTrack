@@ -14,6 +14,7 @@ const Register = () => {
   });
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [usernameSuggestions, setUsernameSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (event) => {
@@ -23,11 +24,28 @@ const Register = () => {
       ...prev,
       [name]: value,
     }));
+
+    setErrorMessage("");
+    setUsernameSuggestions([]);
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setForm((prev) => ({
+      ...prev,
+      userName: suggestion,
+    }));
+
+    setErrorMessage("");
+    setUsernameSuggestions([]);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (isLoading) return;
+
     setErrorMessage("");
+    setUsernameSuggestions([]);
 
     if (!form.userName.trim() || !form.email.trim() || !form.password.trim()) {
       setErrorMessage("Completá usuario, correo y contraseña.");
@@ -38,22 +56,29 @@ const Register = () => {
       setIsLoading(true);
 
       const data = await registerRequest({
-        userName: form.userName,
-        email: form.email,
+        userName: form.userName.trim(),
+        email: form.email.trim(),
         password: form.password,
       });
-
-      console.log("REGISTER RESPONSE:", data);
 
       login(data);
       navigate("/search");
     } catch (error) {
+      console.log("REGISTER ERROR:", error?.response?.data);
+
       const backendMessage =
-        error.response?.data?.message ||
-        error.response?.data?.title ||
+        error?.response?.data?.message ||
+        error?.response?.data?.title ||
+        error?.message ||
         "No se pudo crear la cuenta.";
 
       setErrorMessage(backendMessage);
+
+      const suggestions = error?.response?.data?.suggestions;
+
+      if (Array.isArray(suggestions)) {
+        setUsernameSuggestions(suggestions);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +146,22 @@ const Register = () => {
 
           {errorMessage && (
             <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-              {errorMessage}
+              <p>{errorMessage}</p>
+
+              {usernameSuggestions.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {usernameSuggestions.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white transition hover:bg-white/10"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

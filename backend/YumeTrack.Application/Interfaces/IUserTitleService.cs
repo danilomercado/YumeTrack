@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using YumeTrack.Application.DTOs.UserTitles;
+﻿using YumeTrack.Application.DTOs.UserTitles;
+using YumeTrack.Application.DTOs.Users;
 
 namespace YumeTrack.Application.Interfaces
 {
@@ -9,9 +7,10 @@ namespace YumeTrack.Application.Interfaces
     {
         Task AddAsync(int userId, CreateUserTitleDto dto);
         Task<List<UserTitleListItemDto>> GetUserListAsync(int userId, GetUserTitlesQueryDto filters);
-        Task<PublicUserProfileDto?> GetPublicProfileByUsernameAsync(string username);
-        Task<List<PublicUserSearchItemDto>> SearchUserAsync(string query);
         Task UpdateAsync(int userId, int userTitleId, UpdateUserTitleDto dto);
         Task DeleteAsync(int userId, int userTitleId);
+
+        Task<PublicUserProfileDto?> GetPublicProfileByUsernameAsync(string username);
+        Task<List<PublicUserSearchItemDto>> SearchUsersAsync(string query);
     }
 }

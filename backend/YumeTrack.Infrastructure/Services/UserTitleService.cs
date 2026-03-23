@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
 using YumeTrack.Application.DTOs.UserTitles;
+using YumeTrack.Application.DTOs.Users;
 using YumeTrack.Application.Interfaces;
 using YumeTrack.Domain.Entities;
 using YumeTrack.Infrastructure.Persistence;
@@ -108,62 +108,6 @@ namespace YumeTrack.Infrastructure.Services
                 .ToListAsync();
         }
 
-        public async Task<PublicUserProfileDto?> GetPublicProfileByUsernameAsync(string username)
-        {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserName.ToLower() == username.ToLower());
-
-            if (user == null)
-                return null;
-
-            var titles = await _context.UserTitles
-                .Where(ut => ut.UserId == user.Id)
-                .Include(ut => ut.Title)
-                .OrderByDescending(ut => ut.UpdatedAt)
-                .Select(ut => new UserTitleListItemDto
-                {
-                    Id = ut.Id,
-                    Status = ut.Status,
-                    Progress = ut.Progress,
-                    Score = ut.Score,
-                    IsFavorite = ut.IsFavorite,
-                    Notes = ut.Notes,
-                    CanonicalTitle = ut.Title.CanonicalTitle,
-                    PosterImageUrl = ut.Title.PosterImageUrl,
-                    MediaType = ut.Title.MediaType,
-                    EpisodeCount = ut.Title.EpisodeCount,
-                    ChapterCount = ut.Title.ChapterCount
-                })
-                .ToListAsync ();
-            return new PublicUserProfileDto
-            {
-                UserName = user.UserName,
-                CreateAdt = user.CreatedAt,
-                TotalTitles = titles.Count,
-                FavoriteCount = titles.Count(t => t.IsFavorite),
-                Titles = titles
-            };
-        }
-
-        public async Task<List<PublicUserSearchItemDto>> SearchUserAsync(string query)
-        {
-            if (string.IsNullOrWhiteSpace(query))
-                return new List<PublicUserSearchItemDto>();
-
-            query = query.Trim().ToLower();
-
-            return await _context.Users
-                .Where(u => u.UserName.ToLower().Contains(query))
-                .OrderBy(u => u.UserName)
-                .Select(u => new PublicUserSearchItemDto
-                {
-                    UserName = u.UserName,
-                    TotalTitles = u.UserTitles.Count
-                })
-                .Take(8)
-                .ToListAsync();
-        }
-
         public async Task UpdateAsync(int userId, int userTitleId, UpdateUserTitleDto dto)
         {
             ValidateInput(dto.Progress, dto.Score, dto.Notes);
@@ -194,6 +138,72 @@ namespace YumeTrack.Infrastructure.Services
 
             _context.UserTitles.Remove(userTitle);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<PublicUserProfileDto?> GetPublicProfileByUsernameAsync(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return null;
+
+            var normalizedUsername = username.Trim().ToLower();
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.UserName.ToLower() == normalizedUsername);
+
+            if (user == null)
+                return null;
+
+            var titles = await _context.UserTitles
+                .AsNoTracking()
+                .Where(ut => ut.UserId == user.Id)
+                .Include(ut => ut.Title)
+                .OrderByDescending(ut => ut.UpdatedAt)
+                .Select(ut => new UserTitleListItemDto
+                {
+                    Id = ut.Id,
+                    Status = ut.Status,
+                    Progress = ut.Progress,
+                    Score = ut.Score,
+                    IsFavorite = ut.IsFavorite,
+                    Notes = ut.Notes,
+                    CanonicalTitle = ut.Title.CanonicalTitle,
+                    PosterImageUrl = ut.Title.PosterImageUrl,
+                    MediaType = ut.Title.MediaType,
+                    EpisodeCount = ut.Title.EpisodeCount,
+                    ChapterCount = ut.Title.ChapterCount
+                })
+                .ToListAsync();
+
+            return new PublicUserProfileDto
+            {
+                UserName = user.UserName,
+                Bio = user.Bio,
+                CreatedAt = user.CreatedAt,
+                TotalTitles = titles.Count,
+                FavoritesCount = titles.Count(t => t.IsFavorite),
+                Titles = titles
+            };
+        }
+
+        public async Task<List<PublicUserSearchItemDto>> SearchUsersAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return new List<PublicUserSearchItemDto>();
+
+            var normalizedQuery = query.Trim().ToLower();
+
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => u.UserName.ToLower().Contains(normalizedQuery))
+                .OrderBy(u => u.UserName)
+                .Select(u => new PublicUserSearchItemDto
+                {
+                    UserName = u.UserName,
+                    TotalTitles = u.UserTitles.Count
+                })
+                .Take(8)
+                .ToListAsync();
         }
 
         private static void ValidateInput(int progress, int? score, string? notes)

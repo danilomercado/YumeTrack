@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import TitleGrid from "../../components/TitleGrid/TitleGrid";
@@ -13,9 +13,8 @@ import {
 } from "../../services/userTitleService";
 import { useAuth } from "../../context/AuthContext";
 import { searchUsersRequest } from "../../services/publicService";
-
 const Search = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
@@ -81,6 +80,17 @@ const Search = () => {
 
     return () => clearTimeout(timeoutId);
   }, [successMessage, errorMessage]);
+
+  const filteredUsers = useMemo(() => {
+    const loggedUserName = user?.userName?.trim().toLowerCase();
+
+    if (!loggedUserName) return users;
+
+    return users.filter(
+      (searchedUser) =>
+        searchedUser.userName?.trim().toLowerCase() !== loggedUserName,
+    );
+  }, [users, user]);
 
   const handleOpenDetail = async (item) => {
     try {
@@ -162,7 +172,7 @@ const Search = () => {
     !errorMessage &&
     query.trim() &&
     titles.length === 0 &&
-    users.length === 0;
+    filteredUsers.length === 0;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
@@ -213,33 +223,33 @@ const Search = () => {
         </div>
       )}
 
-      {users.length > 0 && (
+      {filteredUsers.length > 0 && (
         <section className="mt-8">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-bold text-white">Usuarios</h2>
             <span className="text-sm text-zinc-400">
-              {users.length} resultados
+              {filteredUsers.length} resultados
             </span>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {users.map((user) => (
+            {filteredUsers.map((searchedUser) => (
               <Link
-                key={user.userName}
-                to={`/profile/${user.userName}`}
+                key={searchedUser.userName}
+                to={`/profile/${searchedUser.userName}`}
                 className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4 transition hover:-translate-y-1 hover:border-violet-500/40"
               >
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-violet-500 to-pink-500 text-lg font-bold text-white">
-                    {user.userName?.charAt(0)?.toUpperCase() || "U"}
+                    {searchedUser.userName?.charAt(0)?.toUpperCase() || "U"}
                   </div>
 
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-white">
-                      {user.userName}
+                      {searchedUser.userName}
                     </p>
                     <p className="text-sm text-zinc-400">
-                      {user.totalTitles} títulos en su lista
+                      {searchedUser.totalTitles} títulos en su lista
                     </p>
                   </div>
                 </div>

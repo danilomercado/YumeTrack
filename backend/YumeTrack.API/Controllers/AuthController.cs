@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using YumeTrack.Application.Common;
 using YumeTrack.Application.DTOs.Auth;
 using YumeTrack.Application.Interfaces;
 
@@ -22,6 +23,14 @@ public class AuthController : ControllerBase
         {
             var response = await _authService.RegisterAsync(request);
             return Ok(response);
+        }
+        catch (UsernameAlreadyTakenException ex)
+        {
+            return BadRequest(new
+            {
+                message = ex.Message,
+                suggestions = ex.Suggestions
+            });
         }
         catch (Exception ex)
         {

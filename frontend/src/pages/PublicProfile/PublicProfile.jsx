@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { getPublicProfileRequest } from "../../services/publicService";
 
 const STATUS_LABELS = {
@@ -12,10 +13,20 @@ const STATUS_LABELS = {
 
 const PublicProfile = () => {
   const { username } = useParams();
+  const { user } = useAuth();
+
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const isOwnPublicProfile =
+    username?.trim().toLowerCase() === user?.userName?.trim().toLowerCase();
+
   useEffect(() => {
+    if (isOwnPublicProfile) {
+      setLoading(false);
+      return;
+    }
+
     const fetchProfile = async () => {
       try {
         const data = await getPublicProfileRequest(username);
@@ -29,7 +40,7 @@ const PublicProfile = () => {
     };
 
     fetchProfile();
-  }, [username]);
+  }, [username, isOwnPublicProfile]);
 
   const favoriteTitles = useMemo(() => {
     if (!profile?.titles) return [];
@@ -42,6 +53,10 @@ const PublicProfile = () => {
     const date = new Date(profile.createdAt);
     return Number.isNaN(date.getTime()) ? null : date;
   }, [profile]);
+
+  if (isOwnPublicProfile) {
+    return <Navigate to="/profile" replace />;
+  }
 
   if (loading) {
     return (
@@ -65,11 +80,10 @@ const PublicProfile = () => {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 text-white">
-      {/* HERO */}
-      <section className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black">
-        <div className="h-24 bg-gradient-to-r from-violet-600/30 via-fuchsia-500/20 to-pink-500/30" />
+      <section className="overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/80 shadow-[0_0_40px_rgba(168,85,247,0.08)] backdrop-blur">
+        <div className="h-28 bg-gradient-to-r from-violet-600/25 via-fuchsia-500/20 to-pink-500/25" />
 
-        <div className="relative px-6 pb-8">
+        <div className="relative bg-gradient-to-b from-transparent to-zinc-950/40 px-6 pb-8">
           <div className="-mt-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500 to-pink-500 text-3xl font-black shadow-lg shadow-violet-900/30">
@@ -99,13 +113,13 @@ const PublicProfile = () => {
           </div>
 
           <div className="mt-6 max-w-2xl rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
-            Lista pública de anime y manga con puntuaciones, favoritos y
-            reviews.
+            {profile.bio?.trim()
+              ? profile.bio
+              : "Lista pública de anime y manga con puntuaciones, favoritos y reviews."}
           </div>
         </div>
       </section>
 
-      {/* FAVORITOS */}
       {favoriteTitles.length > 0 && (
         <section className="mt-8">
           <div className="mb-4 flex items-center justify-between">
@@ -166,7 +180,6 @@ const PublicProfile = () => {
         </section>
       )}
 
-      {/* LISTA COMPLETA */}
       <section className="mt-10">
         <div className="mb-4 flex items-center justify-between">
           <div>
@@ -213,7 +226,6 @@ const PublicProfile = () => {
                   <div className="flex flex-wrap gap-2 text-xs">
                     <Badge>{title.mediaType}</Badge>
                     <Badge>{STATUS_LABELS[title.status] || "Sin estado"}</Badge>
-
                     {title.isFavorite && <Badge strong>Favorito</Badge>}
                   </div>
 
@@ -247,8 +259,8 @@ const PublicProfile = () => {
 };
 
 const ProfileStat = ({ label, value }) => (
-  <div className="min-w-[110px] rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur">
-    <p className="text-2xl font-black">{value}</p>
+  <div className="min-w-[120px] rounded-2xl border border-white/10 bg-zinc-950/70 px-4 py-3 shadow-inner">
+    <p className="text-2xl font-black text-white">{value}</p>
     <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">{label}</p>
   </div>
 );
