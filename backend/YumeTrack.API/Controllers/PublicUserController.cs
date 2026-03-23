@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using YumeTrack.Application.Interfaces;
 
 namespace YumeTrack.API.Controllers
@@ -22,9 +24,20 @@ namespace YumeTrack.API.Controllers
         }
 
         [HttpGet("{username}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetByUsername(string username)
         {
-            var profile = await _userTitleService.GetPublicProfileByUsernameAsync(username);
+            int? currentUserId = null;
+
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (int.TryParse(claim, out var parsedUserId))
+                    currentUserId = parsedUserId;
+            }
+
+            var profile = await _userTitleService.GetPublicProfileByUsernameAsync(username, currentUserId);
 
             if (profile == null)
                 return NotFound(new { message = "Usuario no encontrado." });

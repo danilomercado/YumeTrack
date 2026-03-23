@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getPublicProfileRequest } from "../../services/publicService";
+import {
+  followUserRequest,
+  unfollowUserRequest,
+} from "../../services/followService";
 
 const STATUS_LABELS = {
   0: "Planificado",
@@ -13,10 +17,12 @@ const STATUS_LABELS = {
 
 const PublicProfile = () => {
   const { username } = useParams();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const isOwnPublicProfile =
     username?.trim().toLowerCase() === user?.userName?.trim().toLowerCase();
@@ -29,10 +35,14 @@ const PublicProfile = () => {
 
     const fetchProfile = async () => {
       try {
+        setLoading(true);
+        setErrorMessage("");
+
         const data = await getPublicProfileRequest(username);
         setProfile(data);
       } catch (error) {
-        console.error(error.message);
+        console.error(error);
+        setErrorMessage(error.message || "No se pudo cargar el perfil.");
         setProfile(null);
       } finally {
         setLoading(false);
@@ -54,6 +64,46 @@ const PublicProfile = () => {
     return Number.isNaN(date.getTime()) ? null : date;
   }, [profile]);
 
+  const handleToggleFollow = async () => {
+    if (!profile?.id || followLoading) return;
+
+    try {
+      setFollowLoading(true);
+      setErrorMessage("");
+
+      if (profile.isFollowing) {
+        await unfollowUserRequest(profile.id);
+
+        setProfile((prev) => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            isFollowing: false,
+            followersCount: Math.max(0, (prev.followersCount || 0) - 1),
+          };
+        });
+      } else {
+        await followUserRequest(profile.id);
+
+        setProfile((prev) => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            isFollowing: true,
+            followersCount: (prev.followersCount || 0) + 1,
+          };
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(error.message || "No se pudo actualizar el follow.");
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
   if (isOwnPublicProfile) {
     return <Navigate to="/profile" replace />;
   }
@@ -72,7 +122,7 @@ const PublicProfile = () => {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10 text-white">
         <div className="rounded-3xl border border-white/10 bg-zinc-900/60 p-8">
-          Usuario no encontrado.
+          {errorMessage || "Usuario no encontrado."}
         </div>
       </main>
     );
@@ -80,6 +130,12 @@ const PublicProfile = () => {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 text-white">
+      {errorMessage && (
+        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          {errorMessage}
+        </div>
+      )}
+
       <section className="overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/80 shadow-[0_0_40px_rgba(168,85,247,0.08)] backdrop-blur">
         <div className="h-28 bg-gradient-to-r from-violet-600/25 via-fuchsia-500/20 to-pink-500/25" />
 
@@ -106,9 +162,38 @@ const PublicProfile = () => {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <ProfileStat label="Títulos" value={profile.totalTitles} />
-              <ProfileStat label="Favoritos" value={profile.favoritesCount} />
+            <div className="flex flex-col items-start gap-3 md:items-end">
+              <div className="flex flex-wrap gap-3">
+                <ProfileStat label="Títulos" value={profile.totalTitles} />
+                <ProfileStat label="Favoritos" value={profile.favoritesCount} />
+                <ProfileStat
+                  label="Seguidores"
+                  value={profile.followersCount || 0}
+                />
+                <ProfileStat
+                  label="Siguiendo"
+                  value={profile.followingCount || 0}
+                />
+              </div>
+
+              {isAuthenticated && !isOwnPublicProfile && (
+                <button
+                  type="button"
+                  onClick={handleToggleFollow}
+                  disabled={followLoading}
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                    profile.isFollowing
+                      ? "border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                      : "bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:opacity-90"
+                  } disabled:cursor-not-allowed disabled:opacity-60`}
+                >
+                  {followLoading
+                    ? "Procesando..."
+                    : profile.isFollowing
+                      ? "Siguiendo"
+                      : "Seguir"}
+                </button>
+              )}
             </div>
           </div>
 

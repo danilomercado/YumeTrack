@@ -10,7 +10,7 @@ namespace YumeTrack.Application.Interfaces
         Task UpdateAsync(int userId, int userTitleId, UpdateUserTitleDto dto);
         Task DeleteAsync(int userId, int userTitleId);
 
-        Task<PublicUserProfileDto?> GetPublicProfileByUsernameAsync(string username);
+        Task<PublicUserProfileDto?> GetPublicProfileByUsernameAsync(string username, int? currentUserId);
         Task<List<PublicUserSearchItemDto>> SearchUsersAsync(string query);
     }
 }

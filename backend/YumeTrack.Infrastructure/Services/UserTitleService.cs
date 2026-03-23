@@ -140,7 +140,7 @@ namespace YumeTrack.Infrastructure.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<PublicUserProfileDto?> GetPublicProfileByUsernameAsync(string username)
+        public async Task<PublicUserProfileDto?> GetPublicProfileByUsernameAsync(string username, int? currentUserId)
         {
             if (string.IsNullOrWhiteSpace(username))
                 return null;
@@ -175,13 +175,34 @@ namespace YumeTrack.Infrastructure.Services
                 })
                 .ToListAsync();
 
+            var followersCount = await _context.UserFollows
+                .AsNoTracking()
+                .CountAsync(f => f.FollowingId == user.Id);
+
+            var followingCount = await _context.UserFollows
+                .AsNoTracking()
+                .CountAsync(f => f.FollowerId == user.Id);
+
+            var isFollowing = false;
+
+            if (currentUserId.HasValue)
+            {
+                isFollowing = await _context.UserFollows
+                    .AsNoTracking()
+                    .AnyAsync(f => f.FollowerId == currentUserId.Value && f.FollowingId == user.Id);
+            }
+
             return new PublicUserProfileDto
             {
+                Id = user.Id,
                 UserName = user.UserName,
                 Bio = user.Bio,
                 CreatedAt = user.CreatedAt,
                 TotalTitles = titles.Count,
                 FavoritesCount = titles.Count(t => t.IsFavorite),
+                FollowersCount = followersCount,
+                FollowingCount = followingCount,
+                IsFollowing = isFollowing,
                 Titles = titles
             };
         }

@@ -27,5 +27,8 @@ namespace YumeTrack.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<UserTitle> UserTitles { get; set; } = new List<UserTitle>();
+
+        public ICollection<UserFollow> Followers { get; set; } = new List<UserFollow>();
+        public ICollection<UserFollow> Following { get; set; } = new List<UserFollow>();
     }
 }

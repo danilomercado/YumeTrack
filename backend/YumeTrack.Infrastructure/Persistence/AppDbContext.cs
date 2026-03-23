@@ -13,7 +13,7 @@ namespace YumeTrack.Infrastructure.Persistence
         public DbSet<Title> Titles => Set<Title>();
         public DbSet<UserTitle> UserTitles => Set<UserTitle>();
         public DbSet<MediaTranslation> MediaTranslations => Set<MediaTranslation>();
-
+        public DbSet<UserFollow> UserFollows => Set<UserFollow>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -132,6 +132,27 @@ namespace YumeTrack.Infrastructure.Persistence
                     .IsRequired();
 
                 entity.HasIndex(mt => new { mt.KitsuId, mt.MediaType, mt.Language })
+                    .IsUnique();
+            });
+
+            modelBuilder.Entity<UserFollow>(entity =>
+            {
+                entity.HasKey(f => f.Id);
+
+                entity.Property(f => f.CreatedAt)
+                    .IsRequired();
+
+                entity.HasOne(f => f.Follower)
+                    .WithMany(u => u.Following)
+                    .HasForeignKey(f => f.FollowerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(f => f.Following)
+                    .WithMany(u => u.Followers)
+                    .HasForeignKey(f => f.FollowingId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(f => new { f.FollowerId, f.FollowingId })
                     .IsUnique();
             });
         }

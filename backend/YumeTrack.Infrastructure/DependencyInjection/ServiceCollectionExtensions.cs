@@ -17,6 +17,8 @@ namespace YumeTrack.Infrastructure.DependencyInjection
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserTitleService, UserTitleService>();
+            services.AddScoped<FollowService>();
+
             services.AddHttpClient<ITranslationService, TranslationService>();
             services.AddHttpClient<IKitsuService, KitsuService>(client =>
             {
