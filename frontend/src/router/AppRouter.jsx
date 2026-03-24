@@ -10,6 +10,7 @@ import MyList from "../pages/MyList/MyList";
 import Profile from "../pages/Profile/Profile";
 import Catalog from "../pages/Catalog/Catalog";
 import PublicProfile from "../pages/PublicProfile/PublicProfile";
+import Feed from "../pages/Feed/Feed";
 
 const AppRouter = () => {
   return (
@@ -20,7 +21,7 @@ const AppRouter = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
+        <Route path="/feed" element={<Feed />} />
         <Route
           path="/search"
           element={

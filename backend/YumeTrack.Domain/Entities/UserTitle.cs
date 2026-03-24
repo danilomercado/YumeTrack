@@ -19,6 +19,7 @@ namespace YumeTrack.Domain.Entities
         public string? Notes { get; set; }
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? ReviewUpdatedAt { get; set; }
 
         public User User { get; set; } = null!;
         public Title Title { get; set; } = null!;

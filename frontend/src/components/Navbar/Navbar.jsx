@@ -83,6 +83,10 @@ const Navbar = () => {
               <NavLink to="/search" className={navLinkClass}>
                 Buscar
               </NavLink>
+              <NavLink to="/feed" className={navLinkClass}>
+                Feed
+              </NavLink>
+
               <NavLink to="/catalog" className={navLinkClass}>
                 Catálogo
               </NavLink>

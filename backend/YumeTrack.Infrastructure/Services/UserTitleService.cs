@@ -54,6 +54,7 @@ namespace YumeTrack.Infrastructure.Services
                 await _context.SaveChangesAsync();
             }
 
+
             var exists = await _context.UserTitles
                 .AnyAsync(ut => ut.UserId == userId && ut.TitleId == title.Id);
 
@@ -69,7 +70,8 @@ namespace YumeTrack.Infrastructure.Services
                 Score = dto.Score,
                 IsFavorite = dto.IsFavorite,
                 Notes = NormalizeNotes(dto.Notes),
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                ReviewUpdatedAt = string.IsNullOrWhiteSpace(dto.Notes) ? null : DateTime.UtcNow,
             };
 
             _context.UserTitles.Add(userTitle);
@@ -118,11 +120,22 @@ namespace YumeTrack.Infrastructure.Services
             if (userTitle == null)
                 throw new KeyNotFoundException("No encontrado.");
 
+            var newNotes = NormalizeNotes(dto.Notes);
+
+            if (userTitle.Notes != newNotes)
+            {
+                userTitle.Notes = newNotes;
+                userTitle.ReviewUpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                userTitle.Notes = newNotes;
+            }
+
             userTitle.Status = dto.Status;
             userTitle.Progress = dto.Progress;
             userTitle.Score = dto.Score;
             userTitle.IsFavorite = dto.IsFavorite;
-            userTitle.Notes = NormalizeNotes(dto.Notes);
             userTitle.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();

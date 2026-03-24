@@ -14,6 +14,8 @@ import {
 } from "../../services/userTitleService";
 import TitleGridSkeleton from "../../components/TitleGridSkeleton/TitleGirdSkeleton";
 import { useAuth } from "../../context/AuthContext";
+import { getGlobalFeedRequest } from "../../services/feedService";
+import FeedCard from "../../components/FeedCard/FeedCard";
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
@@ -31,6 +33,8 @@ const Home = () => {
   const [selectedTitle, setSelectedTitle] = useState(null);
   const [titleDetail, setTitleDetail] = useState(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [feedPreview, setFeedPreview] = useState([]);
+  const [loadingFeed, setLoadingFeed] = useState(true);
 
   useEffect(() => {
     const fetchTrendingAnime = async () => {
@@ -65,6 +69,21 @@ const Home = () => {
 
     fetchTrendingAnime();
     fetchTrendingManga();
+  }, []);
+
+  useEffect(() => {
+    const loadFeed = async () => {
+      try {
+        const res = await getGlobalFeedRequest();
+        setFeedPreview(res.data.slice(0, 3));
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingFeed(false);
+      }
+    };
+
+    loadFeed();
   }, []);
 
   const handleSelectTitle = async (title) => {
@@ -137,7 +156,24 @@ const Home = () => {
             </div>
           </div>
         </section>
+        <section className="mb-12 space-y-4">
+          <SectionHeader
+            title="Actividad de la comunidad"
+            subtitle="Últimas reseñas de usuarios"
+            actionLabel="Ver feed"
+            onAction={() => navigate("/feed")}
+          />
 
+          {loadingFeed ? (
+            <p>Cargando...</p>
+          ) : (
+            <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-2">
+              {feedPreview.map((item) => (
+                <FeedCard key={item.userTitleId} item={item} />
+              ))}
+            </div>
+          )}
+        </section>
         <section className="space-y-4">
           <SectionHeader
             title="Trending Anime"
