@@ -21,6 +21,8 @@ namespace YumeTrack.Domain.Entities
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ReviewUpdatedAt { get; set; }
 
+
+        public ICollection<ReviewLike> ReviewLikes { get; set; } = new List<ReviewLike>();
         public User User { get; set; } = null!;
         public Title Title { get; set; } = null!;
 

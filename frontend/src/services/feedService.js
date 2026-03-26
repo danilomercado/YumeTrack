@@ -7,3 +7,8 @@ export const getGlobalFeedRequest = () => {
 export const getFollowingFeedRequest = () => {
   return api.get("/feed/following");
 };
+
+export const toggleLikeRequest = async (userTitleId) => {
+  const res = await api.post(`/review-likes/${userTitleId}`);
+  return res.data;
+};
