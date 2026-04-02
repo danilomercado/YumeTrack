@@ -43,7 +43,7 @@ const Login = () => {
       console.log("REGISTER RESPONSE:", data);
 
       login(data);
-      navigate("/search");
+      navigate("/");
     } catch (error) {
       const backedMessage =
         error.response?.data?.message ||

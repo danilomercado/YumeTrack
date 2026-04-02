@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toggleLikeRequest } from "../../services/feedService";
+import { useNavigate } from "react-router-dom";
 
 const FeedCard = ({ item }) => {
+  const navigate = useNavigate();
   const [liked, setLiked] = useState(item.isLikedByCurrentUser);
   const [likesCount, setLikesCount] = useState(item.likesCount);
 
@@ -32,7 +34,10 @@ const FeedCard = ({ item }) => {
   };
 
   return (
-    <article className="group rounded-2xl border border-white/10 bg-zinc-900/70 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-violet-500/30 hover:bg-zinc-900">
+    <article
+      onClick={() => navigate(`/reviews/${item.userTitleId}`)}
+      className="group rounded-2xl border border-white/10 bg-zinc-900/70 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-violet-500/30 hover:bg-zinc-900"
+    >
       <div className="mb-3 flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-500 font-bold text-white shadow-lg shadow-violet-900/30">
           {userName.charAt(0).toUpperCase()}
@@ -54,7 +59,10 @@ const FeedCard = ({ item }) => {
             </span>
 
             <button
-              onClick={handleLike}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLike();
+              }}
               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition ${
                 liked
                   ? "border-pink-500/30 bg-pink-500/10 text-pink-300 hover:bg-pink-500/20"

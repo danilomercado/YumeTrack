@@ -11,6 +11,7 @@ import Profile from "../pages/Profile/Profile";
 import Catalog from "../pages/Catalog/Catalog";
 import PublicProfile from "../pages/PublicProfile/PublicProfile";
 import Feed from "../pages/Feed/Feed";
+import ReviewDetail from "../pages/ReviewDetail/ReviewDetail";
 
 const AppRouter = () => {
   return (
@@ -22,6 +23,7 @@ const AppRouter = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/feed" element={<Feed />} />
+        <Route path="/reviews/:id" element={<ReviewDetail />} />
         <Route
           path="/search"
           element={

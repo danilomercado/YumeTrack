@@ -88,5 +88,44 @@ namespace YumeTrack.API.Controllers
 
             return Ok(items);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetReviewDetail(int id)
+        {
+            int? currentUserId = null;
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdClaim, out var parsedUserId))
+                currentUserId = parsedUserId;
+
+            var review = await _context.UserTitles
+                .Where(ut => ut.Id == id)
+                .Where(ut => ut.Notes != null && ut.Notes.Trim() != "")
+                .Select(ut => new ReviewDetailDto
+                {
+                    UserTitleId = ut.Id,
+                    UserId = ut.UserId,
+                    UserName = ut.User.UserName,
+
+                    TitleId = ut.TitleId,
+                    CanonicalTitle = ut.Title.CanonicalTitle,
+                    PosterImageUrl = ut.Title.PosterImageUrl,
+                    MediaType = ut.Title.MediaType,
+
+                    Score = ut.Score,
+                    Review = ut.Notes!,
+                    ReviewUpdatedAt = ut.ReviewUpdatedAt!.Value,
+
+                    LikesCount = ut.ReviewLikes.Count(),
+                    IsLikedByCurrentUser = currentUserId.HasValue &&
+                        ut.ReviewLikes.Any(rl => rl.UserId == currentUserId.Value)
+                })
+                .FirstOrDefaultAsync();
+
+            if (review == null)
+                return NotFound();
+
+            return Ok(review);
+        }
     }
 }

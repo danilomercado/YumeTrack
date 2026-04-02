@@ -12,3 +12,7 @@ export const toggleLikeRequest = async (userTitleId) => {
   const res = await api.post(`/review-likes/${userTitleId}`);
   return res.data;
 };
+
+export const getReviewDetailRequest = (id) => {
+  return api.get(`/feed/${id}`);
+};
