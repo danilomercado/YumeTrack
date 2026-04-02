@@ -120,42 +120,68 @@ const Home = () => {
       isFavorite: false,
     });
   };
+
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <section className="mb-10">
-          <div className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] sm:p-8">
-            <p className="mb-2 text-sm uppercase tracking-[0.2em] text-violet-400">
-              YumeTrack
-            </p>
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] sm:p-8">
+            {/* Glow decorativo izquierda */}
+            <div className="pointer-events-none absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-violet-500/15 blur-3xl" />
 
-            <h1 className="max-w-4xl text-3xl font-bold leading-tight sm:text-5xl">
-              Descubrí anime y manga, guardá tus títulos y seguí tu progreso.
-            </h1>
+            {/* Glow decorativo derecha */}
+            <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-pink-500/10 blur-3xl" />
 
-            <p className="mt-4 max-w-2xl text-sm text-zinc-400 sm:text-base">
-              Explorá títulos populares, mirá detalles y armá tu lista personal.
-            </p>
+            {/* Personaje izquierda */}
+            <img
+              src="/characters/gon.png"
+              alt="Personaje anime izquierda"
+              className="pointer-events-none absolute left-0 -bottom-20 hidden h-[380px] object-contain opacity-70 drop-shadow-[0_0_30px_rgba(168,85,247,0.25)] animate-float lg:block xl:h-[430px]"
+            />
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => navigate("/catalog")}
-                className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-violet-500"
-              >
-                Explorar catálogo
-              </button>
+            {/* Personaje derecha */}
+            <img
+              src="/characters/narutito.png"
+              alt="Personaje anime derecha"
+              className="pointer-events-none absolute right-6 -bottom-20 hidden h-[380px] object-contain opacity-70 drop-shadow-[0_0_30px_rgba(236,72,153,0.18)] animate-float lg:block xl:h-[430px]"
+            />
 
-              <button
-                type="button"
-                onClick={() => navigate("/search")}
-                className="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10"
-              >
-                Buscar títulos
-              </button>
+            {/* Contenido hero */}
+            <div className="relative z-10 mx-auto max-w-4xl text-center lg:text-left">
+              <p className="mb-2 text-sm uppercase tracking-[0.2em] text-violet-400">
+                YumeTrack
+              </p>
+
+              <h1 className="max-w-4xl text-3xl font-bold leading-tight sm:text-5xl">
+                Descubrí anime y manga, guardá tus títulos y seguí tu progreso.
+              </h1>
+
+              <p className="mt-4 max-w-2xl text-sm text-zinc-400 sm:text-base">
+                Explorá títulos populares, mirá detalles y armá tu lista
+                personal.
+              </p>
+
+              <div className="mt-6 flex flex-wrap gap-3 justify-center lg:justify-start">
+                <button
+                  type="button"
+                  onClick={() => navigate("/catalog")}
+                  className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-violet-500"
+                >
+                  Explorar catálogo
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/search")}
+                  className="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+                >
+                  Buscar títulos
+                </button>
+              </div>
             </div>
           </div>
         </section>
+
         <section className="mb-12 space-y-4">
           <SectionHeader
             title="Actividad de la comunidad"
@@ -174,6 +200,7 @@ const Home = () => {
             </div>
           )}
         </section>
+
         <section className="space-y-4">
           <SectionHeader
             title="Trending Anime"

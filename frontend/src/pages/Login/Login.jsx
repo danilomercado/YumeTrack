@@ -55,9 +55,25 @@ const Login = () => {
     }
   };
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-80px)] max-w-6xl items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-zinc-900/70 p-8 shadow-2xl shadow-violet-900/20 backdrop-blur">
+    <main className="relative mx-auto flex min-h-[calc(100vh-80px)] max-w-6xl items-center justify-center px-4 py-10 overflow-hidden">
+      {/* PERSONAJE IZQUIERDA */}
+      <img
+        src="/characters/gojo.png"
+        alt="gojo"
+        className="pointer-events-none hidden xl:block absolute left-0 top-1/2 -translate-y-1/2 h-[420px] opacity-80 animate-float"
+      />
+
+      {/* PERSONAJE DERECHA */}
+      <img
+        src="/characters/itachi.png"
+        alt="itachi"
+        className="pointer-events-none hidden xl:block absolute right-0 top-1/2 -translate-y-1/2 h-[420px] opacity-80 animate-float"
+      />
+
+      {/* FORM (NO TOCADO) */}
+      <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/10 bg-zinc-900/70 p-8 shadow-2xl shadow-violet-900/20 backdrop-blur">
         <h1 className="text-3xl font-bold text-white">Iniciar sesión</h1>
+
         <p className="mt-2 text-sm text-zinc-400">
           Accedé a tu cuenta para continuar.
         </p>
