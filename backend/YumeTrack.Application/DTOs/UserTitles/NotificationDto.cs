@@ -7,7 +7,7 @@
         public bool IsRead { get; set; }
 
         public string ActorUserName { get; set; } = string.Empty;
-
+        public int? UserTitleId { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

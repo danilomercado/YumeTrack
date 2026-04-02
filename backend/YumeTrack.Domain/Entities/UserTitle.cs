@@ -23,6 +23,7 @@ namespace YumeTrack.Domain.Entities
 
 
         public ICollection<ReviewLike> ReviewLikes { get; set; } = new List<ReviewLike>();
+        public ICollection<ReviewComments> Comments { get; set; } = new List<ReviewComments>();
         public User User { get; set; } = null!;
         public Title Title { get; set; } = null!;
 

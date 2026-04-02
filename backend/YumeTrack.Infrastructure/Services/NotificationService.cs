@@ -24,6 +24,7 @@ namespace YumeTrack.Infrastructure.Services
                     Type = n.Type,
                     IsRead = n.IsRead,
                     ActorUserName = n.ActorUser.UserName,
+                    UserTitleId = n.UserTitleId,
                     CreatedAt = n.CreatedAt
                 })
                 .ToListAsync();

@@ -16,6 +16,7 @@ namespace YumeTrack.Infrastructure.Persistence
         public DbSet<UserFollow> UserFollows => Set<UserFollow>();
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<ReviewLike> ReviewLikes { get; set; }
+        public DbSet<ReviewComments> ReviewComments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -188,6 +189,29 @@ namespace YumeTrack.Infrastructure.Persistence
                 .WithMany(ut => ut.ReviewLikes)
                 .HasForeignKey(x => x.UserTitleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ReviewComments>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+
+                entity.Property(c => c.Content)
+                    .IsRequired()
+                    .HasMaxLength(1000);
+
+                entity.Property(c => c.CreatedAt)
+                    .IsRequired();
+
+                entity.HasOne(c => c.User)
+                    .WithMany()
+                    .HasForeignKey(c => c.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(c => c.UserTitle)
+                    .WithMany(ut => ut.Comments)
+                    .HasForeignKey(c => c.UserTitleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
         }
+
     }
 }

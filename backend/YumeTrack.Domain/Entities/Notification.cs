@@ -14,6 +14,8 @@
 
         public bool IsRead { get; set; } = false;
 
+        public int ? UserTitleId { get; set; } // para notificaciones relacionadas con títulos
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

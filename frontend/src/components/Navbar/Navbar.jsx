@@ -187,7 +187,9 @@ const Navbar = () => {
                             to={
                               n.type === "follow"
                                 ? `/profile/${n.actorUserName}`
-                                : "#"
+                                : n.type === "review_comment" && n.userTitleId
+                                  ? `/reviews/${n.userTitleId}`
+                                  : "#"
                             }
                             onClick={() => setOpen(false)}
                             className="block rounded-2xl border border-white/10 bg-black/20 p-3 transition hover:border-violet-500/30 hover:bg-black/30"
@@ -205,6 +207,31 @@ const Navbar = () => {
                                       {n.actorUserName}
                                     </span>{" "}
                                     te siguió
+                                  </p>
+
+                                  {n.createdAt && (
+                                    <p className="mt-1 text-xs text-zinc-400">
+                                      {new Date(
+                                        n.createdAt,
+                                      ).toLocaleDateString()}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            {n.type === "review_comment" && (
+                              <div className="flex items-start gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-500 font-bold text-white">
+                                  {n.actorUserName?.charAt(0)?.toUpperCase() ||
+                                    "U"}
+                                </div>
+
+                                <div className="min-w-0">
+                                  <p className="text-sm text-white">
+                                    <span className="font-semibold">
+                                      {n.actorUserName}
+                                    </span>{" "}
+                                    comentó tu reseña
                                   </p>
 
                                   {n.createdAt && (
