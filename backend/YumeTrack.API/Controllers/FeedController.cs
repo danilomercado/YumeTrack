@@ -19,7 +19,7 @@ namespace YumeTrack.API.Controllers
         }
 
         [HttpGet("global")]
-        public async Task<IActionResult> GetGlobalFeed()
+        public async Task<IActionResult> GetGlobalFeed([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             int? currentUserId = null;
 
@@ -27,11 +27,14 @@ namespace YumeTrack.API.Controllers
             if (int.TryParse(userIdClaim, out var parsedUserId))
                 currentUserId = parsedUserId;
 
-            var items = await _context.UserTitles
+            var query = _context.UserTitles
                 .Where(ut => ut.Notes != null && ut.Notes.Trim() != "")
-                .Where(ut => ut.ReviewUpdatedAt != null)
+                .Where(ut => ut.ReviewUpdatedAt != null);
+
+            var items = await query
                 .OrderByDescending(ut => ut.ReviewUpdatedAt)
-                .Take(20)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize + 1)
                 .Select(ut => new FeedItemDto
                 {
                     UserTitleId = ut.Id,
@@ -44,16 +47,25 @@ namespace YumeTrack.API.Controllers
                     ReviewUpdatedAt = ut.ReviewUpdatedAt!.Value,
                     LikesCount = ut.ReviewLikes.Count(),
                     IsLikedByCurrentUser = currentUserId.HasValue &&
-                                           ut.ReviewLikes.Any(rl => rl.UserId == currentUserId.Value)
+                        ut.ReviewLikes.Any(rl => rl.UserId == currentUserId.Value)
                 })
                 .ToListAsync();
 
-            return Ok(items);
+            var hasMore = items.Count > pageSize;
+
+            if (hasMore)
+                items = items.Take(pageSize).ToList();
+
+            return Ok(new
+            {
+                items,
+                hasMore
+            });
         }
 
         [Authorize]
         [HttpGet("following")]
-        public async Task<IActionResult> GetFollowingFeed()
+        public async Task<IActionResult> GetFollowingFeed([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -65,12 +77,15 @@ namespace YumeTrack.API.Controllers
                 .Select(f => f.FollowingId)
                 .ToListAsync();
 
-            var items = await _context.UserTitles
+            var query = _context.UserTitles
                 .Where(ut => followingIds.Contains(ut.UserId))
                 .Where(ut => ut.Notes != null && ut.Notes.Trim() != "")
-                .Where(ut => ut.ReviewUpdatedAt != null)
+                .Where(ut => ut.ReviewUpdatedAt != null);
+
+            var items = await query
                 .OrderByDescending(ut => ut.ReviewUpdatedAt)
-                .Take(20)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize + 1)
                 .Select(ut => new FeedItemDto
                 {
                     UserTitleId = ut.Id,
@@ -86,7 +101,16 @@ namespace YumeTrack.API.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(items);
+            var hasMore = items.Count > pageSize;
+
+            if (hasMore)
+                items = items.Take(pageSize).ToList();
+
+            return Ok(new
+            {
+                items,
+                hasMore
+            });
         }
 
         [HttpGet("{id}")]

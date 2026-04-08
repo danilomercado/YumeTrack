@@ -7,43 +7,99 @@ import {
 } from "../../services/feedService";
 import FeedCard from "../../components/FeedCard/FeedCard";
 
+const PAGE_SIZE = 10;
+
 const Feed = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("global");
   const [items, setItems] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const loadFeed = async () => {
-      try {
+  const fetchFeed = async ({ selectedTab, nextPage = 1, append = false }) => {
+    try {
+      if (append) {
+        setLoadingMore(true);
+      } else {
         setLoading(true);
-        setError("");
-
-        if (activeTab === "following" && !isAuthenticated) {
-          setItems([]);
-          return;
-        }
-
-        const response =
-          activeTab === "global"
-            ? await getGlobalFeedRequest()
-            : await getFollowingFeedRequest();
-
-        setItems(response?.data ?? []);
-      } catch (err) {
-        console.error("Error cargando feed:", err);
-        setError("No se pudo cargar el feed.");
-        setItems([]);
-      } finally {
-        setLoading(false);
       }
-    };
 
-    loadFeed();
+      setError("");
+
+      if (selectedTab === "following" && !isAuthenticated) {
+        setItems([]);
+        setHasMore(false);
+        return;
+      }
+
+      const response =
+        selectedTab === "global"
+          ? await getGlobalFeedRequest({
+              page: nextPage,
+              pageSize: PAGE_SIZE,
+            })
+          : await getFollowingFeedRequest({
+              page: nextPage,
+              pageSize: PAGE_SIZE,
+            });
+
+      const payload = response?.data;
+
+      // Soporta backend paginado: { items, hasMore }
+      if (payload && Array.isArray(payload.items)) {
+        const newItems = payload.items;
+
+        setItems((prev) => (append ? [...prev, ...newItems] : newItems));
+        setHasMore(Boolean(payload.hasMore));
+        setPage(nextPage);
+        return;
+      }
+
+      // Fallback por si el backend todavía devuelve array plano
+      const fallbackItems = Array.isArray(payload) ? payload : [];
+
+      setItems((prev) =>
+        append ? [...prev, ...fallbackItems] : fallbackItems,
+      );
+
+      // Como fallback, asumimos que si vino menos que PAGE_SIZE, no hay más
+      setHasMore(fallbackItems.length === PAGE_SIZE);
+      setPage(nextPage);
+    } catch (err) {
+      console.error("Error cargando feed:", err);
+      setError("No se pudo cargar el feed.");
+
+      if (!append) {
+        setItems([]);
+      }
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    setItems([]);
+    setPage(1);
+    setHasMore(true);
+    fetchFeed({ selectedTab: activeTab, nextPage: 1, append: false });
   }, [activeTab, isAuthenticated]);
+
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMore) return;
+
+    await fetchFeed({
+      selectedTab: activeTab,
+      nextPage: page + 1,
+      append: true,
+    });
+  };
 
   const renderTabButton = (tabKey, label) => {
     const isActive = activeTab === tabKey;
@@ -132,11 +188,29 @@ const Feed = () => {
               </button>
             </div>
           ) : items.length > 0 ? (
-            <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 xl:grid-cols-2">
-              {items.map((item) => (
-                <FeedCard key={item.userTitleId} item={item} />
-              ))}
-            </div>
+            <>
+              <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 xl:grid-cols-2">
+                {items.map((item) => (
+                  <FeedCard
+                    key={`${item.userTitleId}-${item.reviewUpdatedAt || ""}`}
+                    item={item}
+                  />
+                ))}
+              </div>
+
+              {hasMore && (
+                <div className="flex justify-center pt-2">
+                  <button
+                    type="button"
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {loadingMore ? "Cargando..." : "Cargar más"}
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6 text-sm text-zinc-400">
               No hay reseñas para mostrar.

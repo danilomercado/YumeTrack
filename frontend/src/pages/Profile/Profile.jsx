@@ -12,7 +12,7 @@ import {
   followUserRequest,
   unfollowUserRequest,
 } from "../../services/followService";
-
+import FeedCard from "../../components/FeedCard/FeedCard";
 const STATUS_LABELS = {
   0: "Planificados",
   1: "En progreso",
@@ -83,6 +83,22 @@ const Profile = () => {
   }, {});
 
   const favoriteTitles = titles.filter((t) => t.isFavorite).slice(0, 6);
+
+  const reviewItems = titles
+    .filter((t) => t.notes && t.notes.trim() !== "")
+    .slice(0, 6)
+    .map((t) => ({
+      userTitleId: t.id,
+      userName: profile?.userName || user?.userName,
+      canonicalTitle: t.canonicalTitle,
+      mediaType: t.mediaType,
+      review: t.notes,
+      posterImageUrl: t.posterImageUrl,
+      score: t.score,
+      reviewUpdatedAt: null, // no lo tenés en DTO aún
+      likesCount: 0,
+      isLikedByCurrentUser: false,
+    }));
 
   const safeCreatedAt = useMemo(() => {
     if (!profile?.createdAt) return null;
@@ -476,6 +492,28 @@ const Profile = () => {
             </div>
           )}
         </div>
+      </section>
+      <section className="mt-8 rounded-2xl border border-white/10 bg-zinc-900/70 p-4">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.16em] text-violet-300">
+              Reseñas
+            </p>
+            <h2 className="mt-1 text-2xl font-black">Últimas reseñas</h2>
+          </div>
+        </div>
+
+        {reviewItems.length === 0 ? (
+          <div className="rounded-xl border border-white/10 bg-black/20 p-4 text-zinc-400">
+            Todavía no escribiste ninguna reseña.
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {reviewItems.map((item) => (
+              <FeedCard key={item.userTitleId} item={item} />
+            ))}
+          </div>
+        )}
       </section>
       {followModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">

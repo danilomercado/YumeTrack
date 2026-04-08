@@ -167,11 +167,20 @@ namespace YumeTrack.Infrastructure.Services
             if (user == null)
                 return null;
 
+            var totalTitles = await _context.UserTitles
+                .AsNoTracking()
+                .CountAsync(ut => ut.UserId == user.Id);
+
+            var favoritesCount = await _context.UserTitles
+                .AsNoTracking()
+                .CountAsync(ut => ut.UserId == user.Id && ut.IsFavorite);
+
             var titles = await _context.UserTitles
                 .AsNoTracking()
-                .Where(ut => ut.UserId == user.Id)
+                .Where(ut => ut.UserId == user.Id && !string.IsNullOrEmpty(ut.Notes))
                 .Include(ut => ut.Title)
-                .OrderByDescending(ut => ut.UpdatedAt)
+                .OrderByDescending(ut => ut.ReviewUpdatedAt)
+                .Take(6)
                 .Select(ut => new UserTitleListItemDto
                 {
                     Id = ut.Id,
@@ -211,8 +220,8 @@ namespace YumeTrack.Infrastructure.Services
                 UserName = user.UserName,
                 Bio = user.Bio,
                 CreatedAt = user.CreatedAt,
-                TotalTitles = titles.Count,
-                FavoritesCount = titles.Count(t => t.IsFavorite),
+                TotalTitles = totalTitles,
+                FavoritesCount = favoritesCount,
                 FollowersCount = followersCount,
                 FollowingCount = followingCount,
                 IsFollowing = isFollowing,
