@@ -5,6 +5,7 @@ import {
   toggleLikeRequest,
 } from "../../services/feedService";
 import ReviewComments from "../../components/ReviewComments/ReviewComments";
+import { formatRelativeTime } from "../../utils/formatRelativeTime";
 
 const ReviewDetail = () => {
   const { id } = useParams();
@@ -118,11 +119,7 @@ const ReviewDetail = () => {
                 </Link>
 
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-400">
-                  <span>
-                    {data.reviewUpdatedAt
-                      ? new Date(data.reviewUpdatedAt).toLocaleDateString()
-                      : ""}
-                  </span>
+                  <span>{formatRelativeTime(data.reviewUpdatedAt)}</span>
 
                   <span className="h-1 w-1 rounded-full bg-zinc-600" />
 

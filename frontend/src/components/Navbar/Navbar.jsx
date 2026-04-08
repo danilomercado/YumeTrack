@@ -6,6 +6,7 @@ import {
   getUnreadCountRequest,
   markAllReadRequest,
 } from "../../services/notificationService";
+import { formatRelativeTime } from "../../utils/formatRelativeTime";
 
 const navLinkClass = ({ isActive }) =>
   `relative text-sm font-medium transition ${
@@ -211,9 +212,7 @@ const Navbar = () => {
 
                                   {n.createdAt && (
                                     <p className="mt-1 text-xs text-zinc-400">
-                                      {new Date(
-                                        n.createdAt,
-                                      ).toLocaleDateString()}
+                                      {formatRelativeTime(n.createdAt)}
                                     </p>
                                   )}
                                 </div>
@@ -236,9 +235,7 @@ const Navbar = () => {
 
                                   {n.createdAt && (
                                     <p className="mt-1 text-xs text-zinc-400">
-                                      {new Date(
-                                        n.createdAt,
-                                      ).toLocaleDateString()}
+                                      {formatRelativeTime(n.createdAt)}
                                     </p>
                                   )}
                                 </div>

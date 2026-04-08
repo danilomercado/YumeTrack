@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toggleLikeRequest } from "../../services/feedService";
 import { useNavigate } from "react-router-dom";
+import { formatRelativeTime } from "../../utils/formatRelativeTime";
 
 const FeedCard = ({ item }) => {
   const navigate = useNavigate();
@@ -53,9 +54,7 @@ const FeedCard = ({ item }) => {
 
           <div className="mt-1 flex items-center gap-3">
             <span className="text-xs text-zinc-400">
-              {item.reviewUpdatedAt
-                ? new Date(item.reviewUpdatedAt).toLocaleDateString()
-                : ""}
+              {formatRelativeTime(item.reviewUpdasteAt)}
             </span>
 
             <button

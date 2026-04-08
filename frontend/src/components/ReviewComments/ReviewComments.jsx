@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   getCommentsRequest,
   createCommentRequest,
@@ -6,6 +6,7 @@ import {
 } from "../../services/commentsService";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
+import { formatRelativeTime } from "../../utils/formatRelativeTime";
 
 const ReviewComments = ({ userTitleId }) => {
   const { user, isAuthenticated } = useAuth();
@@ -14,8 +15,10 @@ const ReviewComments = ({ userTitleId }) => {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await getCommentsRequest(userTitleId);
       setComments(res.data);
@@ -24,21 +27,24 @@ const ReviewComments = ({ userTitleId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userTitleId]);
 
   useEffect(() => {
     loadComments();
-  }, [userTitleId]);
+  }, [loadComments]);
 
   const handleCreate = async () => {
-    if (!content.trim()) return;
+    if (!content.trim() || isSubmitting) return;
 
     try {
+      setIsSubmitting(true);
       await createCommentRequest(userTitleId, content);
       setContent("");
       loadComments();
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsSubmitting(true);
     }
   };
 
@@ -65,10 +71,12 @@ const ReviewComments = ({ userTitleId }) => {
             }}
             placeholder="Escribí un comentario..."
             className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none focus:border-violet-500"
+            disabled={isSubmitting}
           />
           <button
             onClick={handleCreate}
-            className="rounded-xl bg-violet-600 px-4 py-2 text-sm text-white hover:bg-violet-500"
+            disabled={!content.trim() || isSubmitting}
+            className="rounded-xl bg-violet-600 px-4 py-2 text-sm text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Enviar
           </button>
@@ -77,9 +85,27 @@ const ReviewComments = ({ userTitleId }) => {
 
       {/* LISTA */}
       {loading ? (
-        <p className="text-sm text-zinc-400">Cargando comentarios...</p>
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="animate-pulse rounded-2xl border border-white/10 bg-black/20 p-4"
+            >
+              <div className="mb-3 flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full bg-white/10" />
+                <div className="space-y-2">
+                  <div className="h-3 w-24 rounded bg-white/10" />
+                  <div className="h-3 w-16 rounded bg-white/10" />
+                </div>
+              </div>
+              <div className="h-3 w-full rounded bg-white/10" />
+            </div>
+          ))}
+        </div>
       ) : comments.length === 0 ? (
-        <p className="text-sm text-zinc-500">Todavía no hay comentarios.</p>
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-400">
+          Todavía no hay comentarios.
+        </div>
       ) : (
         <div className="space-y-4">
           {comments.map((c) => (
@@ -105,7 +131,7 @@ const ReviewComments = ({ userTitleId }) => {
 
                     {c.createdAt && (
                       <span className="ml-2 text-xs text-zinc-500">
-                        {new Date(c.createdAt).toLocaleDateString()}
+                        {formatRelativeTime(c.createdAt)}
                       </span>
                     )}
                   </div>

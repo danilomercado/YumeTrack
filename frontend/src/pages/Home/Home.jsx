@@ -74,8 +74,16 @@ const Home = () => {
   useEffect(() => {
     const loadFeed = async () => {
       try {
-        const res = await getGlobalFeedRequest();
-        setFeedPreview(res.data.slice(0, 3));
+        const res = await getGlobalFeedRequest({ page: 1, pageSize: 3 });
+        const payload = res?.data;
+
+        const items = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.items)
+            ? payload.items
+            : [];
+
+        setFeedPreview(items.slice(0, 3));
       } catch (e) {
         console.error(e);
       } finally {
@@ -191,12 +199,32 @@ const Home = () => {
           />
 
           {loadingFeed ? (
-            <p>Cargando...</p>
-          ) : (
+            <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-2">
+              {Array.from({ length: 2 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="animate-pulse rounded-2xl border border-white/10 bg-zinc-900/60 p-4"
+                >
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-white/10" />
+                    <div className="space-y-2">
+                      <div className="h-4 w-24 rounded bg-white/10" />
+                      <div className="h-3 w-16 rounded bg-white/10" />
+                    </div>
+                  </div>
+                  <div className="h-20 w-full rounded bg-white/10" />
+                </div>
+              ))}
+            </div>
+          ) : feedPreview.length > 0 ? (
             <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-2">
               {feedPreview.map((item) => (
                 <FeedCard key={item.userTitleId} item={item} />
               ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-5 text-sm text-zinc-400">
+              Todavía no hay actividad para mostrar.
             </div>
           )}
         </section>
