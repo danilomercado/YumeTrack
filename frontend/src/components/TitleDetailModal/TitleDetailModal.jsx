@@ -5,6 +5,12 @@ import { getTitleCharactersRequest } from "../../services/titleService";
 import { useEffect, useState } from "react";
 import { USER_TITLE_STATUS } from "../../services/userTitleService";
 import { useToast } from "../../context/ToastContext";
+import { useAuth } from "../../context/AuthContext";
+import EpisodeThread from "../EpisodeThread/EpisodeThread";
+import {
+  addListItemRequest,
+  getMyListsRequest,
+} from "../../services/communityService";
 
 const statusOptions = (isManga) => [
   {
@@ -18,8 +24,89 @@ const statusOptions = (isManga) => [
   { value: USER_TITLE_STATUS.COMPLETED, label: "Completado" },
 ];
 
+// Suma el título a una de tus listas compartibles.
+const AddToList = ({ title, onClose }) => {
+  const { toast } = useToast();
+  const [lists, setLists] = useState(null);
+  const [token, setToken] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getMyListsRequest()
+      .then((data) => {
+        if (cancelled) return;
+        setLists(data);
+        setToken(data[0]?.token ?? "");
+      })
+      .catch(() => !cancelled && setLists([]));
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (lists === null) return null;
+
+  const add = async () => {
+    try {
+      setBusy(true);
+      await addListItemRequest(token, {
+        kitsuId: title.id,
+        mediaType: title.mediaType,
+      });
+      toast("Agregado a la lista");
+    } catch (error) {
+      toast(error.message || "No se pudo agregar a la lista", "error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mt-5 flex flex-wrap items-center gap-2">
+      <span className="text-sm font-bold text-paper">Agregar a una lista</span>
+
+      {lists.length === 0 ? (
+        <Link
+          to="/lists"
+          onClick={onClose}
+          className="rounded-full bg-panel-2 px-4 py-2 text-sm font-bold text-paper hover:bg-white/10"
+        >
+          Crear mi primera lista
+        </Link>
+      ) : (
+        <>
+          <select
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            aria-label="Elegí una lista"
+            className="max-w-[12rem] rounded-full bg-panel-2 px-4 py-2 text-sm text-paper"
+          >
+            {lists.map((list) => (
+              <option key={list.token} value={list.token}>
+                {list.title}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            disabled={busy || !token}
+            onClick={add}
+            className="rounded-full bg-panel-2 px-4 py-2 text-sm font-bold text-paper hover:bg-white/10 disabled:opacity-60"
+          >
+            Agregar
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
 const TitleDetailModal = ({ isOpen, onClose, title, isLoading, onAdd }) => {
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [status, setStatus] = useState(USER_TITLE_STATUS.PLANNED);
@@ -215,6 +302,16 @@ const TitleDetailModal = ({ isOpen, onClose, title, isLoading, onAdd }) => {
             )}
 
             <div className="px-6 pb-6 sm:px-8">
+              <EpisodeThread
+                key={title.id}
+                kitsuId={title.id}
+                mediaType={title.mediaType}
+                total={title.episodeCount || title.chapterCount}
+                onNavigate={onClose}
+              />
+            </div>
+
+            <div className="px-6 pb-6 sm:px-8">
               <h3 className="mb-3 text-lg text-paper">Qué dice la comunidad</h3>
 
               {reviews === null ? (
@@ -297,6 +394,8 @@ const TitleDetailModal = ({ isOpen, onClose, title, isLoading, onAdd }) => {
                   Favorito
                 </button>
               </div>
+
+              {isAuthenticated && <AddToList title={title} onClose={onClose} />}
 
               {submitError && (
                 <div className="mt-4 rounded-xl bg-red-500/10 p-3 text-sm text-red-300">

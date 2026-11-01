@@ -18,6 +18,10 @@ namespace YumeTrack.Infrastructure.Persistence
         public DbSet<ReviewLike> ReviewLikes { get; set; }
         public DbSet<ReviewComments> ReviewComments { get; set; }
         public DbSet<UserBlock> UserBlocks => Set<UserBlock>();
+        public DbSet<CommentReaction> CommentReactions => Set<CommentReaction>();
+        public DbSet<UserList> UserLists => Set<UserList>();
+        public DbSet<UserListItem> UserListItems => Set<UserListItem>();
+        public DbSet<EpisodeComment> EpisodeComments => Set<EpisodeComment>();
         public DbSet<ContentReport> ContentReports => Set<ContentReport>();
         public DbSet<ActivityEvent> ActivityEvents => Set<ActivityEvent>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -139,6 +143,68 @@ namespace YumeTrack.Infrastructure.Persistence
 
                 entity.HasIndex(mt => new { mt.KitsuId, mt.MediaType, mt.Language })
                     .IsUnique();
+            });
+
+            modelBuilder.Entity<CommentReaction>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+
+                // Una reacción por usuario y comentario (se puede cambiar).
+                entity.HasIndex(r => new { r.CommentId, r.UserId }).IsUnique();
+
+                entity.HasOne(r => r.Comment)
+                    .WithMany(c => c.Reactions)
+                    .HasForeignKey(r => r.CommentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(r => r.User)
+                    .WithMany()
+                    .HasForeignKey(r => r.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<UserList>(entity =>
+            {
+                entity.HasKey(l => l.Id);
+                entity.HasIndex(l => l.Token).IsUnique();
+                entity.HasIndex(l => l.UserId);
+
+                entity.HasOne(l => l.User)
+                    .WithMany()
+                    .HasForeignKey(l => l.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<UserListItem>(entity =>
+            {
+                entity.HasKey(i => i.Id);
+                entity.HasIndex(i => new { i.ListId, i.TitleId }).IsUnique();
+
+                entity.HasOne(i => i.List)
+                    .WithMany(l => l.Items)
+                    .HasForeignKey(i => i.ListId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(i => i.Title)
+                    .WithMany()
+                    .HasForeignKey(i => i.TitleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<EpisodeComment>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.HasIndex(c => new { c.TitleId, c.Episode, c.CreatedAt });
+
+                entity.HasOne(c => c.User)
+                    .WithMany()
+                    .HasForeignKey(c => c.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(c => c.Title)
+                    .WithMany()
+                    .HasForeignKey(c => c.TitleId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<UserBlock>(entity =>

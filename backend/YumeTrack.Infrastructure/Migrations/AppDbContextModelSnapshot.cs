@@ -53,6 +53,38 @@ namespace YumeTrack.Infrastructure.Migrations
                     b.ToTable("ActivityEvents");
                 });
 
+            modelBuilder.Entity("YumeTrack.Domain.Entities.CommentReaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("CommentId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("CommentReactions");
+                });
+
             modelBuilder.Entity("YumeTrack.Domain.Entities.ContentReport", b =>
                 {
                     b.Property<int>("Id")
@@ -97,6 +129,40 @@ namespace YumeTrack.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("ContentReports");
+                });
+
+            modelBuilder.Entity("YumeTrack.Domain.Entities.EpisodeComment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Episode")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TitleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("TitleId", "Episode", "CreatedAt");
+
+                    b.ToTable("EpisodeComments");
                 });
 
             modelBuilder.Entity("YumeTrack.Domain.Entities.MediaTranslation", b =>
@@ -195,6 +261,9 @@ namespace YumeTrack.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("ParentCommentId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
@@ -418,6 +487,84 @@ namespace YumeTrack.Infrastructure.Migrations
                     b.ToTable("UserFollows");
                 });
 
+            modelBuilder.Entity("YumeTrack.Domain.Entities.UserList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserLists");
+                });
+
+            modelBuilder.Entity("YumeTrack.Domain.Entities.UserListItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ListId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TitleId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TitleId");
+
+                    b.HasIndex("ListId", "TitleId")
+                        .IsUnique();
+
+                    b.ToTable("UserListItems");
+                });
+
             modelBuilder.Entity("YumeTrack.Domain.Entities.UserTitle", b =>
                 {
                     b.Property<int>("Id")
@@ -483,6 +630,25 @@ namespace YumeTrack.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("YumeTrack.Domain.Entities.CommentReaction", b =>
+                {
+                    b.HasOne("YumeTrack.Domain.Entities.ReviewComments", "Comment")
+                        .WithMany("Reactions")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YumeTrack.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("YumeTrack.Domain.Entities.ContentReport", b =>
                 {
                     b.HasOne("YumeTrack.Domain.Entities.User", "Reporter")
@@ -492,6 +658,25 @@ namespace YumeTrack.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Reporter");
+                });
+
+            modelBuilder.Entity("YumeTrack.Domain.Entities.EpisodeComment", b =>
+                {
+                    b.HasOne("YumeTrack.Domain.Entities.Title", "Title")
+                        .WithMany()
+                        .HasForeignKey("TitleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YumeTrack.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Title");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("YumeTrack.Domain.Entities.Notification", b =>
@@ -589,6 +774,36 @@ namespace YumeTrack.Infrastructure.Migrations
                     b.Navigation("Following");
                 });
 
+            modelBuilder.Entity("YumeTrack.Domain.Entities.UserList", b =>
+                {
+                    b.HasOne("YumeTrack.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("YumeTrack.Domain.Entities.UserListItem", b =>
+                {
+                    b.HasOne("YumeTrack.Domain.Entities.UserList", "List")
+                        .WithMany("Items")
+                        .HasForeignKey("ListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YumeTrack.Domain.Entities.Title", "Title")
+                        .WithMany()
+                        .HasForeignKey("TitleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("List");
+
+                    b.Navigation("Title");
+                });
+
             modelBuilder.Entity("YumeTrack.Domain.Entities.UserTitle", b =>
                 {
                     b.HasOne("YumeTrack.Domain.Entities.Title", "Title")
@@ -608,6 +823,11 @@ namespace YumeTrack.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("YumeTrack.Domain.Entities.ReviewComments", b =>
+                {
+                    b.Navigation("Reactions");
+                });
+
             modelBuilder.Entity("YumeTrack.Domain.Entities.Title", b =>
                 {
                     b.Navigation("UserTitles");
@@ -622,6 +842,11 @@ namespace YumeTrack.Infrastructure.Migrations
                     b.Navigation("ReviewLikes");
 
                     b.Navigation("UserTitles");
+                });
+
+            modelBuilder.Entity("YumeTrack.Domain.Entities.UserList", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("YumeTrack.Domain.Entities.UserTitle", b =>

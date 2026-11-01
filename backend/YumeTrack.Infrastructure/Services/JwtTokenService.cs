@@ -33,6 +33,9 @@ namespace YumeTrack.Infrastructure.Services
                 new(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
+            if (IsAdmin(user))
+                claims.Add(new Claim(ClaimTypes.Role, "admin"));
+
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -45,6 +48,19 @@ namespace YumeTrack.Infrastructure.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        // Admin:Emails = correos separados por coma (variable Admin__Emails).
+        public bool IsAdmin(User user)
+        {
+            var raw = _configuration["Admin:Emails"];
+
+            if (string.IsNullOrWhiteSpace(raw))
+                return false;
+
+            return raw
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Contains(user.Email, StringComparer.OrdinalIgnoreCase);
         }
 
         private string MfaAudience => $"{_configuration["JwtSettings:Audience"]}:mfa";

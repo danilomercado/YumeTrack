@@ -20,6 +20,7 @@ const normalizeUser = (rawUser) => {
     id: rawUser.id ?? null,
     userName: rawUser.userName ?? rawUser.username ?? rawUser.name ?? "",
     email: rawUser.email ?? "",
+    isAdmin: Boolean(rawUser.isAdmin),
   };
 };
 

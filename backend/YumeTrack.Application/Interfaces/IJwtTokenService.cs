@@ -9,6 +9,7 @@ namespace YumeTrack.Application.Interfaces
     {
         string GenerateToken(User user);
         string GenerateMfaToken(User user);
+        bool IsAdmin(User user);
         int? ValidateMfaToken(string token);
     }
 }

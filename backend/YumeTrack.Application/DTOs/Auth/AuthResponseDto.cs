@@ -11,6 +11,8 @@ namespace YumeTrack.Application.DTOs.Auth
         public string Email { get; set; } = string.Empty;
 
         // Si el usuario activó MFA, el login devuelve esto en lugar del token final.
+        public bool IsAdmin { get; set; }
+
         public bool MfaRequired { get; set; }
         public string? MfaToken { get; set; }
 

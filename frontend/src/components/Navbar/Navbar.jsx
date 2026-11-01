@@ -23,6 +23,7 @@ const NAV_KANJI = {
   "/feed": "声",
   "/catalog": "図",
   "/my-list": "記",
+  "/lists": "集",
 };
 
 const navLinkClass = ({ isActive }) =>
@@ -173,6 +174,7 @@ const Navbar = () => {
               {renderNavItem("/feed", "Feed")}
               {renderNavItem("/catalog", "Catálogo")}
               {renderNavItem("/my-list", "Mi lista")}
+              {renderNavItem("/lists", "Listas")}
             </nav>
 
             {/* RIGHT SIDE */}
@@ -257,7 +259,9 @@ const Navbar = () => {
                             to={
                               n.type === "follow"
                                 ? `/profile/${n.actorUserName}`
-                                : n.type === "review_comment" && n.userTitleId
+                                : (n.type === "review_comment" ||
+                                      n.type === "comment_reply") &&
+                                    n.userTitleId
                                   ? `/reviews/${n.userTitleId}`
                                   : "#"
                             }
@@ -288,7 +292,8 @@ const Navbar = () => {
                                 </div>
                               </div>
                             )}
-                            {n.type === "review_comment" && (
+                            {(n.type === "review_comment" ||
+                              n.type === "comment_reply") && (
                               <div className="flex items-start gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent font-bold text-paper">
                                   {n.actorUserName?.charAt(0)?.toUpperCase() ||
@@ -301,7 +306,9 @@ const Navbar = () => {
                                       {n.actorUserName}
                                     </span>
                                     {""}
-                                    comentó tu reseña
+                                    {n.type === "comment_reply"
+                                      ? "respondió tu comentario"
+                                      : "comentó tu reseña"}
                                   </p>
 
                                   {n.createdAt && (
@@ -442,9 +449,17 @@ const Navbar = () => {
               <NavLink to="/profile" className={mobileLinkClass}>
                 {user?.userName || "Perfil"}
               </NavLink>
+              <NavLink to="/lists" className={mobileLinkClass}>
+                Mis listas
+              </NavLink>
               <NavLink to="/settings/security" className={mobileLinkClass}>
                 Seguridad
               </NavLink>
+              {user?.isAdmin && (
+                <NavLink to="/admin/reports" className={mobileLinkClass}>
+                  Denuncias
+                </NavLink>
+              )}
               <button
                 type="button"
                 onClick={handleLogout}

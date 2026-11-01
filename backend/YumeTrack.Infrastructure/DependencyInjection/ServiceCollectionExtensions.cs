@@ -22,6 +22,7 @@ namespace YumeTrack.Infrastructure.DependencyInjection
             services.AddSingleton<SecretProtector>();
             services.AddScoped<MfaService>();
             services.AddScoped<AccountService>();
+            services.AddScoped<TitleResolver>();
 
             // Sin Email:Host el correo solo se escribe en el log (desarrollo).
             if (!string.IsNullOrWhiteSpace(configuration["Email:Host"]))

@@ -28,6 +28,9 @@ const ResetPassword = lazy(
 const SecuritySettings = lazy(
   () => import("../pages/SecuritySettings/SecuritySettings"),
 );
+const Lists = lazy(() => import("../pages/Lists/Lists"));
+const ListDetail = lazy(() => import("../pages/ListDetail/ListDetail"));
+const AdminReports = lazy(() => import("../pages/AdminReports/AdminReports"));
 const NotFound = lazy(() => import("../pages/NotFound/NotFound"));
 
 const PageFallback = () => (
@@ -59,6 +62,23 @@ const AppRouter = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/l/:token" element={<ListDetail />} />
+              <Route
+                path="/lists"
+                element={
+                  <ProtectedRoute>
+                    <Lists />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/reports"
+                element={
+                  <ProtectedRoute>
+                    <AdminReports />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route
                 path="/settings/security"

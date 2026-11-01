@@ -6,7 +6,7 @@ const linkClass =
   "inline-block text-sm text-zinc-400 transition hover:translate-x-1 hover:text-paper";
 
 const Footer = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <footer className="relative mt-16 overflow-hidden bg-panel">
@@ -79,9 +79,17 @@ const Footer = () => {
               <Link to="/profile" className={linkClass}>
                 Mi perfil
               </Link>
+              <Link to="/lists" className={linkClass}>
+                Mis listas
+              </Link>
               <Link to="/settings/security" className={linkClass}>
                 Seguridad
               </Link>
+              {user?.isAdmin && (
+                <Link to="/admin/reports" className={linkClass}>
+                  Denuncias
+                </Link>
+              )}
             </>
           ) : (
             <>

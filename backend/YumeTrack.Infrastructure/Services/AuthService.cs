@@ -90,7 +90,8 @@ namespace YumeTrack.Infrastructure.Services
             {
                 Token = token,
                 UserName = user.UserName,
-                Email = user.Email
+                Email = user.Email,
+                IsAdmin = _jwtTokenService.IsAdmin(user)
             };
         }
 
@@ -156,7 +157,8 @@ namespace YumeTrack.Infrastructure.Services
         {
             Token = _jwtTokenService.GenerateToken(user),
             UserName = user.UserName,
-            Email = user.Email
+            Email = user.Email,
+            IsAdmin = _jwtTokenService.IsAdmin(user)
         };
 
         private static void EnsureNotLocked(User user)
