@@ -1,25 +1,75 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Threading.RateLimiting;
 using YumeTrack.Application.Interfaces;
 using YumeTrack.Infrastructure.DependencyInjection;
+using YumeTrack.Infrastructure.Persistence;
 using YumeTrack.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Los hosts tipo Render/Railway entregan el puerto por la variable PORT.
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+    builder.WebHost.UseUrls($"http://+:{port}");
+
 builder.Services.AddControllers();
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173", "https://localhost:5173")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // El proxy del hosting es quien nos llama: confiamos en sus headers.
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsync(
+            "{\"message\":\"Demasiadas solicitudes. Esperá un momento e intentá de nuevo.\"}",
+            cancellationToken);
+    };
+
+    static string ClientKey(HttpContext context) =>
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+    void AddPerIpPolicy(string name, int permitLimit) =>
+        options.AddPolicy(name, context => RateLimitPartition.GetFixedWindowLimiter(
+            ClientKey(context),
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = permitLimit,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+
+    AddPerIpPolicy("auth", 10);
+    AddPerIpPolicy("titles", 120);
+    // Cada detalle nuevo puede gastar cuota de DeepL.
+    AddPerIpPolicy("title-detail", 30);
+});
+
+builder.Services.AddHealthChecks();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -60,8 +110,10 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddHttpClient<ITranslationService, TranslationService>();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-var jwtKey = builder.Configuration["JwtSettings:Key"]
-             ?? throw new InvalidOperationException("JWT Key is not configured.");
+var jwtKey = builder.Configuration["JwtSettings:Key"];
+
+if (string.IsNullOrWhiteSpace(jwtKey) || jwtKey.Length < 32)
+    throw new InvalidOperationException("JwtSettings:Key no está configurada o tiene menos de 32 caracteres.");
 
 var jwtIssuer = builder.Configuration["JwtSettings:Issuer"];
 var jwtAudience = builder.Configuration["JwtSettings:Audience"];
@@ -88,6 +140,16 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    if (db.Database.IsRelational())
+        db.Database.Migrate();
+}
+
+app.UseForwardedHeaders();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -96,11 +158,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<YumeTrack.API.Middlewares.ExceptionMiddleware>();
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
+
 app.UseCors("FrontendPolicy");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
+
+public partial class Program { }

@@ -2,6 +2,17 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const AuthContext = createContext();
 
+const isTokenExpired = (token) => {
+  try {
+    const payload = JSON.parse(
+      atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")),
+    );
+    return typeof payload.exp === "number" && payload.exp * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+};
+
 const normalizeUser = (rawUser) => {
   if (!rawUser) return null;
 
@@ -21,13 +32,23 @@ export const AuthProvider = ({ children }) => {
     const savedToken = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
 
+    if (savedToken && isTokenExpired(savedToken)) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setIsLoading(false);
+      return;
+    }
+
     if (savedToken) {
       setToken(savedToken);
     }
 
     if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setUser(normalizeUser(parsedUser));
+      try {
+        setUser(normalizeUser(JSON.parse(savedUser)));
+      } catch {
+        localStorage.removeItem("user");
+      }
     }
 
     setIsLoading(false);
@@ -36,10 +57,7 @@ export const AuthProvider = ({ children }) => {
   const login = (authData) => {
     const newToken = authData.token;
 
-    const newUser = {
-      userName: authData.userName,
-      email: authData.email,
-    };
+    const newUser = normalizeUser(authData);
 
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(newUser));

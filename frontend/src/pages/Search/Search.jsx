@@ -3,17 +3,17 @@ import { Link, useNavigate } from "react-router-dom";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import TitleGrid from "../../components/TitleGrid/TitleGrid";
 import TitleDetailModal from "../../components/TitleDetailModal/TitleDetailModal";
-import {
-  searchTitlesRequest,
-  getTitleDetailRequest,
-} from "../../services/searchService";
+import { searchTitlesRequest } from "../../services/searchService";
+import { getTitleDetailRequest } from "../../services/titleService";
 import {
   createUserTitleRequest,
   USER_TITLE_STATUS,
 } from "../../services/userTitleService";
 import { useAuth } from "../../context/AuthContext";
 import { searchUsersRequest } from "../../services/publicService";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 const Search = () => {
+  useDocumentTitle("Buscar");
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
@@ -38,19 +38,23 @@ const Search = () => {
       return;
     }
 
+    const controller = new AbortController();
+
     const timeoutId = setTimeout(async () => {
       try {
         setIsLoading(true);
         setErrorMessage("");
 
         const [titlesData, usersData] = await Promise.all([
-          searchTitlesRequest(trimmedQuery),
-          searchUsersRequest(trimmedQuery),
+          searchTitlesRequest(trimmedQuery, { signal: controller.signal }),
+          searchUsersRequest(trimmedQuery, { signal: controller.signal }),
         ]);
 
         setTitles(Array.isArray(titlesData) ? titlesData : []);
         setUsers(Array.isArray(usersData) ? usersData : []);
       } catch (error) {
+        if (controller.signal.aborted) return;
+
         const backendMessage =
           error.message || "No se pudo realizar la búsqueda.";
 
@@ -63,11 +67,14 @@ const Search = () => {
         setTitles([]);
         setUsers([]);
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     }, 500);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [query]);
 
   useEffect(() => {
@@ -177,12 +184,7 @@ const Search = () => {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <div className="mb-8">
-        <p className="text-sm uppercase tracking-[0.25em] text-violet-300">
-          Explorar
-        </p>
-        <h1 className="mt-2 text-4xl font-black">
-          Buscar anime, manga o usuarios
-        </h1>
+        <h1 className="mt-2 text-4xl">Buscar anime, manga o usuarios</h1>
         <p className="mt-3 text-zinc-400">
           Encontrá personas y títulos para descubrir más dentro de YumeTrack.
         </p>
@@ -194,31 +196,31 @@ const Search = () => {
       />
 
       {successMessage && (
-        <div className="mt-6 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-300">
+        <div className="mt-6 rounded-md bg-green-500/10 px-4 py-3 text-sm text-green-300">
           {successMessage}
         </div>
       )}
 
       {errorMessage && (
-        <div className="mt-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="mt-6 rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {errorMessage}
         </div>
       )}
 
       {isLoading && (
-        <div className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
+        <div className="mt-6 rounded-md bg-panel-2 px-4 py-3 text-sm text-zinc-300">
           Buscando usuarios y títulos...
         </div>
       )}
 
       {showEmptyState && (
-        <div className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-400">
+        <div className="mt-6 rounded-md bg-panel-2 px-4 py-3 text-sm text-zinc-400">
           No se encontraron resultados.
         </div>
       )}
 
       {!query.trim() && (
-        <div className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-400">
+        <div className="mt-6 rounded-md bg-panel-2 px-4 py-3 text-sm text-zinc-400">
           Escribí el nombre de un anime, manga o usuario para buscar.
         </div>
       )}
@@ -226,7 +228,7 @@ const Search = () => {
       {filteredUsers.length > 0 && (
         <section className="mt-8">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">Usuarios</h2>
+            <h2 className="text-xl text-paper">Usuarios</h2>
             <span className="text-sm text-zinc-400">
               {filteredUsers.length} resultados
             </span>
@@ -237,15 +239,15 @@ const Search = () => {
               <Link
                 key={searchedUser.userName}
                 to={`/profile/${searchedUser.userName}`}
-                className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4 transition hover:-translate-y-1 hover:border-violet-500/40"
+                className="rounded-lg bg-panel p-4 transition hover:-translate-y-1"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-violet-500 to-pink-500 text-lg font-bold text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-lg font-bold text-paper">
                     {searchedUser.userName?.charAt(0)?.toUpperCase() || "U"}
                   </div>
 
                   <div className="min-w-0">
-                    <p className="truncate font-semibold text-white">
+                    <p className="truncate font-semibold text-paper">
                       {searchedUser.userName}
                     </p>
                     <p className="text-sm text-zinc-400">
@@ -262,7 +264,7 @@ const Search = () => {
       {titles.length > 0 && (
         <section className="mt-10">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">Anime y manga</h2>
+            <h2 className="text-xl text-paper">Anime y manga</h2>
             <span className="text-sm text-zinc-400">
               {titles.length} resultados
             </span>

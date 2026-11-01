@@ -85,15 +85,43 @@ npm run dev
 
 ---
 
-## 🔐 Variables de entorno
+## 🔐 Configuración y variables de entorno
 
 ### Frontend (`frontend/.env`)
 
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5044/api
 ```
 
 Ajustar según puerto real de tu API.
+
+### Backend
+
+`appsettings.json` no contiene secretos. En local se completan en `backend/YumeTrack.API/appsettings.Development.json` (ignorado por git) o con `dotnet user-secrets`. En producción se usan variables de entorno:
+
+| Variable | Descripción |
+|---|---|
+| `ConnectionStrings__DefaultConnection` | Connection string de Npgsql **o** URL `postgres://user:pass@host/db` (Neon, Supabase, Render) |
+| `JwtSettings__Key` | Clave secreta del JWT, mínimo 32 caracteres |
+| `DeepL__ApiKey` | Opcional. Sin ella las sinopsis se muestran en su idioma original |
+| `Cors__AllowedOrigins__0` | URL del frontend desplegado (`Cors__AllowedOrigins__1`, ... para más) |
+| `PORT` | Puerto de escucha (lo define el hosting) |
+
+Las migraciones se aplican solas al iniciar la API y `GET /health` sirve para el health check del hosting.
+
+### Deploy
+
+- **Backend:** `backend/Dockerfile` (contexto `backend/`).
+- **Frontend:** `npm run build` genera `dist/`; `vercel.json` y `public/_redirects` resuelven el fallback de SPA en Vercel, Netlify y Cloudflare Pages.
+
+---
+
+## 🧪 Tests
+
+```bash
+cd backend
+dotnet test
+```
 
 ---
 

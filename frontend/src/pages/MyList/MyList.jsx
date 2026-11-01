@@ -6,6 +6,7 @@ import {
   updateUserTitleRequest,
   USER_TITLE_STATUS,
 } from "../../services/userTitleService";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const statusOptions = [
   { label: "Planeado", value: USER_TITLE_STATUS.PLANNED },
@@ -33,6 +34,7 @@ const normalizeItemForCompare = (item) => ({
 });
 
 const MyList = () => {
+  useDocumentTitle("Mi lista");
   const [items, setItems] = useState([]);
   const [originalItems, setOriginalItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -193,10 +195,7 @@ const MyList = () => {
     <>
       <main className="mx-auto max-w-7xl px-4 py-10">
         <div className="mb-8">
-          <p className="text-sm uppercase tracking-[0.25em] text-violet-300">
-            Biblioteca
-          </p>
-          <h1 className="mt-2 text-4xl font-black">Mi Lista</h1>
+          <h1 className="mt-2 text-4xl">Mi Lista</h1>
           <p className="mt-3 text-zinc-400">
             Gestioná tus animes y mangas guardados.
           </p>
@@ -208,8 +207,8 @@ const MyList = () => {
             onClick={() => setStatusFilter("all")}
             className={`rounded-full px-4 py-2 text-sm font-medium transition ${
               statusFilter === "all"
-                ? "bg-violet-600 text-white"
-                : "border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10"
+                ? "bg-accent text-paper"
+                : "  bg-panel-2 text-zinc-300 hover:bg-white/10"
             }`}
           >
             Todos
@@ -222,8 +221,8 @@ const MyList = () => {
               onClick={() => setStatusFilter(String(option.value))}
               className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                 String(statusFilter) === String(option.value)
-                  ? "bg-violet-600 text-white"
-                  : "border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10"
+                  ? "bg-accent text-paper"
+                  : "  bg-panel-2 text-zinc-300 hover:bg-white/10"
               }`}
             >
               {option.label}
@@ -233,32 +232,32 @@ const MyList = () => {
           <button
             type="button"
             onClick={loadUserTitles}
-            className="ml-auto rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition hover:bg-white/10"
+            className="ml-auto rounded-md bg-panel-2 px-4 py-2 text-sm text-paper transition hover:bg-white/10"
           >
             Recargar
           </button>
         </div>
 
         {successMessage && (
-          <div className="mb-6 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-300">
+          <div className="mb-6 rounded-md bg-green-500/10 px-4 py-3 text-sm text-green-300">
             {successMessage}
           </div>
         )}
 
         {errorMessage && (
-          <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="mb-6 rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-300">
             {errorMessage}
           </div>
         )}
 
         {isLoading && (
-          <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
+          <div className="rounded-md bg-panel-2 px-4 py-3 text-sm text-zinc-300">
             Cargando tu lista...
           </div>
         )}
 
         {!isLoading && filteredItems.length === 0 && (
-          <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-400">
+          <div className="rounded-md bg-panel-2 px-4 py-3 text-sm text-zinc-400">
             No tenés títulos en esta vista.
           </div>
         )}
@@ -275,25 +274,25 @@ const MyList = () => {
               return (
                 <article
                   key={item.id}
-                  className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 md:grid-cols-[120px_1fr]"
+                  className="grid gap-4 rounded-lg bg-panel-2 p-4 md:grid-cols-[120px_1fr]"
                 >
                   <div>
                     <img
                       src={item.posterImageUrl}
                       alt={item.canonicalTitle}
-                      className="h-40 w-full rounded-xl object-cover md:h-full"
+                      className="h-40 w-full rounded-md object-cover md:h-full"
                     />
                   </div>
 
                   <div>
                     <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <h2 className="text-xl font-bold text-white">
+                        <h2 className="text-xl text-paper">
                           {item.canonicalTitle}
                         </h2>
 
                         {hasChanges && (
-                          <span className="mt-2 inline-block rounded-full bg-orange-500/20 px-2 py-1 text-xs font-semibold text-orange-300">
+                          <span className="mt-2 inline-block rounded-full bg-orange-500/20 px-2 py-1 text-[13px] font-semibold text-orange-300">
                             Cambios sin guardar
                           </span>
                         )}
@@ -304,7 +303,7 @@ const MyList = () => {
                           </span>
 
                           <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusBadgeClass(
+                            className={`rounded-full px-3 py-1 text-[13px] font-semibold ${getStatusBadgeClass(
                               item.status,
                             )}`}
                           >
@@ -312,7 +311,6 @@ const MyList = () => {
                           </span>
                         </div>
                       </div>
-
                       <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
                         <input
                           type="checkbox"
@@ -324,12 +322,11 @@ const MyList = () => {
                               event.target.checked,
                             )
                           }
-                          className="h-4 w-4 rounded border-white/20 bg-zinc-900 text-violet-600 focus:ring-violet-500"
+                          className="h-4 w-4 rounded bg-panel text-accent"
                         />
-                        Favorito
-                      </label>
+                        Favorito{" "}
+                      </label>{" "}
                     </div>
-
                     <div className="grid gap-3 md:grid-cols-3">
                       <div>
                         <label className="mb-1 block text-sm text-zinc-400">
@@ -344,7 +341,7 @@ const MyList = () => {
                               Number(event.target.value),
                             )
                           }
-                          className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-white outline-none"
+                          className="w-full rounded-md bg-panel px-3 py-2 text-sm text-paper"
                         >
                           {statusOptions.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -380,10 +377,10 @@ const MyList = () => {
 
                             handleFieldChange(item.id, "progress", nextValue);
                           }}
-                          className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-white outline-none"
+                          className="w-full rounded-md bg-panel px-3 py-2 text-sm text-paper"
                         />
 
-                        <p className="mt-1 text-xs text-zinc-500">
+                        <p className="mt-1 text-[13px] text-zinc-500">
                           {item.episodeCount
                             ? `Total episodios: ${item.episodeCount}`
                             : item.chapterCount
@@ -417,15 +414,14 @@ const MyList = () => {
 
                             handleFieldChange(item.id, "score", nextValue);
                           }}
-                          className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-white outline-none"
+                          className="w-full rounded-md bg-panel px-3 py-2 text-sm text-paper"
                         />
 
-                        <p className="mt-1 text-xs text-zinc-500">
+                        <p className="mt-1 text-[13px] text-zinc-500">
                           Puntaje de 0 a 10
                         </p>
                       </div>
                     </div>
-
                     <div className="mt-4">
                       <label className="mb-1 block text-sm text-zinc-400">
                         Review
@@ -442,19 +438,18 @@ const MyList = () => {
                         }
                         maxLength={2000}
                         placeholder="Escribí tu opinión sobre este título..."
-                        className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-sm text-white outline-none"
+                        className="w-full rounded-md bg-panel px-3 py-2 text-sm text-paper"
                       />
-                      <p className="mt-1 text-xs text-zinc-500">
+                      <p className="mt-1 text-[13px] text-zinc-500">
                         {(item.notes ?? "").length}/2000
                       </p>
                     </div>
-
                     <div className="mt-4 flex flex-wrap gap-3">
                       <button
                         type="button"
                         onClick={() => handleSave(item)}
                         disabled={isSaving || isDeleting || !hasChanges}
-                        className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isSaving
                           ? "Guardando..."
@@ -467,7 +462,7 @@ const MyList = () => {
                         type="button"
                         onClick={() => openDeleteModal(item.id)}
                         disabled={isDeleting || isSaving}
-                        className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-md bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isDeleting ? "Eliminando..." : "Eliminar"}
                       </button>
@@ -503,7 +498,7 @@ const getStatusBadgeClass = (status) => {
     case USER_TITLE_STATUS.COMPLETED:
       return "bg-green-500/20 text-green-300";
     case USER_TITLE_STATUS.ON_HOLD:
-      return "bg-yellow-500/20 text-yellow-300";
+      return "bg-gold/20 text-gold";
     case USER_TITLE_STATUS.DROPPED:
       return "bg-red-500/20 text-red-300";
     default:

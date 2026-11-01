@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using YumeTrack.Application.Interfaces;
 
 namespace YumeTrack.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableRateLimiting("titles")]
     public class TitlesController : ControllerBase
     {
         private readonly IKitsuService _kitsuService;
@@ -25,8 +27,12 @@ namespace YumeTrack.API.Controllers
         }
 
         [HttpGet("anime/{id}")]
+        [EnableRateLimiting("title-detail")]
         public async Task<IActionResult> GetAnimeById(string id, CancellationToken cancellationToken)
         {
+            if (!int.TryParse(id, out _))
+                return NotFound();
+
             var anime = await _kitsuService.GetAnimeByIdAsync(id, cancellationToken);
 
             if (anime is null)
@@ -36,8 +42,12 @@ namespace YumeTrack.API.Controllers
         }
 
         [HttpGet("manga/{id}")]
+        [EnableRateLimiting("title-detail")]
         public async Task<IActionResult> GetMangaById(string id, CancellationToken cancellationToken)
         {
+            if (!int.TryParse(id, out _))
+                return NotFound();
+
             var manga = await _kitsuService.GetMangaByIdAsync(id, cancellationToken);
 
             if (manga is null)

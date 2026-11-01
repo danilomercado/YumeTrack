@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { useAuth } from "../../context/AuthContext";
 import { getPublicProfileRequest } from "../../services/publicService";
 import {
@@ -17,6 +18,7 @@ const STATUS_LABELS = {
 
 const PublicProfile = () => {
   const { username } = useParams();
+  useDocumentTitle(username);
   const { user, isAuthenticated } = useAuth();
 
   const [profile, setProfile] = useState(null);
@@ -110,8 +112,8 @@ const PublicProfile = () => {
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-6xl px-4 py-10 text-white">
-        <div className="animate-pulse rounded-3xl border border-white/10 bg-zinc-900/60 p-8">
+      <main className="mx-auto max-w-6xl px-4 py-10 text-paper">
+        <div className="animate-pulse rounded-lg bg-panel p-8">
           <div className="mb-3 h-4 w-36 rounded bg-white/10" />
           <div className="h-3 w-24 rounded bg-white/10" />
         </div>
@@ -121,8 +123,8 @@ const PublicProfile = () => {
 
   if (!profile) {
     return (
-      <main className="mx-auto max-w-6xl px-4 py-10 text-white">
-        <div className="rounded-3xl border border-white/10 bg-zinc-900/60 p-8">
+      <main className="mx-auto max-w-6xl px-4 py-10 text-paper">
+        <div className="rounded-lg bg-panel p-8">
           {errorMessage || "Usuario no encontrado."}
         </div>
       </main>
@@ -130,28 +132,24 @@ const PublicProfile = () => {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 text-white">
+    <main className="mx-auto max-w-6xl px-4 py-10 text-paper">
       {errorMessage && (
-        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="mb-6 rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {errorMessage}
         </div>
       )}
 
-      <section className="overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/80 shadow-[0_0_40px_rgba(168,85,247,0.08)] backdrop-blur">
-        <div className="h-28 bg-gradient-to-r from-violet-600/25 via-fuchsia-500/20 to-pink-500/25" />
-
-        <div className="relative bg-gradient-to-b from-transparent to-zinc-950/40 px-6 pb-8">
+      <section className="overflow-hidden rounded-lg bg-panel">
+        <div className="h-28 bg-accent/25" />
+        <div className="relative px-6 pb-8">
           <div className="-mt-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500 to-pink-500 text-3xl font-black shadow-lg shadow-violet-900/30">
+              <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-accent text-3xl font-black">
                 {profile.userName?.charAt(0)?.toUpperCase() || "U"}
               </div>
 
               <div>
-                <p className="text-sm uppercase tracking-[0.22em] text-violet-300">
-                  Perfil público
-                </p>
-                <h1 className="mt-1 text-3xl font-black md:text-4xl">
+                <h1 className="mt-1 text-3xl md:text-4xl">
                   {profile.userName}
                 </h1>
 
@@ -182,10 +180,10 @@ const PublicProfile = () => {
                   type="button"
                   onClick={handleToggleFollow}
                   disabled={followLoading}
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                  className={`rounded-md px-4 py-2 text-sm font-semibold transition ${
                     profile.isFollowing
-                      ? "border border-white/10 bg-white/5 text-white hover:bg-white/10"
-                      : "bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:opacity-90"
+                      ? "  bg-panel-2 text-paper hover:bg-white/10"
+                      : "bg-accent   text-paper hover:opacity-90"
                   } disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   {followLoading
@@ -198,7 +196,7 @@ const PublicProfile = () => {
             </div>
           </div>
 
-          <div className="mt-6 max-w-2xl rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
+          <div className="mt-6 max-w-2xl rounded-lg bg-panel-2 px-4 py-3 text-sm text-zinc-300">
             {profile.bio?.trim()
               ? profile.bio
               : "Lista pública de anime y manga con puntuaciones, favoritos y reviews."}
@@ -210,10 +208,7 @@ const PublicProfile = () => {
         <section className="mt-8">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.22em] text-violet-300">
-                Destacados
-              </p>
-              <h2 className="mt-1 text-2xl font-black">Favoritos</h2>
+              <h2 className="mt-1 text-2xl">Favoritos</h2>
             </div>
             <span className="text-sm text-zinc-400">
               {favoriteTitles.length} destacados
@@ -224,7 +219,7 @@ const PublicProfile = () => {
             {favoriteTitles.map((title) => (
               <article
                 key={title.id}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80"
+                className="overflow-hidden rounded-lg bg-panel"
               >
                 <div className="relative">
                   <img
@@ -232,24 +227,21 @@ const PublicProfile = () => {
                     alt={title.canonicalTitle}
                     className="h-60 w-full object-cover"
                   />
-
-                  <div className="absolute left-3 top-3 rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-black">
+                  <div className="absolute left-3 top-3 rounded-full bg-gold px-3 py-1 text-[13px] font-bold text-black">
                     ★ Favorito
                   </div>
-
                   {title.score !== null && title.score !== undefined && (
-                    <div className="absolute right-3 top-3 rounded-full bg-black/75 px-3 py-1 text-xs font-bold text-yellow-300 backdrop-blur">
-                      ★ {title.score}/10
+                    <div className="absolute right-3 top-3 rounded-full bg-black/75 px-3 py-1 text-[13px] font-bold text-gold ★">
+                      {title.score}/10{" "}
                     </div>
-                  )}
+                  )}{" "}
                 </div>
-
                 <div className="space-y-2 p-4">
                   <h3 className="line-clamp-1 text-lg font-bold">
                     {title.canonicalTitle}
                   </h3>
 
-                  <div className="flex flex-wrap gap-2 text-xs">
+                  <div className="flex flex-wrap gap-2 text-[13px]">
                     <Badge>{title.mediaType}</Badge>
                     <Badge>{STATUS_LABELS[title.status] || "Sin estado"}</Badge>
                   </div>
@@ -269,10 +261,7 @@ const PublicProfile = () => {
       <section className="mt-10">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.22em] text-violet-300">
-              Colección
-            </p>
-            <h2 className="mt-1 text-2xl font-black">Lista pública</h2>
+            <h2 className="mt-1 text-2xl">Lista pública</h2>
           </div>
           <span className="text-sm text-zinc-400">
             {profile.titles?.length || 0} resultados
@@ -280,7 +269,7 @@ const PublicProfile = () => {
         </div>
 
         {profile.titles?.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 text-zinc-400">
+          <div className="rounded-lg bg-panel p-6 text-zinc-400">
             Este usuario todavía no tiene títulos en su lista pública.
           </div>
         ) : (
@@ -288,14 +277,13 @@ const PublicProfile = () => {
             {profile.titles.map((title) => (
               <article
                 key={title.id}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 transition hover:-translate-y-1 hover:border-violet-500/40"
+                className="overflow-hidden rounded-lg bg-panel transition hover:-translate-y-1"
               >
                 <img
                   src={title.posterImageUrl}
                   alt={title.canonicalTitle}
                   className="h-56 w-full object-cover"
                 />
-
                 <div className="space-y-3 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="line-clamp-2 text-base font-bold">
@@ -303,13 +291,13 @@ const PublicProfile = () => {
                     </h3>
 
                     {title.score !== null && title.score !== undefined && (
-                      <div className="shrink-0 rounded-xl bg-yellow-400/15 px-2.5 py-1 text-sm font-bold text-yellow-300">
+                      <div className="shrink-0 rounded-md bg-gold/15 px-2.5 py-1 text-sm font-bold text-gold">
                         ★ {title.score}
                       </div>
                     )}
                   </div>
 
-                  <div className="flex flex-wrap gap-2 text-xs">
+                  <div className="flex flex-wrap gap-2 text-[13px]">
                     <Badge>{title.mediaType}</Badge>
                     <Badge>{STATUS_LABELS[title.status] || "Sin estado"}</Badge>
                     {title.isFavorite && <Badge strong>Favorito</Badge>}
@@ -317,7 +305,7 @@ const PublicProfile = () => {
 
                   <div className="text-sm text-zinc-400">
                     <p>
-                      Progreso:{" "}
+                      Progreso:{""}
                       <span className="font-medium text-zinc-200">
                         {title.progress ?? 0}
                       </span>
@@ -325,10 +313,8 @@ const PublicProfile = () => {
                   </div>
 
                   {title.notes && (
-                    <div className="rounded-xl border border-white/10 bg-black/20 p-3">
-                      <p className="mb-1 text-xs uppercase tracking-[0.18em] text-zinc-500">
-                        Review
-                      </p>
+                    <div className="rounded-md bg-ground p-3">
+                      <p className="mb-1 text-[13px] text-zinc-500">Review</p>
                       <p className="line-clamp-4 text-sm text-zinc-300">
                         {title.notes}
                       </p>
@@ -345,16 +331,16 @@ const PublicProfile = () => {
 };
 
 const ProfileStat = ({ label, value }) => (
-  <div className="min-w-[120px] rounded-2xl border border-white/10 bg-zinc-950/70 px-4 py-3 shadow-inner">
-    <p className="text-2xl font-black text-white">{value}</p>
-    <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">{label}</p>
+  <div className="min-w-[120px] rounded-lg bg-ground px-4 py-3">
+    <p className="text-2xl font-black text-paper">{value}</p>
+    <p className="text-[13px] text-zinc-400">{label}</p>
   </div>
 );
 
 const Badge = ({ children, strong = false }) => (
   <span
     className={`rounded-full px-2.5 py-1 ${
-      strong ? "bg-violet-500/20 text-violet-200" : "bg-white/5 text-zinc-300"
+      strong ? "bg-accent/20 text-accent-soft" : "bg-panel-2 text-zinc-300"
     }`}
   >
     {children}

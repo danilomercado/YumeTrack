@@ -55,7 +55,7 @@ public class ReviewCommentsController : ControllerBase
         {
             UserId = userId,
             UserTitleId = userTitleId,
-            Content = dto.Content
+            Content = dto.Content.Trim()
         };
 
         _context.ReviewComments.Add(comment);

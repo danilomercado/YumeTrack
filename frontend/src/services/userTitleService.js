@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+import api from "./api";
 
 const USER_TITLE_STATUS = {
   PLANNED: 0,
@@ -6,35 +6,6 @@ const USER_TITLE_STATUS = {
   COMPLETED: 2,
   ON_HOLD: 3,
   DROPPED: 4,
-};
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    throw new Error("Sesión no encontrada. Iniciá sesión de nuevo.");
-  }
-
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  };
-};
-
-const handleJsonResponse = async (response, fallbackMessage) => {
-  let data = null;
-
-  try {
-    data = await response.json();
-  } catch {
-    data = null;
-  }
-
-  if (!response.ok) {
-    throw new Error(data?.message || data?.title || fallbackMessage);
-  }
-
-  return data;
 };
 
 export const createUserTitleRequest = async ({
@@ -46,61 +17,42 @@ export const createUserTitleRequest = async ({
   isFavorite = false,
   notes = null,
 }) => {
-  const response = await fetch(`${API_URL}/UserTitles`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({
-      kitsuId,
-      mediaType,
-      status,
-      progress,
-      score,
-      isFavorite,
-      notes,
-    }),
+  const response = await api.post("/UserTitles", {
+    kitsuId,
+    mediaType,
+    status,
+    progress,
+    score,
+    isFavorite,
+    notes,
   });
 
-  return handleJsonResponse(
-    response,
-    "No se pudo agregar el título a tu lista.",
-  );
+  return response.data;
 };
 
 export const getUserTitlesRequest = async () => {
-  const response = await fetch(`${API_URL}/UserTitles`, {
-    method: "GET",
-    headers: getAuthHeaders(),
-  });
-
-  return handleJsonResponse(response, "No se pudo obtener tu lista.");
+  const response = await api.get("/UserTitles");
+  return response.data;
 };
 
 export const updateUserTitleRequest = async (
   id,
   { status, progress, score, isFavorite, notes },
 ) => {
-  const response = await fetch(`${API_URL}/UserTitles/${id}`, {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({
-      status,
-      progress,
-      score,
-      isFavorite,
-      notes,
-    }),
+  const response = await api.put(`/UserTitles/${id}`, {
+    status,
+    progress,
+    score,
+    isFavorite,
+    notes,
   });
 
-  return handleJsonResponse(response, "No se pudo actualizar el título.");
+  return response.data;
 };
 
 export const deleteUserTitleRequest = async (id) => {
-  const response = await fetch(`${API_URL}/UserTitles/${id}`, {
-    method: "DELETE",
-    headers: getAuthHeaders(),
-  });
-
-  return handleJsonResponse(response, "No se pudo eliminar el título.");
+  const response = await api.delete(`/UserTitles/${id}`);
+  return response.data;
 };
 
 export { USER_TITLE_STATUS };

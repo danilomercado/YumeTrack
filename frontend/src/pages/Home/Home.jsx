@@ -12,7 +12,7 @@ import {
   createUserTitleRequest,
   USER_TITLE_STATUS,
 } from "../../services/userTitleService";
-import TitleGridSkeleton from "../../components/TitleGridSkeleton/TitleGirdSkeleton";
+import TitleGridSkeleton from "../../components/TitleGridSkeleton/TitleGridSkeleton";
 import { useAuth } from "../../context/AuthContext";
 import { getGlobalFeedRequest } from "../../services/feedService";
 import FeedCard from "../../components/FeedCard/FeedCard";
@@ -130,50 +130,25 @@ const Home = () => {
   };
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
+    <main className="min-h-screen bg-ground text-paper">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <section className="mb-10">
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] sm:p-8">
-            {/* Glow decorativo izquierda */}
-            <div className="pointer-events-none absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-violet-500/15 blur-3xl" />
-
-            {/* Glow decorativo derecha */}
-            <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-pink-500/10 blur-3xl" />
-
-            {/* Personaje izquierda */}
-            <img
-              src="/characters/gon.png"
-              alt="Personaje anime izquierda"
-              className="pointer-events-none absolute left-0 -bottom-20 hidden h-[380px] object-contain opacity-70 drop-shadow-[0_0_30px_rgba(168,85,247,0.25)] animate-float lg:block xl:h-[430px]"
-            />
-
-            {/* Personaje derecha */}
-            <img
-              src="/characters/narutito.png"
-              alt="Personaje anime derecha"
-              className="pointer-events-none absolute right-6 -bottom-20 hidden h-[380px] object-contain opacity-70 drop-shadow-[0_0_30px_rgba(236,72,153,0.18)] animate-float lg:block xl:h-[430px]"
-            />
-
-            {/* Contenido hero */}
-            <div className="relative z-10 mx-auto max-w-4xl text-center lg:text-left">
-              <p className="mb-2 text-sm uppercase tracking-[0.2em] text-violet-400">
-                YumeTrack
-              </p>
-
-              <h1 className="max-w-4xl text-3xl font-bold leading-tight sm:text-5xl">
-                Descubrí anime y manga, guardá tus títulos y seguí tu progreso.
+        <section className="mb-14">
+          <div className="relative grid overflow-hidden rounded-lg bg-panel lg:grid-cols-[1.15fr_1fr]">
+            <div className="relative z-10 flex flex-col justify-center px-6 py-12 sm:px-10 lg:py-20">
+              <h1 className="text-4xl leading-[1.1] text-paper sm:text-6xl">
+                Tu anime y manga, al día.
               </h1>
 
-              <p className="mt-4 max-w-2xl text-sm text-zinc-400 sm:text-base">
-                Explorá títulos populares, mirá detalles y armá tu lista
-                personal.
+              <p className="mt-6 max-w-md text-base leading-relaxed text-zinc-300 sm:text-lg">
+                Descubrí títulos, llevá tu progreso al día y compartí reseñas
+                con otros fans.
               </p>
 
-              <div className="mt-6 flex flex-wrap gap-3 justify-center lg:justify-start">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => navigate("/catalog")}
-                  className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-violet-500"
+                  className="rounded-md bg-accent px-6 py-3 text-sm font-bold text-paper transition hover:bg-accent-hover active:translate-y-px"
                 >
                   Explorar catálogo
                 </button>
@@ -181,11 +156,35 @@ const Home = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/search")}
-                  className="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+                  className="rounded-md bg-panel-2 px-6 py-3 text-sm font-bold text-paper transition hover:bg-white/10 active:translate-y-px"
                 >
                   Buscar títulos
                 </button>
               </div>
+            </div>
+
+            <div
+              aria-hidden="true"
+              className="relative hidden min-h-[460px] overflow-hidden bg-accent lg:block"
+            >
+              <span className="absolute -right-6 -top-10 kanji select-none text-[22rem] leading-none text-ground/20">
+                夢
+              </span>
+
+              <img
+                src="/characters/gon.webp"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="rise-in absolute bottom-0 left-4 h-[88%] object-contain object-bottom"
+              />
+              <img
+                src="/characters/narutito.webp"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="rise-in absolute bottom-0 right-4 h-[78%] object-contain object-bottom [animation-delay:120ms]"
+              />
             </div>
           </div>
         </section>
@@ -199,11 +198,11 @@ const Home = () => {
           />
 
           {loadingFeed ? (
-            <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               {Array.from({ length: 2 }).map((_, index) => (
                 <div
                   key={index}
-                  className="animate-pulse rounded-2xl border border-white/10 bg-zinc-900/60 p-4"
+                  className="animate-pulse rounded-lg bg-panel p-4"
                 >
                   <div className="mb-4 flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-white/10" />
@@ -217,13 +216,13 @@ const Home = () => {
               ))}
             </div>
           ) : feedPreview.length > 0 ? (
-            <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               {feedPreview.map((item) => (
                 <FeedCard key={item.userTitleId} item={item} />
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-5 text-sm text-zinc-400">
+            <div className="rounded-lg bg-panel p-5 text-sm text-zinc-400">
               Todavía no hay actividad para mostrar.
             </div>
           )}
@@ -240,7 +239,7 @@ const Home = () => {
           {isLoadingAnime ? (
             <TitleGridSkeleton count={10} />
           ) : animeError ? (
-            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
+            <div className="rounded-lg bg-red-500/10 p-4 text-sm text-red-300">
               {animeError}
             </div>
           ) : (
@@ -251,7 +250,7 @@ const Home = () => {
           )}
         </section>
 
-        <section className="mt-12 space-y-4 border-t border-white/5 pt-8">
+        <section className="mt-12 space-y-4 pt-8">
           <SectionHeader
             title="Trending Manga"
             subtitle="Los mangas más populares del momento."
@@ -260,7 +259,7 @@ const Home = () => {
           {isLoadingManga ? (
             <TitleGridSkeleton count={10} />
           ) : mangaError ? (
-            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
+            <div className="rounded-lg bg-red-500/10 p-4 text-sm text-red-300">
               {mangaError}
             </div>
           ) : (

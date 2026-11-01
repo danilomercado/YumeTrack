@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { registerRequest } from "../../services/authService";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const Register = () => {
+  useDocumentTitle("Crear cuenta");
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -64,8 +66,6 @@ const Register = () => {
       login(data);
       navigate("/search");
     } catch (error) {
-      console.log("REGISTER ERROR:", error?.response?.data);
-
       const backendMessage =
         error?.response?.data?.message ||
         error?.response?.data?.title ||
@@ -86,12 +86,11 @@ const Register = () => {
 
   return (
     <main className="mx-auto flex min-h-[calc(100vh-80px)] max-w-6xl items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-zinc-900/70 p-8 shadow-2xl shadow-pink-900/20 backdrop-blur">
-        <h1 className="text-3xl font-bold text-white">Crear cuenta</h1>
+      <div className="w-full max-w-md rounded-lg bg-panel p-8">
+        <h1 className="text-3xl text-paper">Crear cuenta</h1>
         <p className="mt-2 text-sm text-zinc-400">
           Registrate y empezá a trackear títulos.
         </p>
-
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
             <label
@@ -107,10 +106,9 @@ const Register = () => {
               value={form.userName}
               onChange={handleChange}
               placeholder="nombre"
-              className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-white outline-none transition focus:border-pink-500"
+              className="w-full rounded-md bg-ground px-4 py-3 text-paper transition"
             />
           </div>
-
           <div>
             <label className="mb-2 block text-sm text-zinc-300" htmlFor="email">
               Correo
@@ -122,10 +120,9 @@ const Register = () => {
               value={form.email}
               onChange={handleChange}
               placeholder="email@gmail.com"
-              className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-white outline-none transition focus:border-pink-500"
+              className="w-full rounded-md bg-ground px-4 py-3 text-paper transition"
             />
           </div>
-
           <div>
             <label
               className="mb-2 block text-sm text-zinc-300"
@@ -140,12 +137,11 @@ const Register = () => {
               value={form.password}
               onChange={handleChange}
               placeholder="********"
-              className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-white outline-none transition focus:border-pink-500"
+              className="w-full rounded-md bg-ground px-4 py-3 text-paper transition"
             />
           </div>
-
           {errorMessage && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            <div className="rounded-md   bg-red-500/10 px-4 py-3 text-sm text-red-300">
               <p>{errorMessage}</p>
 
               {usernameSuggestions.length > 0 && (
@@ -155,7 +151,7 @@ const Register = () => {
                       key={suggestion}
                       type="button"
                       onClick={() => handleSuggestionClick(suggestion)}
-                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white transition hover:bg-white/10"
+                      className="rounded-full bg-panel-2 px-3 py-1 text-[13px] text-paper transition hover:bg-white/10"
                     >
                       {suggestion}
                     </button>
@@ -164,11 +160,10 @@ const Register = () => {
               )}
             </div>
           )}
-
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-xl bg-gradient-to-r from-pink-600 to-violet-600 px-4 py-3 font-semibold text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-md bg-accent px-4 py-3 font-semibold text-paper transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoading ? "Creando cuenta..." : "Registrarme"}
           </button>

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using YumeTrack.Application.DTOs.Kitsu;
 using YumeTrack.Application.DTOs.UserTitles;
 using YumeTrack.Application.Interfaces;
@@ -9,12 +10,15 @@ namespace YumeTrack.Infrastructure.Services
     {
         private readonly HttpClient _httpClient;
         private readonly ITranslationService _translationService;
+        private readonly IMemoryCache _cache;
         private const int KitsuMaxLimit = 20;
+        private static readonly TimeSpan ListCacheDuration = TimeSpan.FromMinutes(10);
 
-        public KitsuService(HttpClient httpClient, ITranslationService translationService)
+        public KitsuService(HttpClient httpClient, ITranslationService translationService, IMemoryCache cache)
         {
             _httpClient = httpClient;
             _translationService = translationService;
+            _cache = cache;
         }
 
         public async Task<List<TitleSearchResultDto>> SearchTitlesAsync(string query)
@@ -112,6 +116,11 @@ namespace YumeTrack.Infrastructure.Services
             string mediaType,
             CancellationToken cancellationToken = default)
         {
+            var cacheKey = $"kitsu:{mediaType}:{url}";
+
+            if (_cache.TryGetValue(cacheKey, out List<TitleSearchResultDto>? cached) && cached is not null)
+                return cached;
+
             var response = await _httpClient.GetAsync(url, cancellationToken);
             var rawJson = await response.Content.ReadAsStringAsync(cancellationToken);
 
@@ -150,6 +159,12 @@ namespace YumeTrack.Infrastructure.Services
                     ChapterCount = GetNullableInt(attributes, "chapterCount")
                 });
             }
+
+            _cache.Set(cacheKey, results, new MemoryCacheEntryOptions
+            {
+                Size = 1,
+                AbsoluteExpirationRelativeToNow = ListCacheDuration
+            });
 
             return results;
         }

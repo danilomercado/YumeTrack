@@ -70,13 +70,13 @@ const ReviewComments = ({ userTitleId }) => {
               if (e.key === "Enter") handleCreate();
             }}
             placeholder="Escribí un comentario..."
-            className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none focus:border-violet-500"
+            className="flex-1 rounded-md bg-panel-2 px-4 py-2 text-sm text-paper"
             disabled={isSubmitting}
           />
           <button
             onClick={handleCreate}
             disabled={!content.trim() || isSubmitting}
-            className="rounded-xl bg-violet-600 px-4 py-2 text-sm text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-md bg-accent px-4 py-2 text-sm text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
             Enviar
           </button>
@@ -87,10 +87,7 @@ const ReviewComments = ({ userTitleId }) => {
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div
-              key={index}
-              className="animate-pulse rounded-2xl border border-white/10 bg-black/20 p-4"
-            >
+            <div key={index} className="animate-pulse rounded-lg bg-ground p-4">
               <div className="mb-3 flex items-center gap-3">
                 <div className="h-9 w-9 rounded-full bg-white/10" />
                 <div className="space-y-2">
@@ -103,18 +100,15 @@ const ReviewComments = ({ userTitleId }) => {
           ))}
         </div>
       ) : comments.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-400">
+        <div className="rounded-lg bg-ground p-4 text-sm text-zinc-400">
           Todavía no hay comentarios.
         </div>
       ) : (
         <div className="space-y-4">
           {comments.map((c) => (
-            <div
-              key={c.id}
-              className="flex gap-3 rounded-2xl border border-white/10 bg-black/20 p-4"
-            >
+            <div key={c.id} className="flex gap-3 rounded-lg bg-ground p-4">
               {/* Avatar */}
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-500 text-sm font-bold text-white">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-sm font-bold text-paper">
                 {c.userName.charAt(0).toUpperCase()}
               </div>
 
@@ -124,13 +118,13 @@ const ReviewComments = ({ userTitleId }) => {
                   <div>
                     <Link
                       to={`/profile/${c.userName}`}
-                      className="text-sm font-semibold text-white transition hover:text-violet-400"
+                      className="text-sm font-semibold text-paper transition hover:text-accent-soft"
                     >
                       {c.userName}
                     </Link>
 
                     {c.createdAt && (
-                      <span className="ml-2 text-xs text-zinc-500">
+                      <span className="ml-2 text-[13px] text-zinc-500">
                         {formatRelativeTime(c.createdAt)}
                       </span>
                     )}
@@ -143,14 +137,14 @@ const ReviewComments = ({ userTitleId }) => {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleDelete(userTitleId, c.id)}
-                            className="text-xs text-red-400 hover:text-red-300"
+                            className="text-[13px] text-red-400 hover:text-red-300"
                           >
                             Confirmar
                           </button>
 
                           <button
                             onClick={() => setDeletingId(null)}
-                            className="text-xs text-zinc-400 hover:text-white"
+                            className="text-[13px] text-zinc-400 hover:text-paper"
                           >
                             Cancelar
                           </button>
@@ -158,7 +152,7 @@ const ReviewComments = ({ userTitleId }) => {
                       ) : (
                         <button
                           onClick={() => setDeletingId(c.id)}
-                          className="text-xs text-red-400 hover:text-red-300"
+                          className="text-[13px] text-red-400 hover:text-red-300"
                         >
                           Eliminar
                         </button>

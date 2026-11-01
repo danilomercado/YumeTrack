@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 
 const ConfirmModal = ({
   isOpen,
@@ -10,12 +10,28 @@ const ConfirmModal = ({
   onCancel,
   isLoading = false,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape" && !isLoading) onCancel();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, isLoading, onCancel]);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-zinc-900 p-6">
-        <h2 className="text-lg font-bold text-white">{title}</h2>
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-label={title}
+        className="w-full max-w-md rounded-lg bg-panel p-6"
+      >
+        <h2 className="text-lg text-paper">{title}</h2>
 
         <p className="mt-3 text-sm text-zinc-400">{message}</p>
 
@@ -23,7 +39,7 @@ const ConfirmModal = ({
           <button
             onClick={onCancel}
             disabled={isLoading}
-            className="rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/10 disabled:opacity-50"
+            className="rounded-lg px-4 py-2 text-sm text-zinc-300 hover:bg-white/10 disabled:opacity-50"
           >
             {cancelText}
           </button>
@@ -31,7 +47,7 @@ const ConfirmModal = ({
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-50"
+            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-paper hover:bg-red-500 disabled:opacity-50"
           >
             {isLoading ? "Eliminando..." : confirmText}
           </button>

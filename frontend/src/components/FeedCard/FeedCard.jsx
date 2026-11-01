@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { toggleLikeRequest } from "../../services/feedService";
 import { useNavigate } from "react-router-dom";
 import { formatRelativeTime } from "../../utils/formatRelativeTime";
+import { useAuth } from "../../context/AuthContext";
 
 const FeedCard = ({ item }) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [liked, setLiked] = useState(item.isLikedByCurrentUser);
   const [likesCount, setLikesCount] = useState(item.likesCount);
 
@@ -20,6 +22,11 @@ const FeedCard = ({ item }) => {
     item.score !== null && item.score !== undefined ? item.score : null;
 
   const handleLike = async () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
     const prevLiked = liked;
     const prevLikesCount = likesCount;
 
@@ -37,24 +44,23 @@ const FeedCard = ({ item }) => {
   return (
     <article
       onClick={() => navigate(`/reviews/${item.userTitleId}`)}
-      className="group rounded-2xl border border-white/10 bg-zinc-900/70 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-violet-500/30 hover:bg-zinc-900"
+      className="group rounded-lg bg-panel p-4 transition duration-200 hover:-translate-y-0.5 hover:bg-panel-2"
     >
       <div className="mb-3 flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-500 font-bold text-white shadow-lg shadow-violet-900/30">
-          {userName.charAt(0).toUpperCase()}
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-paper">
+          {userName.charAt(0).toUpperCase()}{" "}
         </div>
-
         <div className="min-w-0 flex-1">
           <Link
             to={`/profile/${userName}`}
-            className="block truncate text-sm font-semibold text-white transition group-hover:text-violet-400"
+            className="block truncate text-sm font-semibold text-paper transition group-hover:text-accent-soft"
           >
             {userName}
           </Link>
 
           <div className="mt-1 flex items-center gap-3">
-            <span className="text-xs text-zinc-400">
-              {formatRelativeTime(item.reviewUpdasteAt)}
+            <span className="text-[13px] text-zinc-400">
+              {formatRelativeTime(item.reviewUpdatedAt)}
             </span>
 
             <button
@@ -62,10 +68,10 @@ const FeedCard = ({ item }) => {
                 e.stopPropagation();
                 handleLike();
               }}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition ${
+              className={`inline-flex items-center gap-1.5 rounded-full  px-2.5 py-1 text-[13px] font-medium transition ${
                 liked
-                  ? "border-pink-500/30 bg-pink-500/10 text-pink-300 hover:bg-pink-500/20"
-                  : "border-white/10 bg-white/5 text-zinc-300 hover:border-pink-500/20 hover:bg-pink-500/10 hover:text-pink-300"
+                  ? " bg-accent/10 text-accent-soft hover:bg-accent/20"
+                  : " bg-panel-2 text-zinc-300  hover:bg-accent/10 hover:text-accent-soft"
               }`}
             >
               <svg
@@ -96,24 +102,26 @@ const FeedCard = ({ item }) => {
           <img
             src={posterImageUrl}
             alt={canonicalTitle}
-            className="h-24 w-16 rounded-xl object-cover shadow-md"
+            loading="lazy"
+            decoding="async"
+            className="h-24 w-16 rounded-md object-cover"
           />
         ) : (
-          <div className="h-24 w-16 rounded-xl bg-white/5" />
+          <div className="h-24 w-16 rounded-md bg-panel-2" />
         )}
 
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <h3 className="line-clamp-1 text-sm font-bold text-white">
+            <h3 className="line-clamp-1 text-sm font-bold text-paper">
               {canonicalTitle}
             </h3>
 
-            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-300">
+            <span className="rounded-full bg-panel-2 px-2 py-0.5 text-[13px] text-zinc-300">
               {mediaType}
             </span>
 
             {score !== null && (
-              <span className="rounded-full bg-yellow-500/15 px-2 py-0.5 text-[11px] font-semibold text-yellow-300">
+              <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[13px] font-semibold text-gold">
                 ★ {score}/10
               </span>
             )}

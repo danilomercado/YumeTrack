@@ -26,6 +26,11 @@ namespace YumeTrack.Infrastructure.Services
             return userName.Trim().ToLowerInvariant();
         }
 
+        private static string NormalizeEmail(string email)
+        {
+            return email.Trim().ToLowerInvariant();
+        }
+
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
         {
@@ -33,7 +38,7 @@ namespace YumeTrack.Infrastructure.Services
             var normalizedUserName = NormalizeUserName(userName);
 
             if (string.IsNullOrWhiteSpace(userName))
-                throw new Exception("El nombre de usuario es obligatorio.");
+                throw new InvalidOperationException("El nombre de usuario es obligatorio.");
 
             var userNameExists = await _context.Users
                 .AnyAsync(u => u.NormalizedUserName == normalizedUserName);
@@ -48,17 +53,19 @@ namespace YumeTrack.Infrastructure.Services
                 );
             }
 
+            var normalizedEmail = NormalizeEmail(request.Email);
+
             var emailExists = await _context.Users
-                .AnyAsync(u => u.Email == request.Email);
+                .AnyAsync(u => u.Email.ToLower() == normalizedEmail);
 
             if (emailExists)
-                throw new Exception("El email ya está registrado.");
+                throw new InvalidOperationException("El email ya está registrado.");
 
             var user = new User
             {
                 UserName = userName,
                 NormalizedUserName = normalizedUserName,
-                Email = request.Email.Trim(),
+                Email = normalizedEmail,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 CreatedAt = DateTime.UtcNow
             };
@@ -80,15 +87,15 @@ namespace YumeTrack.Infrastructure.Services
 
         public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
         {
-            var normalizedEmail = request.Email.Trim().ToLower();
+            var normalizedEmail = NormalizeEmail(request.Email);
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
             if (user is null)
-                throw new Exception("Credenciales invalidas.");
+                throw new InvalidOperationException("Credenciales invalidas.");
 
             var passwordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
             if (!passwordValid)
-                throw new Exception("Credenciales invalidas.");
+                throw new InvalidOperationException("Credenciales invalidas.");
 
             var token = _jwtTokenService.GenerateToken(user);
 

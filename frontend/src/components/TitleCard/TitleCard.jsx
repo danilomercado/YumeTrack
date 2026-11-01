@@ -1,55 +1,54 @@
 const TitleCard = ({ title, onClick }) => {
-  const metaText =
-    title.mediaType?.toLowerCase() === "manga"
-      ? title.chapterCount
-        ? `${title.chapterCount} caps`
-        : null
-      : title.episodeCount
-        ? `${title.episodeCount} eps`
-        : null;
+  const isManga = title.mediaType?.toLowerCase() === "manga";
+
+  const metaText = isManga
+    ? title.chapterCount
+      ? `${title.chapterCount} caps`
+      : null
+    : title.episodeCount
+      ? `${title.episodeCount} eps`
+      : null;
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 text-left transition duration-300 hover:-translate-y-1 hover:border-violet-400/40 hover:bg-zinc-900/80"
+      className="group flex flex-col overflow-hidden rounded-lg bg-panel text-left transition duration-200 hover:-translate-y-1 hover:bg-panel-2"
     >
-      <div className="relative aspect-[2/3] overflow-hidden bg-zinc-800">
+      <div className="relative aspect-[2/3] overflow-hidden bg-panel-2">
         {title.posterImage ? (
           <img
             src={title.posterImage}
             alt={title.title}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-sm text-zinc-500">
-            Sin imagen
+          <div className="flex h-full items-center justify-center kanji text-6xl text-zinc-600">
+            夢
           </div>
         )}
 
-        <span className="absolute left-2 top-2 rounded-full border border-white/10 bg-black/70 px-2 py-1 text-[11px] font-medium text-white backdrop-blur">
-          {title.mediaType}
+        <span
+          className={`absolute bottom-0 left-0 py-1 pl-2 pr-5 text-[13px] font-bold text-paper [clip-path:polygon(0_0,100%_0,calc(100%-10px)_100%,0_100%)] ${
+            isManga ? "bg-ground" : "bg-accent"
+          }`}
+        >
+          {isManga ? "Manga" : "Anime"}
         </span>
       </div>
 
-      <div className="p-3">
-        <h3 className="line-clamp-2 min-h-[3.5rem] font-semibold text-white">
+      <div className="flex flex-1 flex-col gap-2 p-3">
+        <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-bold leading-snug text-paper sm:text-base">
           {title.title}
         </h3>
 
-        <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-400">
-          {title.status && (
-            <span className="rounded-full bg-white/5 px-2 py-1">
-              {title.status}
-            </span>
-          )}
-
-          {metaText && (
-            <span className="rounded-full bg-white/5 px-2 py-1">
-              {metaText}
-            </span>
-          )}
-        </div>
+        {(title.status || metaText) && (
+          <p className="text-[13px] text-zinc-400">
+            {[title.status, metaText].filter(Boolean).join(" · ")}
+          </p>
+        )}
       </div>
     </button>
   );

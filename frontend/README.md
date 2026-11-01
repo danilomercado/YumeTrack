@@ -1,12 +1,36 @@
-# React + Vite
+# YumeTrack — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SPA en React 19 + Vite + Tailwind 4 + React Router 7.
 
-Currently, two official plugins are available:
+## Desarrollo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+cp .env.example .env   # y ajustá VITE_API_URL
+npm install
+npm run dev
+```
 
-## Expanding the ESLint configuration
+| Script | Qué hace |
+| --- | --- |
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción en `dist/` |
+| `npm run lint` | ESLint |
+| `npm test` | Tests con Vitest + Testing Library |
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Deploy (hosting estático gratuito)
+
+Vercel, Netlify o Cloudflare Pages:
+
+- Root directory: `frontend`
+- Build command: `npm run build`
+- Output directory: `dist`
+- Variable de entorno: `VITE_API_URL` (se inyecta en build time: si la cambiás, hay que volver a deployar)
+
+El rewrite de SPA ya está en `vercel.json` y `public/_redirects`.
+En el backend hay que permitir el dominio del front en CORS.
+
+## Notas
+
+- Si el backend está en un plan gratuito que se duerme, el front reintenta los GET
+  y muestra un aviso de "Despertando el servidor…" tras 4 s sin respuesta.
+- El token JWT se guarda en `localStorage`.

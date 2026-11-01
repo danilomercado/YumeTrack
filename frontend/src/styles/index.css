@@ -1,40 +1,98 @@
 @import "tailwindcss";
 
-html,
-body,
-#root {
-  height: 100%;
+@theme {
+  /* Tinta sumi: una base, escalones de tono para las superficies, un acento. */
+  --color-ground: #0f1115;
+  --color-panel: #171a21;
+  --color-panel-2: #20242d;
+  --color-paper: #f2f2f0;
+  --color-accent: #c8254a;
+  --color-accent-hover: #da3a5e;
+  --color-accent-soft: #ff7c95;
+  --color-gold: #f6c453;
+
+  --font-sans: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui,
+    sans-serif;
+  --font-display: "Dela Gothic One", "Zen Kaku Gothic New", system-ui,
+    sans-serif;
 }
 
-body {
-  @apply min-h-screen bg-zinc-950 text-zinc-100;
-  background-image:
-    radial-gradient(
-      circle at top left,
-      rgba(139, 92, 246, 0.18),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at top right,
-      rgba(236, 72, 153, 0.12),
-      transparent 25%
-    );
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-ground font-sans text-paper antialiased;
+  }
+
+  h1,
+  h2 {
+    @apply font-display font-normal;
+    letter-spacing: 0;
+    word-spacing: 0.12em;
+  }
+
+  /* El kanji de la marca necesita una fuente con glifos japoneses. */
+  .kanji {
+    font-family: "Zen Kaku Gothic New", "Yu Gothic", "Hiragino Sans", sans-serif;
+    font-weight: 900;
+  }
+
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .rise-in {
+    animation: rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Campos de formulario: único lugar donde se conserva el borde. */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    @apply rounded-md bg-ground text-paper;
+    border: 1px solid rgb(255 255 255 / 0.16);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgb(245 242 235 / 0.4);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent-soft);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  button:not(:disabled),
+  [role="button"],
+  select {
+    cursor: pointer;
+  }
 }
 
-@keyframes float {
-  0% {
-    transform: translateY(0px);
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-
-  50% {
-    transform: translateY(-12px);
-  }
-
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-.animate-float {
-  animation: float 5s ease-in-out infinite;
 }

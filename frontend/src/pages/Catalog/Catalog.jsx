@@ -15,10 +15,11 @@ import {
   getGlobalFeedRequest,
   getFollowingFeedRequest,
 } from "../../services/feedService";
-import TitleGridSkeleton from "../../components/TitleGridSkeleton/TitleGirdSkeleton";
+import TitleGridSkeleton from "../../components/TitleGridSkeleton/TitleGridSkeleton";
 import FeedCard from "../../components/FeedCard/FeedCard";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const PAGE_SIZE = 20;
 
@@ -26,14 +27,14 @@ const TAB_CONFIG = {
   anime: {
     heroSubtitle: "Explorá títulos populares de anime y descubrí algo nuevo.",
     sectionTitle: "Catálogo Anime",
-    sectionSubtitle: "Listado paginado desde Kitsu pasando por tu backend.",
+    sectionSubtitle: "Los títulos más populares de Kitsu, de a 20.",
     emptyMessage: "No hay títulos de anime para mostrar.",
     loadError: "No se pudo cargar el catálogo de anime.",
   },
   manga: {
     heroSubtitle: "Explorá mangas populares y agregalos a tu lista.",
     sectionTitle: "Catálogo Manga",
-    sectionSubtitle: "Listado paginado desde Kitsu pasando por tu backend.",
+    sectionSubtitle: "Los títulos más populares de Kitsu, de a 20.",
     emptyMessage: "No hay mangas para mostrar.",
     loadError: "No se pudo cargar el catálogo de manga.",
   },
@@ -55,6 +56,7 @@ const TAB_CONFIG = {
 };
 
 const Catalog = () => {
+  useDocumentTitle("Catálogo");
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -120,7 +122,11 @@ const Catalog = () => {
               ? await getGlobalFeedRequest()
               : await getFollowingFeedRequest();
 
-          const data = response?.data ?? [];
+          // El backend pagina: { items, hasMore }. Se acepta también un array plano.
+          const payload = response?.data;
+          const data = Array.isArray(payload)
+            ? payload
+            : (payload?.items ?? []);
           setFeedItems(data);
         }
       } catch (err) {
@@ -208,10 +214,10 @@ const Catalog = () => {
       <button
         type="button"
         onClick={() => setActiveTab(tabKey)}
-        className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
+        className={`rounded-md px-4 py-2 text-sm font-medium transition ${
           isActive
-            ? "bg-violet-600 text-white shadow-lg shadow-violet-900/30"
-            : "border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10"
+            ? "bg-accent text-paper"
+            : "bg-panel-2 text-zinc-300 hover:bg-white/10"
         }`}
       >
         {label}
@@ -220,17 +226,11 @@ const Catalog = () => {
   };
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
+    <main className="min-h-screen bg-ground text-paper">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <section className="mb-8">
-          <div className="rounded-3xl border border-white/10 bg-zinc-900/60 p-6">
-            <p className="mb-2 text-sm uppercase tracking-[0.2em] text-violet-400">
-              Descubrir
-            </p>
-
-            <h1 className="text-3xl font-bold sm:text-4xl">
-              Anime, manga y comunidad
-            </h1>
+          <div className="rounded-lg bg-panel p-6">
+            <h1 className="text-3xl sm:text-5xl">Anime, manga y comunidad</h1>
 
             <p className="mt-3 max-w-2xl text-sm text-zinc-400 sm:text-base">
               {currentTabConfig.heroSubtitle}
@@ -259,7 +259,7 @@ const Catalog = () => {
                 {Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={index}
-                    className="animate-pulse rounded-2xl border border-white/10 bg-zinc-900/60 p-4"
+                    className="animate-pulse rounded-lg bg-panel p-4"
                   >
                     <div className="mb-4 flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-white/10" />
@@ -283,7 +283,7 @@ const Catalog = () => {
               </div>
             )
           ) : error ? (
-            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
+            <div className="rounded-lg bg-red-500/10 p-4 text-sm text-red-300">
               {error}
             </div>
           ) : isCatalogTab ? (
@@ -291,7 +291,7 @@ const Catalog = () => {
               {titles.length > 0 ? (
                 <TitleGrid titles={titles} onSelectTitle={handleSelectTitle} />
               ) : (
-                <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6 text-sm text-zinc-400">
+                <div className="rounded-lg bg-panel p-6 text-sm text-zinc-400">
                   {currentTabConfig.emptyMessage}
                 </div>
               )}
@@ -302,7 +302,7 @@ const Catalog = () => {
                     type="button"
                     onClick={handleLoadMore}
                     disabled={isLoadingMore}
-                    className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-md bg-accent px-5 py-3 text-sm font-medium text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isLoadingMore ? "Cargando..." : "Cargar más"}
                   </button>
@@ -314,14 +314,14 @@ const Catalog = () => {
               ) : null}
             </>
           ) : activeTab === "following" && !isAuthenticated ? (
-            <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6 text-center">
+            <div className="rounded-lg bg-panel p-6 text-center">
               <p className="text-sm text-zinc-300">
                 Iniciá sesión para ver el feed de usuarios que seguís.
               </p>
               <button
                 type="button"
                 onClick={() => navigate("/login")}
-                className="mt-4 rounded-xl bg-violet-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-violet-500"
+                className="mt-4 rounded-md bg-accent px-5 py-3 text-sm font-medium text-paper transition hover:bg-accent-hover"
               >
                 Ir a login
               </button>
@@ -333,7 +333,7 @@ const Catalog = () => {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6 text-sm text-zinc-400">
+            <div className="rounded-lg bg-panel p-6 text-sm text-zinc-400">
               {currentTabConfig.emptyMessage}
             </div>
           )}

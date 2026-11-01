@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using YumeTrack.Application.Interfaces;
 using YumeTrack.Domain.Entities;
 using YumeTrack.Infrastructure.Persistence;
@@ -12,15 +13,18 @@ namespace YumeTrack.Infrastructure.Services
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
         private readonly AppDbContext _context;
+        private readonly ILogger<TranslationService> _logger;
 
         public TranslationService(
             HttpClient httpClient,
             IConfiguration configuration,
-            AppDbContext context)
+            AppDbContext context,
+            ILogger<TranslationService> logger)
         {
             _httpClient = httpClient;
             _configuration = configuration;
             _context = context;
+            _logger = logger;
         }
 
 
@@ -49,56 +53,46 @@ namespace YumeTrack.Infrastructure.Services
                     x.Language == language,
                     cancellationToken);
 
-            if (existing is not null)
+            if (existing is not null && existing.OriginalSynopsis == originalSynopsis)
             {
-                Console.WriteLine("🟢 USANDO CACHE");
-
-                if (existing.OriginalSynopsis == originalSynopsis)
-                {
-                    return existing.TranslatedSynopsis;
-                }
-
-                Console.WriteLine("🟡 ACTUALIZANDO TRADUCCIÓN");
-
-                var updatedTranslation = await TranslateWithDeepLAsync(
-                    originalSynopsis,
-                    language,
-                    cancellationToken);
-
-                existing.OriginalSynopsis = originalSynopsis;
-                existing.TranslatedSynopsis = updatedTranslation;
-                existing.UpdatedAtUtc = DateTime.UtcNow;
-
-                await _context.SaveChangesAsync(cancellationToken);
-
                 return existing.TranslatedSynopsis;
             }
 
-            Console.WriteLine("🔴 LLAMANDO A DEEPL");
-
-            var translatedSynopsis = await TranslateWithDeepLAsync(
+            var translatedSynopsis = await TryTranslateWithDeepLAsync(
                 originalSynopsis,
                 language,
                 cancellationToken);
 
-            var translation = new MediaTranslation
-            {
-                KitsuId = kitsuId,
-                MediaType = mediaType,
-                Language = language,
-                OriginalSynopsis = originalSynopsis,
-                TranslatedSynopsis = translatedSynopsis,
-                CreatedAtUtc = DateTime.UtcNow,
-                UpdatedAtUtc = DateTime.UtcNow
-            };
+            // Sin traducción disponible (sin API key, cuota agotada, DeepL caído): sinopsis original, sin cachear.
+            if (translatedSynopsis is null)
+                return existing?.TranslatedSynopsis ?? originalSynopsis;
 
-            _context.MediaTranslations.Add(translation);
+            if (existing is not null)
+            {
+                existing.OriginalSynopsis = originalSynopsis;
+                existing.TranslatedSynopsis = translatedSynopsis;
+                existing.UpdatedAtUtc = DateTime.UtcNow;
+            }
+            else
+            {
+                _context.MediaTranslations.Add(new MediaTranslation
+                {
+                    KitsuId = kitsuId,
+                    MediaType = mediaType,
+                    Language = language,
+                    OriginalSynopsis = originalSynopsis,
+                    TranslatedSynopsis = translatedSynopsis,
+                    CreatedAtUtc = DateTime.UtcNow,
+                    UpdatedAtUtc = DateTime.UtcNow
+                });
+            }
+
             await _context.SaveChangesAsync(cancellationToken);
 
             return translatedSynopsis;
         }
 
-        private async Task<string> TranslateWithDeepLAsync(
+        private async Task<string?> TryTranslateWithDeepLAsync(
              string text,
              string language,
              CancellationToken cancellationToken)
@@ -106,37 +100,48 @@ namespace YumeTrack.Infrastructure.Services
             var apiKey = _configuration["DeepL:ApiKey"];
 
             if (string.IsNullOrWhiteSpace(apiKey))
-                throw new InvalidOperationException("DeepL:ApiKey no está configurada.");
-
-            var targetLanguage = language.ToUpperInvariant();
-
-            using var request = new HttpRequestMessage(HttpMethod.Post, "https://api-free.deepl.com/v2/translate");
-
-            request.Headers.Add("Authorization", $"DeepL-Auth-Key {apiKey}");
-
-            request.Content = new FormUrlEncodedContent(new[]
             {
-        new KeyValuePair<string, string>("text", text),
-        new KeyValuePair<string, string>("target_lang", targetLanguage)
-    });
-
-            using var response = await _httpClient.SendAsync(request, cancellationToken);
-
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error en DeepL: {(int)response.StatusCode} - {responseBody}");
+                _logger.LogWarning("DeepL:ApiKey no está configurada; se devuelve la sinopsis original.");
+                return null;
             }
 
-            using var document = JsonDocument.Parse(responseBody);
+            try
+            {
+                var targetLanguage = language.ToUpperInvariant();
 
-            var translatedText = document.RootElement
-                .GetProperty("translations")[0]
-                .GetProperty("text")
-                .GetString();
+                using var request = new HttpRequestMessage(HttpMethod.Post, "https://api-free.deepl.com/v2/translate");
 
-            return translatedText ?? text;
+                request.Headers.Add("Authorization", $"DeepL-Auth-Key {apiKey}");
+
+                request.Content = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("text", text),
+                    new KeyValuePair<string, string>("target_lang", targetLanguage)
+                });
+
+                using var response = await _httpClient.SendAsync(request, cancellationToken);
+
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("DeepL respondió {StatusCode}: {Body}", (int)response.StatusCode, responseBody);
+                    return null;
+                }
+
+                using var document = JsonDocument.Parse(responseBody);
+
+                return document.RootElement
+                    .GetProperty("translations")[0]
+                    .GetProperty("text")
+                    .GetString();
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException or InvalidOperationException
+                                       && !cancellationToken.IsCancellationRequested)
+            {
+                _logger.LogWarning(ex, "Falló la traducción con DeepL; se devuelve la sinopsis original.");
+                return null;
+            }
         }
     }
 }

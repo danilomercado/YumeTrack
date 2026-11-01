@@ -6,10 +6,14 @@ import {
 } from "../../services/feedService";
 import ReviewComments from "../../components/ReviewComments/ReviewComments";
 import { formatRelativeTime } from "../../utils/formatRelativeTime";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { useAuth } from "../../context/AuthContext";
 
 const ReviewDetail = () => {
+  useDocumentTitle("Reseña");
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const [data, setData] = useState(null);
   const [liked, setLiked] = useState(false);
@@ -34,6 +38,11 @@ const ReviewDetail = () => {
   }, [id]);
 
   const handleLike = async () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
     const prevLiked = liked;
     const prevLikes = likesCount;
 
@@ -50,12 +59,12 @@ const ReviewDetail = () => {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-zinc-950 text-white">
+      <main className="min-h-screen bg-ground text-paper">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="animate-pulse rounded-3xl border border-white/10 bg-zinc-900/60 p-6">
+          <div className="animate-pulse rounded-lg bg-panel p-6">
             <div className="mb-6 h-4 w-28 rounded bg-white/10" />
             <div className="flex gap-5">
-              <div className="h-40 w-28 rounded-2xl bg-white/10" />
+              <div className="h-40 w-28 rounded-lg bg-white/10" />
               <div className="flex-1 space-y-3">
                 <div className="h-5 w-48 rounded bg-white/10" />
                 <div className="h-4 w-24 rounded bg-white/10" />
@@ -73,9 +82,9 @@ const ReviewDetail = () => {
 
   if (!data) {
     return (
-      <main className="min-h-screen bg-zinc-950 text-white">
+      <main className="min-h-screen bg-ground text-paper">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-red-300">
+          <div className="rounded-lg bg-red-500/10 p-6 text-red-300">
             No se pudo cargar la reseña.
           </div>
         </div>
@@ -90,47 +99,45 @@ const ReviewDetail = () => {
     data.score !== null && data.score !== undefined ? data.score : null;
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
+    <main className="min-h-screen bg-ground text-paper">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="mb-5 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/10 hover:text-white"
+          className="mb-5 inline-flex items-center gap-2 rounded-md bg-panel-2 px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/10 hover:text-paper"
         >
           ← Volver
         </button>
 
-        <section className="overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/70 shadow-2xl shadow-black/20">
-          <div className="border-b border-white/10 bg-gradient-to-r from-violet-600/10 via-fuchsia-500/5 to-transparent px-6 py-5">
+        <section className="overflow-hidden rounded-lg bg-panel">
+          <div className="  bg-accent/10 px-6 py-5">
             <div className="flex items-start gap-3">
               <Link
                 to={`/profile/${userName}`}
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-500 text-lg font-bold text-white shadow-lg shadow-violet-950/30"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent text-lg font-bold text-paper"
               >
-                {userName.charAt(0).toUpperCase()}
-              </Link>
-
+                {userName.charAt(0).toUpperCase()}{" "}
+              </Link>{" "}
               <div className="min-w-0 flex-1">
                 <Link
                   to={`/profile/${userName}`}
-                  className="block truncate text-base font-semibold text-white transition hover:text-violet-400"
+                  className="block truncate text-base font-semibold text-paper transition hover:text-accent-soft"
                 >
                   {userName}
                 </Link>
 
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-zinc-400">
                   <span>{formatRelativeTime(data.reviewUpdatedAt)}</span>
 
                   <span className="h-1 w-1 rounded-full bg-zinc-600" />
 
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 uppercase tracking-wide text-zinc-300">
+                  <span className="rounded-full bg-panel-2 px-2 py-0.5 text-zinc-300">
                     {mediaType}
                   </span>
                 </div>
               </div>
             </div>
           </div>
-
           <div className="p-6">
             <div className="flex flex-col gap-6 md:flex-row">
               <div className="mx-auto w-full max-w-[180px] md:mx-0 md:w-[180px]">
@@ -138,10 +145,10 @@ const ReviewDetail = () => {
                   <img
                     src={data.posterImageUrl}
                     alt={canonicalTitle}
-                    className="w-full rounded-2xl border border-white/10 object-cover shadow-xl"
+                    className="w-full rounded-lg object-cover"
                   />
                 ) : (
-                  <div className="flex aspect-[2/3] w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-sm text-zinc-500">
+                  <div className="flex aspect-[2/3] w-full items-center justify-center rounded-lg   bg-panel-2 text-sm text-zinc-500">
                     Sin imagen
                   </div>
                 )}
@@ -149,18 +156,18 @@ const ReviewDetail = () => {
 
               <div className="min-w-0 flex-1">
                 <div className="mb-4 flex flex-wrap items-center gap-3">
-                  <h1 className="text-2xl font-bold leading-tight text-white sm:text-3xl">
+                  <h1 className="text-2xl leading-tight text-paper sm:text-3xl">
                     {canonicalTitle}
                   </h1>
 
                   {score !== null && (
-                    <span className="rounded-full bg-yellow-500/15 px-3 py-1 text-sm font-semibold text-yellow-300">
+                    <span className="rounded-full bg-gold/15 px-3 py-1 text-sm font-semibold text-gold">
                       ★ {score}/10
                     </span>
                   )}
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div className="rounded-lg bg-ground p-4">
                   <p className="whitespace-pre-line text-sm leading-7 text-zinc-300 sm:text-[15px]">
                     {data.review}
                   </p>
@@ -170,10 +177,10 @@ const ReviewDetail = () => {
                   <button
                     type="button"
                     onClick={handleLike}
-                    className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${
+                    className={`inline-flex items-center gap-2 rounded-md  px-4 py-2 text-sm font-medium transition ${
                       liked
-                        ? "border-pink-500/30 bg-pink-500/10 text-pink-300 hover:bg-pink-500/20"
-                        : "border-white/10 bg-white/5 text-zinc-300 hover:border-pink-500/20 hover:bg-pink-500/10 hover:text-pink-300"
+                        ? " bg-accent/10 text-accent-soft hover:bg-accent/20"
+                        : " bg-panel-2 text-zinc-300  hover:bg-accent/10 hover:text-accent-soft"
                     }`}
                   >
                     <svg
@@ -200,7 +207,7 @@ const ReviewDetail = () => {
 
                   <Link
                     to={`/profile/${userName}`}
-                    className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/10 hover:text-white"
+                    className="inline-flex items-center rounded-md bg-panel-2 px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/10 hover:text-paper"
                   >
                     Ver perfil
                   </Link>
@@ -210,8 +217,8 @@ const ReviewDetail = () => {
           </div>
         </section>
 
-        <section className="mt-6 rounded-3xl border border-white/10 bg-zinc-900/50 p-6">
-          <h2 className="mb-4 text-lg font-semibold text-white">Comentarios</h2>
+        <section className="mt-6 rounded-lg bg-panel p-6">
+          <h2 className="mb-4 text-lg text-paper">Comentarios</h2>
 
           <ReviewComments userTitleId={id} />
         </section>

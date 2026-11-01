@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using YumeTrack.Application.Common;
 using YumeTrack.Application.DTOs.Auth;
 using YumeTrack.Application.Interfaces;
@@ -7,6 +8,7 @@ namespace YumeTrack.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[EnableRateLimiting("auth")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -32,7 +34,7 @@ public class AuthController : ControllerBase
                 suggestions = ex.Suggestions
             });
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
@@ -46,7 +48,7 @@ public class AuthController : ControllerBase
             var response = await _authService.LoginAsync(request);
             return Ok(response);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Unauthorized(new { message = ex.Message });
         }

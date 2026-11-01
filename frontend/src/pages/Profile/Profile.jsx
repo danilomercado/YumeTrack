@@ -13,6 +13,7 @@ import {
   unfollowUserRequest,
 } from "../../services/followService";
 import FeedCard from "../../components/FeedCard/FeedCard";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 const STATUS_LABELS = {
   0: "Planificados",
   1: "En progreso",
@@ -22,6 +23,7 @@ const STATUS_LABELS = {
 };
 
 const Profile = () => {
+  useDocumentTitle("Mi perfil");
   const { user } = useAuth();
 
   const [titles, setTitles] = useState([]);
@@ -245,8 +247,8 @@ const Profile = () => {
 
   if (isLoading) {
     return (
-      <main className="mx-auto max-w-6xl px-4 py-10 text-white">
-        <div className="animate-pulse rounded-3xl border border-white/10 bg-zinc-900/60 p-8">
+      <main className="mx-auto max-w-6xl px-4 py-10 text-paper">
+        <div className="animate-pulse rounded-lg bg-panel p-8">
           <div className="mb-3 h-4 w-36 rounded bg-white/10" />
           <div className="h-3 w-24 rounded bg-white/10" />
         </div>
@@ -255,26 +257,25 @@ const Profile = () => {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 text-white">
+    <main className="mx-auto max-w-6xl px-4 py-10 text-paper">
       {successMessage && (
-        <div className="mb-6 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-300">
+        <div className="mb-6 rounded-md bg-green-500/10 px-4 py-3 text-sm text-green-300">
           {successMessage}
         </div>
       )}
 
       {errorMessage && (
-        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="mb-6 rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {errorMessage}
         </div>
       )}
 
-      <section className="overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/80 shadow-[0_0_40px_rgba(168,85,247,0.08)] backdrop-blur">
-        <div className="h-28 bg-gradient-to-r from-violet-600/25 via-fuchsia-500/20 to-pink-500/25" />
-
-        <div className="relative bg-gradient-to-b from-transparent to-zinc-950/40 px-6 pb-8">
+      <section className="overflow-hidden rounded-lg bg-panel">
+        <div className="h-28 bg-accent/25" />
+        <div className="relative px-6 pb-8">
           <div className="-mt-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-violet-500 to-pink-500 text-3xl font-black shadow-lg shadow-violet-900/30">
+              <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-accent text-3xl font-black">
                 {(
                   profile?.userName?.charAt(0) ||
                   user?.userName?.charAt(0) ||
@@ -283,10 +284,7 @@ const Profile = () => {
               </div>
 
               <div>
-                <p className="text-sm uppercase tracking-[0.22em] text-violet-300">
-                  Mi perfil
-                </p>
-                <h1 className="mt-1 text-3xl font-black md:text-4xl">
+                <h1 className="mt-1 text-3xl md:text-4xl">
                   {profile?.userName || user?.userName || "Usuario"}
                 </h1>
 
@@ -317,25 +315,22 @@ const Profile = () => {
           <div className="mt-6 flex flex-wrap gap-3">
             {/* <Link
               to={`/profile/${profile?.userName || user?.userName}`}
-              className="rounded-xl bg-gradient-to-r from-violet-600 to-pink-500 px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+              className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-paper transition hover:opacity-90"
             >
               Ver perfil público
             </Link> */}
 
             <Link
               to="/my-list"
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+              className="rounded-md bg-panel-2 px-4 py-2 text-sm font-medium text-paper transition hover:bg-white/10"
             >
               Ir a mi lista
             </Link>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="mt-6 rounded-lg bg-panel-2 p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm uppercase tracking-[0.16em] text-violet-300">
-                  Biografía
-                </p>
                 <p className="mt-1 text-sm text-zinc-400">
                   Esta bio se muestra en tu perfil público.
                 </p>
@@ -345,7 +340,7 @@ const Profile = () => {
                 type="button"
                 onClick={handleSaveBio}
                 disabled={isSavingBio || !hasBioChanges}
-                className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSavingBio
                   ? "Guardando..."
@@ -361,10 +356,10 @@ const Profile = () => {
               onChange={(event) => setBio(event.target.value)}
               maxLength={300}
               placeholder="Contá algo de vos, tus gustos o qué tipo de anime/manga te gusta..."
-              className="w-full rounded-2xl border border-white/10 bg-zinc-950/70 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-500"
+              className="w-full rounded-lg bg-ground px-4 py-3 text-sm text-paper placeholder:text-zinc-500"
             />
 
-            <div className="mt-2 flex items-center justify-between text-xs text-zinc-500">
+            <div className="mt-2 flex items-center justify-between text-[13px] text-zinc-500">
               <span>Máximo 300 caracteres</span>
               <span>{bio.length}/300</span>
             </div>
@@ -374,11 +369,7 @@ const Profile = () => {
 
       <section className="mt-8 grid gap-6 lg:grid-cols-[320px_1fr]">
         <div className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4">
-            <p className="text-sm uppercase tracking-[0.16em] text-violet-300">
-              Resumen
-            </p>
-
+          <div className="rounded-lg bg-panel p-4">
             <div className="mt-4 grid grid-cols-2 gap-3">
               <SmallStat label="Total" value={total} />
               <SmallStat label="Favoritos" value={favorites} />
@@ -393,12 +384,9 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4">
+          <div className="rounded-lg bg-panel p-4">
             <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm uppercase tracking-[0.16em] text-violet-300">
-                Favoritos
-              </p>
-              <span className="text-xs text-zinc-500">
+              <span className="text-[13px] text-zinc-500">
                 {favoriteTitles.length}
               </span>
             </div>
@@ -412,7 +400,7 @@ const Profile = () => {
                 {favoriteTitles.map((title) => (
                   <div
                     key={title.id}
-                    className="overflow-hidden rounded-xl border border-white/10 bg-black/20"
+                    className="overflow-hidden rounded-md bg-ground"
                   >
                     <img
                       src={title.posterImageUrl}
@@ -431,13 +419,10 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-zinc-900/70 p-4">
+        <div className="rounded-lg bg-panel p-4">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.16em] text-violet-300">
-                Vista previa pública
-              </p>
-              <h2 className="mt-1 text-2xl font-black">Lo que otros ven</h2>
+              <h2 className="mt-1 text-2xl">Lo que otros ven</h2>
             </div>
             <span className="text-sm text-zinc-400">
               {titles.length} títulos
@@ -445,7 +430,7 @@ const Profile = () => {
           </div>
 
           {titles.length === 0 ? (
-            <div className="rounded-xl border border-white/10 bg-black/20 p-4 text-zinc-400">
+            <div className="rounded-md bg-ground p-4 text-zinc-400">
               Todavía no tenés títulos en tu lista.
             </div>
           ) : (
@@ -453,7 +438,7 @@ const Profile = () => {
               {titles.slice(0, 6).map((title) => (
                 <article
                   key={title.id}
-                  className="overflow-hidden rounded-2xl border border-white/10 bg-black/20"
+                  className="overflow-hidden rounded-lg bg-ground"
                 >
                   <img
                     src={title.posterImageUrl}
@@ -468,13 +453,13 @@ const Profile = () => {
                       </h3>
 
                       {title.score !== null && title.score !== undefined && (
-                        <div className="rounded-xl bg-yellow-400/15 px-2.5 py-1 text-xs font-bold text-yellow-300">
+                        <div className="rounded-md bg-gold/15 px-2.5 py-1 text-[13px] font-bold text-gold">
                           ★ {title.score}
                         </div>
                       )}
                     </div>
 
-                    <div className="flex flex-wrap gap-2 text-xs">
+                    <div className="flex flex-wrap gap-2 text-[13px]">
                       <Badge>{title.mediaType}</Badge>
                       <Badge>
                         {STATUS_LABELS[title.status] || "Sin estado"}
@@ -494,18 +479,15 @@ const Profile = () => {
           )}
         </div>
       </section>
-      <section className="mt-8 rounded-2xl border border-white/10 bg-zinc-900/70 p-4">
+      <section className="mt-8 rounded-lg bg-panel p-4">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.16em] text-violet-300">
-              Reseñas
-            </p>
-            <h2 className="mt-1 text-2xl font-black">Últimas reseñas</h2>
+            <h2 className="mt-1 text-2xl">Últimas reseñas</h2>
           </div>
         </div>
 
         {reviewItems.length === 0 ? (
-          <div className="rounded-xl border border-white/10 bg-black/20 p-4 text-zinc-400">
+          <div className="rounded-md bg-ground p-4 text-zinc-400">
             Todavía no escribiste ninguna reseña.
           </div>
         ) : (
@@ -518,19 +500,18 @@ const Profile = () => {
       </section>
       {followModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="max-h-[80vh] w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-              <h3 className="text-lg font-bold text-white">
+          <div className="max-h-[80vh] w-full max-w-md overflow-hidden rounded-lg bg-panel">
+            <div className="flex items-center justify-between   px-5 py-4">
+              <h3 className="text-lg font-bold text-paper">
                 {followModalTitle}
               </h3>
               <button
                 onClick={() => setFollowModalOpen(false)}
-                className="text-zinc-400 hover:text-white"
+                className="text-zinc-400 hover:text-paper"
               >
                 ✕
               </button>
             </div>
-
             <div className="max-h-[65vh] overflow-y-auto p-4">
               {followModalLoading ? (
                 <p className="text-zinc-400 text-sm">Cargando...</p>
@@ -549,14 +530,14 @@ const Profile = () => {
                     return (
                       <div
                         key={followUser.id}
-                        className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 p-4"
+                        className="flex items-center justify-between gap-3 rounded-lg bg-ground p-4"
                       >
                         <Link
                           to={`/profile/${followUser.userName}`}
                           onClick={() => setFollowModalOpen(false)}
                           className="min-w-0 flex-1"
                         >
-                          <p className="truncate font-semibold text-white">
+                          <p className="truncate font-semibold text-paper">
                             {followUser.userName}
                           </p>
                           <p className="mt-1 text-sm text-zinc-400">
@@ -570,10 +551,10 @@ const Profile = () => {
                               handleToggleFollowUser(followUser.id)
                             }
                             disabled={isLoadingButton}
-                            className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold ${
+                            className={`shrink-0 rounded-md px-4 py-2 text-sm font-semibold ${
                               followUser.isFollowing
-                                ? "border border-white/10 bg-white/5 text-white"
-                                : "bg-gradient-to-r from-violet-600 to-pink-500 text-white"
+                                ? "  bg-panel-2 text-paper"
+                                : "bg-accent   text-paper"
                             }`}
                           >
                             {isLoadingButton
@@ -604,31 +585,27 @@ const ProfileStat = ({ label, value, onClick }) => {
       type="button"
       onClick={onClick}
       disabled={!isClickable}
-      className={`min-w-[120px] rounded-2xl border border-white/10 bg-zinc-950/70 px-4 py-3 text-left shadow-inner transition ${
-        isClickable
-          ? "cursor-pointer hover:border-violet-500/40 hover:bg-zinc-900"
-          : "cursor-default"
+      className={`min-w-[120px] rounded-lg   bg-ground px-4 py-3 text-left  transition ${
+        isClickable ? "cursor-pointer  hover:bg-panel" : "cursor-default"
       }`}
     >
-      <p className="text-2xl font-black text-white">{value}</p>
-      <p className="text-xs uppercase tracking-[0.16em] text-zinc-400">
-        {label}
-      </p>
+      <p className="text-2xl font-black text-paper">{value}</p>
+      <p className="text-[13px] text-zinc-400">{label}</p>
     </button>
   );
 };
 
 const SmallStat = ({ label, value }) => (
-  <div className="rounded-xl border border-white/10 bg-black/20 p-3">
-    <p className="text-lg font-bold text-white">{value}</p>
-    <p className="text-xs text-zinc-400">{label}</p>
+  <div className="rounded-md bg-ground p-3">
+    <p className="text-lg font-bold text-paper">{value}</p>
+    <p className="text-[13px] text-zinc-400">{label}</p>
   </div>
 );
 
 const Badge = ({ children, strong = false }) => (
   <span
     className={`rounded-full px-2.5 py-1 ${
-      strong ? "bg-violet-500/20 text-violet-200" : "bg-white/5 text-zinc-300"
+      strong ? "bg-accent/20 text-accent-soft" : "bg-panel-2 text-zinc-300"
     }`}
   >
     {children}
