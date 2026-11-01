@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children }) => {
   if (isLoading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center px-4">
-        <div className="w-full max-w-md animate-pulse rounded-lg bg-panel p-6">
+        <div className="w-full max-w-md animate-pulse rounded-2xl bg-panel p-6">
           <div className="mb-3 h-4 w-36 rounded bg-white/10" />
           <div className="h-3 w-24 rounded bg-white/10" />
         </div>

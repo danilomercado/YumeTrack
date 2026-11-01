@@ -2,7 +2,7 @@ import React from "react";
 
 const SearchBar = ({ value, onChange }) => {
   return (
-    <div className="rounded-lg bg-panel-2 p-4">
+    <div className="rounded-2xl bg-panel-2 p-4">
       <input
         id="search"
         name="search"
@@ -10,7 +10,7 @@ const SearchBar = ({ value, onChange }) => {
         value={value}
         onChange={onChange}
         placeholder="Ej: Hunter x Hunter"
-        className="w-full rounded-md   bg-ground px-4 py-3 text-paper  transition"
+        className="w-full rounded-xl   bg-ground px-4 py-3 text-paper  transition"
       />
     </div>
   );

@@ -3,7 +3,7 @@ import TitleCard from "../TitleCard/TitleCard";
 const TitleGrid = ({ titles = [], onSelectTitle }) => {
   if (!titles.length) {
     return (
-      <div className="rounded-lg bg-panel p-6 text-center text-zinc-400">
+      <div className="rounded-2xl bg-panel p-6 text-center text-zinc-400">
         No hay títulos para mostrar.
       </div>
     );
@@ -11,9 +11,10 @@ const TitleGrid = ({ titles = [], onSelectTitle }) => {
 
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
-      {titles.map((title) => (
+      {titles.map((title, index) => (
         <TitleCard
           key={`${title.mediaType}-${title.id}`}
+          index={index}
           title={title}
           onClick={() => onSelectTitle(title)}
         />

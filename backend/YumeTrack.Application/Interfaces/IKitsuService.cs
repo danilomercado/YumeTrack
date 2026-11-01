@@ -11,6 +11,7 @@ namespace YumeTrack.Application.Interfaces
         Task<List<TitleSearchResultDto>> GetTrendingAnimeAsync(int limit = 12, CancellationToken cancellationToken = default);
         Task<List<TitleSearchResultDto>> GetTrendingMangaAsync(int limit = 12, CancellationToken cancellationToken = default);
         Task<List<TitleSearchResultDto>> GetAnimeCatalogAsync(int limit = 20, int offset = 0, CancellationToken cancellationToken = default);
+        Task<List<TitleCharacterDto>> GetCharactersAsync(string id, string mediaType, CancellationToken cancellationToken = default);
         Task<List<TitleSearchResultDto>> GetMangaCatalogAsync(int limit = 20, int offset = 0, CancellationToken cancellationToken = default);
     }
 }

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import ProfileStats from "../../components/ProfileStats/ProfileStats";
+import ReportMenu from "../../components/ReportMenu/ReportMenu";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { useAuth } from "../../context/AuthContext";
 import { getPublicProfileRequest } from "../../services/publicService";
@@ -18,6 +20,7 @@ const STATUS_LABELS = {
 
 const PublicProfile = () => {
   const { username } = useParams();
+  const navigate = useNavigate();
   useDocumentTitle(username);
   const { user, isAuthenticated } = useAuth();
 
@@ -113,7 +116,7 @@ const PublicProfile = () => {
   if (loading) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10 text-paper">
-        <div className="animate-pulse rounded-lg bg-panel p-8">
+        <div className="animate-pulse rounded-2xl bg-panel p-8">
           <div className="mb-3 h-4 w-36 rounded bg-white/10" />
           <div className="h-3 w-24 rounded bg-white/10" />
         </div>
@@ -124,7 +127,7 @@ const PublicProfile = () => {
   if (!profile) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10 text-paper">
-        <div className="rounded-lg bg-panel p-8">
+        <div className="rounded-2xl bg-panel p-8">
           {errorMessage || "Usuario no encontrado."}
         </div>
       </main>
@@ -134,17 +137,17 @@ const PublicProfile = () => {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 text-paper">
       {errorMessage && (
-        <div className="mb-6 rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="mb-6 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {errorMessage}
         </div>
       )}
 
-      <section className="overflow-hidden rounded-lg bg-panel">
+      <section className="overflow-hidden rounded-2xl bg-panel">
         <div className="h-28 bg-accent/25" />
         <div className="relative px-6 pb-8">
           <div className="-mt-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-accent text-3xl font-black">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-accent text-3xl font-black">
                 {profile.userName?.charAt(0)?.toUpperCase() || "U"}
               </div>
 
@@ -175,12 +178,22 @@ const PublicProfile = () => {
                 />
               </div>
 
+              {!isOwnPublicProfile && (
+                <ReportMenu
+                  targetType="user"
+                  targetId={profile.id}
+                  userId={profile.id}
+                  userName={profile.userName}
+                  onBlocked={() => navigate("/")}
+                />
+              )}
+
               {isAuthenticated && !isOwnPublicProfile && (
                 <button
                   type="button"
                   onClick={handleToggleFollow}
                   disabled={followLoading}
-                  className={`rounded-md px-4 py-2 text-sm font-semibold transition ${
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
                     profile.isFollowing
                       ? "  bg-panel-2 text-paper hover:bg-white/10"
                       : "bg-accent   text-paper hover:opacity-90"
@@ -196,13 +209,15 @@ const PublicProfile = () => {
             </div>
           </div>
 
-          <div className="mt-6 max-w-2xl rounded-lg bg-panel-2 px-4 py-3 text-sm text-zinc-300">
+          <div className="mt-6 max-w-2xl rounded-2xl bg-panel-2 px-4 py-3 text-sm text-zinc-300">
             {profile.bio?.trim()
               ? profile.bio
               : "Lista pública de anime y manga con puntuaciones, favoritos y reviews."}
           </div>
         </div>
       </section>
+
+      <ProfileStats username={profile.userName} />
 
       {favoriteTitles.length > 0 && (
         <section className="mt-8">
@@ -219,7 +234,7 @@ const PublicProfile = () => {
             {favoriteTitles.map((title) => (
               <article
                 key={title.id}
-                className="overflow-hidden rounded-lg bg-panel"
+                className="overflow-hidden rounded-2xl bg-panel"
               >
                 <div className="relative">
                   <img
@@ -269,7 +284,7 @@ const PublicProfile = () => {
         </div>
 
         {profile.titles?.length === 0 ? (
-          <div className="rounded-lg bg-panel p-6 text-zinc-400">
+          <div className="rounded-2xl bg-panel p-6 text-zinc-400">
             Este usuario todavía no tiene títulos en su lista pública.
           </div>
         ) : (
@@ -277,7 +292,7 @@ const PublicProfile = () => {
             {profile.titles.map((title) => (
               <article
                 key={title.id}
-                className="overflow-hidden rounded-lg bg-panel transition hover:-translate-y-1"
+                className="overflow-hidden rounded-2xl bg-panel transition hover:-translate-y-1"
               >
                 <img
                   src={title.posterImageUrl}
@@ -291,7 +306,7 @@ const PublicProfile = () => {
                     </h3>
 
                     {title.score !== null && title.score !== undefined && (
-                      <div className="shrink-0 rounded-md bg-gold/15 px-2.5 py-1 text-sm font-bold text-gold">
+                      <div className="shrink-0 rounded-xl bg-gold/15 px-2.5 py-1 text-sm font-bold text-gold">
                         ★ {title.score}
                       </div>
                     )}
@@ -313,7 +328,7 @@ const PublicProfile = () => {
                   </div>
 
                   {title.notes && (
-                    <div className="rounded-md bg-ground p-3">
+                    <div className="rounded-xl bg-ground p-3">
                       <p className="mb-1 text-[13px] text-zinc-500">Review</p>
                       <p className="line-clamp-4 text-sm text-zinc-300">
                         {title.notes}
@@ -331,7 +346,7 @@ const PublicProfile = () => {
 };
 
 const ProfileStat = ({ label, value }) => (
-  <div className="min-w-[120px] rounded-lg bg-ground px-4 py-3">
+  <div className="min-w-[120px] rounded-2xl bg-ground px-4 py-3">
     <p className="text-2xl font-black text-paper">{value}</p>
     <p className="text-[13px] text-zinc-400">{label}</p>
   </div>

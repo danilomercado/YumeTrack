@@ -12,6 +12,10 @@ using YumeTrack.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Variables locales desde YumeTrack.API/.env (solo en desarrollo; en producción van como variables de entorno).
+if (builder.Environment.IsDevelopment())
+    YumeTrack.API.Configuration.DotEnv.Load(builder.Configuration, Path.Combine(builder.Environment.ContentRootPath, ".env"));
+
 // Los hosts tipo Render/Railway entregan el puerto por la variable PORT.
 var port = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrWhiteSpace(port))
@@ -65,6 +69,7 @@ builder.Services.AddRateLimiter(options =>
 
     AddPerIpPolicy("auth", 10);
     AddPerIpPolicy("titles", 120);
+    AddPerIpPolicy("social", 60);
     // Cada detalle nuevo puede gastar cuota de DeepL.
     AddPerIpPolicy("title-detail", 30);
 });
@@ -149,6 +154,24 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseForwardedHeaders();
+
+// Cabeceras de seguridad para todas las respuestas.
+app.Use(async (context, next) =>
+{
+    var headers = context.Response.Headers;
+    headers["X-Content-Type-Options"] = "nosniff";
+    headers["X-Frame-Options"] = "DENY";
+    headers["Referrer-Policy"] = "no-referrer";
+    headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
+
+    if (context.Request.Path.StartsWithSegments("/api/auth") || context.Request.Path.StartsWithSegments("/api/security"))
+        headers["Cache-Control"] = "no-store";
+
+    await next();
+});
+
+if (!app.Environment.IsDevelopment())
+    app.UseHsts();
 
 if (app.Environment.IsDevelopment())
 {

@@ -17,10 +17,87 @@ namespace YumeTrack.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("YumeTrack.Domain.Entities.ActivityEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("TitleId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TitleId");
+
+                    b.HasIndex("UserId", "CreatedAt");
+
+                    b.ToTable("ActivityEvents");
+                });
+
+            modelBuilder.Entity("YumeTrack.Domain.Entities.ContentReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Details")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<int>("ReporterId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("TargetId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("ReporterId", "TargetType", "TargetId")
+                        .IsUnique();
+
+                    b.ToTable("ContentReports");
+                });
 
             modelBuilder.Entity("YumeTrack.Domain.Entities.MediaTranslation", b =>
                 {
@@ -236,6 +313,25 @@ namespace YumeTrack.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int>("FailedLoginCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("LockoutUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("MfaEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("MfaLastStep")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("MfaRecoveryCodes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MfaSecretProtected")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
                     b.Property<string>("NormalizedUserName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -244,6 +340,13 @@ namespace YumeTrack.Infrastructure.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("PasswordResetExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PasswordResetTokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -259,6 +362,33 @@ namespace YumeTrack.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("YumeTrack.Domain.Entities.UserBlock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BlockedId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("BlockerId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlockedId");
+
+                    b.HasIndex("BlockerId", "BlockedId")
+                        .IsUnique();
+
+                    b.ToTable("UserBlocks");
                 });
 
             modelBuilder.Entity("YumeTrack.Domain.Entities.UserFollow", b =>
@@ -334,6 +464,36 @@ namespace YumeTrack.Infrastructure.Migrations
                     b.ToTable("UserTitles");
                 });
 
+            modelBuilder.Entity("YumeTrack.Domain.Entities.ActivityEvent", b =>
+                {
+                    b.HasOne("YumeTrack.Domain.Entities.Title", "Title")
+                        .WithMany()
+                        .HasForeignKey("TitleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YumeTrack.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Title");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("YumeTrack.Domain.Entities.ContentReport", b =>
+                {
+                    b.HasOne("YumeTrack.Domain.Entities.User", "Reporter")
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Reporter");
+                });
+
             modelBuilder.Entity("YumeTrack.Domain.Entities.Notification", b =>
                 {
                     b.HasOne("YumeTrack.Domain.Entities.User", "ActorUser")
@@ -389,6 +549,25 @@ namespace YumeTrack.Infrastructure.Migrations
                     b.Navigation("User");
 
                     b.Navigation("UserTitle");
+                });
+
+            modelBuilder.Entity("YumeTrack.Domain.Entities.UserBlock", b =>
+                {
+                    b.HasOne("YumeTrack.Domain.Entities.User", "Blocked")
+                        .WithMany()
+                        .HasForeignKey("BlockedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YumeTrack.Domain.Entities.User", "Blocker")
+                        .WithMany()
+                        .HasForeignKey("BlockerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Blocked");
+
+                    b.Navigation("Blocker");
                 });
 
             modelBuilder.Entity("YumeTrack.Domain.Entities.UserFollow", b =>

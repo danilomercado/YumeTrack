@@ -10,5 +10,6 @@ namespace YumeTrack.Application.Interfaces
     {
         Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request);
         Task<AuthResponseDto> LoginAsync(LoginRequestDto request);
+        Task<AuthResponseDto> LoginWithMfaAsync(MfaLoginRequestDto request);
     }
 }

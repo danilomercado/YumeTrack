@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using YumeTrack.Application.DTOs.Users;
+using Microsoft.EntityFrameworkCore;
+using YumeTrack.Infrastructure.Persistence;
 using YumeTrack.Infrastructure.Services;
 
 namespace YumeTrack.API.Controllers
@@ -12,9 +14,12 @@ namespace YumeTrack.API.Controllers
     public class FollowsController : ControllerBase
     {
         private readonly FollowService _followService;
-        public FollowsController(FollowService followService)
+        private readonly AppDbContext _context;
+
+        public FollowsController(FollowService followService, AppDbContext context)
         {
             _followService = followService;
+            _context = context;
         }
 
         private int GetUserId()
@@ -33,6 +38,14 @@ namespace YumeTrack.API.Controllers
             try
             {
                 var currentUserId = GetUserId();
+
+                var blocked = await _context.UserBlocks.AnyAsync(b =>
+                    (b.BlockerId == currentUserId && b.BlockedId == userId) ||
+                    (b.BlockerId == userId && b.BlockedId == currentUserId));
+
+                if (blocked)
+                    return BadRequest(new { message = "No podés seguir a este usuario." });
+
                 await _followService.FollowAsync(currentUserId, userId);
 
                 return Ok(new { message = "Ahora seguís a este usuario." });

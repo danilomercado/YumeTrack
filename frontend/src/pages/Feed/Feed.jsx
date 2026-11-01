@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import PageBanner from "../../components/PageBanner/PageBanner";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
@@ -6,6 +7,9 @@ import {
   getFollowingFeedRequest,
 } from "../../services/feedService";
 import FeedCard from "../../components/FeedCard/FeedCard";
+import ActivityCard from "../../components/ActivityCard/ActivityCard";
+import SuggestedUsers from "../../components/SuggestedUsers/SuggestedUsers";
+import { getActivityRequest } from "../../services/socialService";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const PAGE_SIZE = 10;
@@ -34,9 +38,26 @@ const Feed = () => {
 
       setError("");
 
-      if (selectedTab === "following" && !isAuthenticated) {
+      if (
+        (selectedTab === "following" || selectedTab === "activity") &&
+        !isAuthenticated
+      ) {
         setItems([]);
         setHasMore(false);
+        return;
+      }
+
+      if (selectedTab === "activity") {
+        const data = await getActivityRequest({
+          page: nextPage,
+          pageSize: PAGE_SIZE,
+        });
+
+        setItems((prev) =>
+          append ? [...prev, ...(data.items ?? [])] : (data.items ?? []),
+        );
+        setHasMore(Boolean(data.hasMore));
+        setPage(nextPage);
         return;
       }
 
@@ -110,7 +131,7 @@ const Feed = () => {
       <button
         type="button"
         onClick={() => setActiveTab(tabKey)}
-        className={`rounded-md px-4 py-2 text-sm font-medium transition ${
+        className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
           isActive
             ? "bg-accent text-paper"
             : "bg-panel-2 text-zinc-300 hover:bg-white/10"
@@ -122,22 +143,20 @@ const Feed = () => {
   };
 
   return (
-    <main className="min-h-screen bg-ground text-paper">
+    <main className="min-h-dvh text-paper">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <section className="mb-8">
-          <div className="rounded-lg bg-panel p-6">
-            <h1 className="text-3xl sm:text-4xl">Feed de reseñas</h1>
-
-            <p className="mt-3 max-w-2xl text-sm text-zinc-400 sm:text-base">
-              Descubrí lo que está viendo y reseñando la comunidad de YumeTrack.
-            </p>
-          </div>
-        </section>
+        <PageBanner
+          image="/art/hanami.jpg"
+          title="Feed de reseñas"
+          subtitle="Descubrí lo que está viendo y reseñando la comunidad de YumeTrack."
+          kanji="声"
+        />
 
         <section className="space-y-4">
           <div className="flex flex-wrap gap-3">
             {renderTabButton("global", "Global")}
             {renderTabButton("following", "Siguiendo")}
+            {renderTabButton("activity", "Actividad")}
           </div>
 
           {loading ? (
@@ -145,7 +164,7 @@ const Feed = () => {
               {Array.from({ length: 6 }).map((_, index) => (
                 <div
                   key={index}
-                  className="animate-pulse rounded-lg bg-panel p-4"
+                  className="animate-pulse rounded-2xl bg-panel p-4"
                 >
                   <div className="mb-4 flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-white/10" />
@@ -168,11 +187,12 @@ const Feed = () => {
               ))}
             </div>
           ) : error ? (
-            <div className="rounded-lg bg-red-500/10 p-4 text-sm text-red-300">
+            <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-300">
               {error}
             </div>
-          ) : activeTab === "following" && !isAuthenticated ? (
-            <div className="rounded-lg bg-panel p-6 text-center">
+          ) : (activeTab === "following" || activeTab === "activity") &&
+            !isAuthenticated ? (
+            <div className="rounded-2xl bg-panel p-6 text-center">
               <p className="text-sm text-zinc-300">
                 Iniciá sesión para ver el feed de usuarios que seguís.
               </p>
@@ -180,21 +200,30 @@ const Feed = () => {
               <button
                 type="button"
                 onClick={() => navigate("/login")}
-                className="mt-4 rounded-md bg-accent px-5 py-3 text-sm font-medium text-paper transition hover:bg-accent-hover"
+                className="mt-4 rounded-xl bg-accent px-5 py-3 text-sm font-medium text-paper transition hover:bg-accent-hover"
               >
                 Ir a login
               </button>
             </div>
           ) : items.length > 0 ? (
             <>
-              <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 xl:grid-cols-2">
-                {items.map((item) => (
-                  <FeedCard
-                    key={`${item.userTitleId}-${item.reviewUpdatedAt || ""}`}
-                    item={item}
-                  />
-                ))}
-              </div>
+              {activeTab === "activity" ? (
+                <div className="mx-auto grid max-w-3xl gap-3">
+                  {items.map((item, index) => (
+                    <ActivityCard key={item.id} item={item} index={index} />
+                  ))}
+                </div>
+              ) : (
+                <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 xl:grid-cols-2">
+                  {items.map((item, index) => (
+                    <FeedCard
+                      key={`${item.userTitleId}-${item.reviewUpdatedAt || ""}`}
+                      item={item}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              )}
 
               {hasMore && (
                 <div className="flex justify-center pt-2">
@@ -202,7 +231,7 @@ const Feed = () => {
                     type="button"
                     onClick={handleLoadMore}
                     disabled={loadingMore}
-                    className="rounded-md bg-panel-2 px-5 py-3 text-sm font-medium text-paper transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl bg-panel-2 px-5 py-3 text-sm font-medium text-paper transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {loadingMore ? "Cargando..." : "Cargar más"}
                   </button>
@@ -210,8 +239,16 @@ const Feed = () => {
               )}
             </>
           ) : (
-            <div className="rounded-lg bg-panel p-6 text-sm text-zinc-400">
-              No hay reseñas para mostrar.
+            <div className="space-y-6 rounded-2xl bg-panel p-6">
+              <p className="text-sm text-zinc-300">
+                {activeTab === "global"
+                  ? "No hay reseñas para mostrar."
+                  : activeTab === "activity"
+                    ? "Todavía no hay actividad de la gente que seguís."
+                    : "Todavía no hay reseñas de la gente que seguís."}
+              </p>
+
+              {activeTab !== "global" && <SuggestedUsers />}
             </div>
           )}
         </section>

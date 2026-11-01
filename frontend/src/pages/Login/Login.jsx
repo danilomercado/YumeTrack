@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { loginRequest } from "../../services/authService";
+import { Link } from "react-router-dom";
+import { loginMfaRequest, loginRequest } from "../../services/authService";
+import AuthShell from "../../components/AuthShell/AuthShell";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const Login = () => {
@@ -10,6 +12,8 @@ const Login = () => {
   const { login } = useAuth();
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [mfaToken, setMfaToken] = useState(null);
+  const [mfaCode, setMfaCode] = useState("");
 
   const [form, setForm] = useState({
     email: "",
@@ -42,93 +46,149 @@ const Login = () => {
         password: form.password,
       });
 
+      if (data.mfaRequired) {
+        setMfaToken(data.mfaToken);
+        return;
+      }
+
       login(data);
       navigate("/");
     } catch (error) {
       const backedMessage =
         error.response?.data?.message ||
-        error.reponse?.data?.title ||
+        error.response?.data?.title ||
         "No se pudo iniciar sesión";
       setErrorMessage(backedMessage);
     } finally {
       setIsLoading(false);
     }
   };
-  return (
-    <main className="relative mx-auto flex min-h-[calc(100vh-80px)] max-w-6xl items-center justify-center px-4 py-10 overflow-hidden">
-      {/* PERSONAJE IZQUIERDA */}
-      <img
-        src="/characters/gojo.webp"
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-        decoding="async"
-        className="pointer-events-none hidden xl:block absolute left-0 top-1/2 -translate-y-1/2 h-[420px]"
-      />
+  const handleMfaSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMessage("");
 
-      {/* PERSONAJE DERECHA */}
-      <img
-        src="/characters/itachi.webp"
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-        decoding="async"
-        className="pointer-events-none hidden xl:block absolute right-0 top-1/2 -translate-y-1/2 h-[420px]"
-      />
+    if (!mfaCode.trim()) {
+      setErrorMessage("Ingresá el código.");
+      return;
+    }
 
-      {/* FORM (NO TOCADO) */}
-      <div className="relative z-10 w-full max-w-md rounded-lg bg-panel p-8">
-        <h1 className="text-3xl text-paper">Iniciar sesión</h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          Accedé a tu cuenta para continuar.
-        </p>
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <label className="mb-2 block text-sm text-zinc-300" htmlFor="email">
-              Correo
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="tuemail@gmail.com"
-              className="w-full rounded-md bg-ground px-4 py-3 text-paper transition"
-            />
-          </div>
-          <div>
-            <label
-              className="mb-2 block text-sm text-zinc-300"
-              htmlFor="password"
-            >
-              Contraseña
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="********"
-              className="w-full rounded-md bg-ground px-4 py-3 text-paper transition"
-            />
-          </div>
+    try {
+      setIsLoading(true);
+      const data = await loginMfaRequest({ mfaToken, code: mfaCode });
+      login(data);
+      navigate("/");
+    } catch (error) {
+      setErrorMessage(error.message || "El código no es correcto.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (mfaToken) {
+    return (
+      <AuthShell
+        title="Verificación en dos pasos"
+        subtitle="Escribí el código de 6 dígitos de tu app de autenticación, o uno de tus códigos de recuperación."
+        tagline="もう一歩！"
+        altText="¿No es tu cuenta?"
+        altLabel="Volver"
+        altTo="/login"
+        characters={["/characters/gojo.webp", "/characters/itachi.webp"]}
+      >
+        <form onSubmit={handleMfaSubmit} className="mt-6 space-y-4">
+          <input
+            autoFocus
+            inputMode="text"
+            autoComplete="one-time-code"
+            value={mfaCode}
+            onChange={(e) => setMfaCode(e.target.value)}
+            placeholder="123456"
+            aria-label="Código de verificación"
+            className="w-full rounded-xl bg-ground px-4 py-3 text-center font-mono text-2xl tracking-[0.3em] text-paper"
+          />
+
           {errorMessage && (
-            <div className="rounded-md   bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            <div className="rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-300">
               {errorMessage}
             </div>
           )}
+
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-md bg-accent px-4 py-3 font-semibold text-paper transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-full bg-accent px-4 py-3 font-bold text-paper disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isLoading ? "Ingresando..." : "Ingresar"}
+            {isLoading ? "Verificando..." : "Verificar"}
           </button>
         </form>
-      </div>
-    </main>
+      </AuthShell>
+    );
+  }
+
+  return (
+    <AuthShell
+      title="Iniciar sesión"
+      subtitle="Accedé a tu cuenta para continuar."
+      tagline="おかえり！"
+      altText="¿Todavía no tenés cuenta?"
+      altLabel="Crear cuenta"
+      altTo="/register"
+      characters={["/characters/gojo.webp", "/characters/itachi.webp"]}
+    >
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div>
+          <label className="mb-2 block text-sm text-zinc-300" htmlFor="email">
+            Correo
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="tuemail@gmail.com"
+            className="w-full rounded-xl bg-ground px-4 py-3 text-paper transition"
+          />
+        </div>
+        <div>
+          <label
+            className="mb-2 block text-sm text-zinc-300"
+            htmlFor="password"
+          >
+            Contraseña
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="********"
+            className="w-full rounded-xl bg-ground px-4 py-3 text-paper transition"
+          />
+        </div>
+        {errorMessage && (
+          <div className="rounded-xl   bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {errorMessage}
+          </div>
+        )}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full rounded-xl bg-accent px-4 py-3 font-semibold text-paper transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isLoading ? "Ingresando..." : "Ingresar"}
+        </button>
+        <p className="text-center text-sm">
+          <Link
+            to="/forgot-password"
+            className="text-zinc-400 transition hover:text-paper"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </p>
+      </form>
+    </AuthShell>
   );
 };
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { registerRequest } from "../../services/authService";
+import AuthShell from "../../components/AuthShell/AuthShell";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 const Register = () => {
@@ -85,91 +86,93 @@ const Register = () => {
   };
 
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-80px)] max-w-6xl items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md rounded-lg bg-panel p-8">
-        <h1 className="text-3xl text-paper">Crear cuenta</h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          Registrate y empezá a trackear títulos.
-        </p>
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <label
-              className="mb-2 block text-sm text-zinc-300"
-              htmlFor="userName"
-            >
-              Usuario
-            </label>
-            <input
-              id="userName"
-              name="userName"
-              type="text"
-              value={form.userName}
-              onChange={handleChange}
-              placeholder="nombre"
-              className="w-full rounded-md bg-ground px-4 py-3 text-paper transition"
-            />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm text-zinc-300" htmlFor="email">
-              Correo
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="email@gmail.com"
-              className="w-full rounded-md bg-ground px-4 py-3 text-paper transition"
-            />
-          </div>
-          <div>
-            <label
-              className="mb-2 block text-sm text-zinc-300"
-              htmlFor="password"
-            >
-              Contraseña
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="********"
-              className="w-full rounded-md bg-ground px-4 py-3 text-paper transition"
-            />
-          </div>
-          {errorMessage && (
-            <div className="rounded-md   bg-red-500/10 px-4 py-3 text-sm text-red-300">
-              <p>{errorMessage}</p>
-
-              {usernameSuggestions.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {usernameSuggestions.map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="rounded-full bg-panel-2 px-3 py-1 text-[13px] text-paper transition hover:bg-white/10"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full rounded-md bg-accent px-4 py-3 font-semibold text-paper transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+    <AuthShell
+      title="Crear cuenta"
+      subtitle="Registrate y empezá a trackear títulos."
+      tagline="ようこそ！"
+      altText="¿Ya tenés cuenta?"
+      altLabel="Ingresar"
+      altTo="/login"
+      characters={["/characters/gon.webp", "/characters/narutito.webp"]}
+    >
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div>
+          <label
+            className="mb-2 block text-sm text-zinc-300"
+            htmlFor="userName"
           >
-            {isLoading ? "Creando cuenta..." : "Registrarme"}
-          </button>
-        </form>
-      </div>
-    </main>
+            Usuario
+          </label>
+          <input
+            id="userName"
+            name="userName"
+            type="text"
+            value={form.userName}
+            onChange={handleChange}
+            placeholder="nombre"
+            className="w-full rounded-xl bg-ground px-4 py-3 text-paper transition"
+          />
+        </div>
+        <div>
+          <label className="mb-2 block text-sm text-zinc-300" htmlFor="email">
+            Correo
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="email@gmail.com"
+            className="w-full rounded-xl bg-ground px-4 py-3 text-paper transition"
+          />
+        </div>
+        <div>
+          <label
+            className="mb-2 block text-sm text-zinc-300"
+            htmlFor="password"
+          >
+            Contraseña
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="********"
+            className="w-full rounded-xl bg-ground px-4 py-3 text-paper transition"
+          />
+        </div>
+        {errorMessage && (
+          <div className="rounded-xl   bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            <p>{errorMessage}</p>
+
+            {usernameSuggestions.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {usernameSuggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="rounded-full bg-panel-2 px-3 py-1 text-[13px] text-paper transition hover:bg-white/10"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full rounded-xl bg-accent px-4 py-3 font-semibold text-paper transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isLoading ? "Creando cuenta..." : "Registrarme"}
+        </button>
+      </form>
+    </AuthShell>
   );
 };
 

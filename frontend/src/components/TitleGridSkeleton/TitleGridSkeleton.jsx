@@ -4,7 +4,7 @@ const TitleGridSkeleton = ({ count = 10 }) => {
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
-          className="animate-pulse overflow-hidden rounded-lg bg-panel"
+          className="animate-pulse overflow-hidden rounded-2xl bg-panel"
         >
           <div className="aspect-[2/3] w-full bg-panel-2" />
           <div className="space-y-2 p-3">

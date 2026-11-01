@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using YumeTrack.Domain.Enums;
 using YumeTrack.Application.DTOs.UserTitles;
 using YumeTrack.Application.DTOs.Users;
 using YumeTrack.Application.Interfaces;
@@ -75,7 +76,34 @@ namespace YumeTrack.Infrastructure.Services
             };
 
             _context.UserTitles.Add(userTitle);
+            RecordActivity(userId, title.Id, null, dto.Status);
             await _context.SaveChangesAsync();
+        }
+
+        // Solo se registran los momentos que le importan a los demás.
+        private void RecordActivity(int userId, int titleId, UserTitleStatus? previous, UserTitleStatus current)
+        {
+            if (previous == current)
+                return;
+
+            var type = current switch
+            {
+                UserTitleStatus.Watching => "started",
+                UserTitleStatus.Completed => "completed",
+                UserTitleStatus.Planned when previous is null => "planned",
+                _ => null
+            };
+
+            if (type is null)
+                return;
+
+            _context.ActivityEvents.Add(new ActivityEvent
+            {
+                UserId = userId,
+                TitleId = titleId,
+                Type = type,
+                CreatedAt = DateTime.UtcNow
+            });
         }
 
         public async Task<List<UserTitleListItemDto>> GetUserListAsync(int userId, GetUserTitlesQueryDto filters)
@@ -131,6 +159,8 @@ namespace YumeTrack.Infrastructure.Services
             {
                 userTitle.Notes = newNotes;
             }
+
+            RecordActivity(userId, userTitle.TitleId, userTitle.Status, dto.Status);
 
             userTitle.Status = dto.Status;
             userTitle.Progress = dto.Progress;

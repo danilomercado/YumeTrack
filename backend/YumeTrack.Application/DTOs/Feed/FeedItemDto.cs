@@ -3,6 +3,7 @@
     public class FeedItemDto
     {
         public int UserTitleId { get; set; }
+        public int UserId { get; set; }
 
         public string UserName { get; set; } = string.Empty;
 
@@ -16,5 +17,7 @@
         public DateTime ReviewUpdatedAt { get; set; }
         public int LikesCount { get; set; }
         public bool IsLikedByCurrentUser { get; set; }
+        public int CommentsCount { get; set; }
+        public bool IsFollowingAuthor { get; set; }
     }
 }

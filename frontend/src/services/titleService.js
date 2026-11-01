@@ -43,3 +43,9 @@ export const getTitleDetailRequest = async (id, mediaType = "Anime") => {
   const response = await api.get(`/Titles/${kind}/${id}`);
   return normalizeTitle(response.data);
 };
+
+export const getTitleCharactersRequest = async (id, mediaType = "anime") => {
+  const kind = mediaType?.toLowerCase() === "manga" ? "manga" : "anime";
+  const response = await api.get(`/Titles/${kind}/${id}/characters`);
+  return response.data;
+};

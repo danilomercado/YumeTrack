@@ -39,7 +39,8 @@ public class KitsuServiceTests
         Assert.Single(first);
         Assert.Equal("Cowboy Bebop", second[0].Title);
         Assert.Equal("Finalizado", second[0].Status);
-        Assert.Equal(1, handler.Calls);
+        // Temporada actual + relleno con lo que sigue al aire; la 2.ª vuelta sale del caché.
+        Assert.Equal(2, handler.Calls);
     }
 
     [Fact]
@@ -52,7 +53,26 @@ public class KitsuServiceTests
         await service.GetTrendingAnimeAsync(12);
         await service.GetTrendingMangaAsync(12);
 
-        Assert.Equal(2, handler.Calls);
+        Assert.Equal(3, handler.Calls);
+    }
+
+    [Fact]
+    public async Task TrendingAnime_AsksKitsuForTheCurrentSeasonAiring()
+    {
+        var urls = new List<string>();
+        var handler = new FakeHttpHandler(request =>
+        {
+            urls.Add(Uri.UnescapeDataString(request.RequestUri!.ToString()));
+            return Ok(KitsuList);
+        });
+        using var cache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 10 });
+
+        await CreateService(handler, cache).GetTrendingAnimeAsync(12);
+
+        var season = new[] { "winter", "spring", "summer", "fall" }[(DateTime.UtcNow.Month - 1) / 3];
+        Assert.Contains($"filter[season]={season}", urls[0]);
+        Assert.Contains($"filter[seasonYear]={DateTime.UtcNow.Year}", urls[0]);
+        Assert.Contains("filter[status]=current", urls[0]);
     }
 
     [Fact]

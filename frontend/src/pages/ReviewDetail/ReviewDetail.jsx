@@ -59,12 +59,12 @@ const ReviewDetail = () => {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-ground text-paper">
+      <main className="min-h-dvh text-paper">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="animate-pulse rounded-lg bg-panel p-6">
+          <div className="animate-pulse rounded-2xl bg-panel p-6">
             <div className="mb-6 h-4 w-28 rounded bg-white/10" />
             <div className="flex gap-5">
-              <div className="h-40 w-28 rounded-lg bg-white/10" />
+              <div className="h-40 w-28 rounded-2xl bg-white/10" />
               <div className="flex-1 space-y-3">
                 <div className="h-5 w-48 rounded bg-white/10" />
                 <div className="h-4 w-24 rounded bg-white/10" />
@@ -82,9 +82,9 @@ const ReviewDetail = () => {
 
   if (!data) {
     return (
-      <main className="min-h-screen bg-ground text-paper">
+      <main className="min-h-dvh text-paper">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="rounded-lg bg-red-500/10 p-6 text-red-300">
+          <div className="rounded-2xl bg-red-500/10 p-6 text-red-300">
             No se pudo cargar la reseña.
           </div>
         </div>
@@ -99,17 +99,17 @@ const ReviewDetail = () => {
     data.score !== null && data.score !== undefined ? data.score : null;
 
   return (
-    <main className="min-h-screen bg-ground text-paper">
+    <main className="min-h-dvh text-paper">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="mb-5 inline-flex items-center gap-2 rounded-md bg-panel-2 px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/10 hover:text-paper"
+          className="mb-5 inline-flex items-center gap-2 rounded-xl bg-panel-2 px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/10 hover:text-paper"
         >
           ← Volver
         </button>
 
-        <section className="overflow-hidden rounded-lg bg-panel">
+        <section className="overflow-hidden rounded-2xl bg-panel">
           <div className="  bg-accent/10 px-6 py-5">
             <div className="flex items-start gap-3">
               <Link
@@ -145,10 +145,10 @@ const ReviewDetail = () => {
                   <img
                     src={data.posterImageUrl}
                     alt={canonicalTitle}
-                    className="w-full rounded-lg object-cover"
+                    className="w-full rounded-2xl object-cover"
                   />
                 ) : (
-                  <div className="flex aspect-[2/3] w-full items-center justify-center rounded-lg   bg-panel-2 text-sm text-zinc-500">
+                  <div className="flex aspect-[2/3] w-full items-center justify-center rounded-2xl   bg-panel-2 text-sm text-zinc-500">
                     Sin imagen
                   </div>
                 )}
@@ -167,7 +167,7 @@ const ReviewDetail = () => {
                   )}
                 </div>
 
-                <div className="rounded-lg bg-ground p-4">
+                <div className="rounded-2xl bg-ground p-4">
                   <p className="whitespace-pre-line text-sm leading-7 text-zinc-300 sm:text-[15px]">
                     {data.review}
                   </p>
@@ -177,7 +177,7 @@ const ReviewDetail = () => {
                   <button
                     type="button"
                     onClick={handleLike}
-                    className={`inline-flex items-center gap-2 rounded-md  px-4 py-2 text-sm font-medium transition ${
+                    className={`inline-flex items-center gap-2 rounded-xl  px-4 py-2 text-sm font-medium transition ${
                       liked
                         ? " bg-accent/10 text-accent-soft hover:bg-accent/20"
                         : " bg-panel-2 text-zinc-300  hover:bg-accent/10 hover:text-accent-soft"
@@ -207,7 +207,7 @@ const ReviewDetail = () => {
 
                   <Link
                     to={`/profile/${userName}`}
-                    className="inline-flex items-center rounded-md bg-panel-2 px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/10 hover:text-paper"
+                    className="inline-flex items-center rounded-xl bg-panel-2 px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/10 hover:text-paper"
                   >
                     Ver perfil
                   </Link>
@@ -217,7 +217,7 @@ const ReviewDetail = () => {
           </div>
         </section>
 
-        <section className="mt-6 rounded-lg bg-panel p-6">
+        <section className="mt-6 rounded-2xl bg-panel p-6">
           <h2 className="mb-4 text-lg text-paper">Comentarios</h2>
 
           <ReviewComments userTitleId={id} />

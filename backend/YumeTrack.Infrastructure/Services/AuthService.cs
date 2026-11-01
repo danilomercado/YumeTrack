@@ -15,11 +15,20 @@ namespace YumeTrack.Infrastructure.Services
     {
         private readonly AppDbContext _context;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly MfaService? _mfa;
 
-        public AuthService(AppDbContext context, IJwtTokenService jwtTokenService)
+        private const int MaxFailedLogins = 5;
+        private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
+
+        // Hash de relleno: si el correo no existe se verifica igual, así el
+        // tiempo de respuesta no delata qué cuentas existen.
+        private static readonly string DummyHash = BCrypt.Net.BCrypt.HashPassword("yumetrack-dummy-password");
+
+        public AuthService(AppDbContext context, IJwtTokenService jwtTokenService, MfaService? mfa = null)
         {
             _context = context;
             _jwtTokenService = jwtTokenService;
+            _mfa = mfa;
         }
         private static string NormalizeUserName(string userName)
         {
@@ -52,6 +61,8 @@ namespace YumeTrack.Infrastructure.Services
                     suggestions
                 );
             }
+
+            PasswordPolicy.Validate(request.Password);
 
             var normalizedEmail = NormalizeEmail(request.Email);
 
@@ -90,21 +101,88 @@ namespace YumeTrack.Infrastructure.Services
             var normalizedEmail = NormalizeEmail(request.Email);
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+
             if (user is null)
-                throw new InvalidOperationException("Credenciales invalidas.");
-
-            var passwordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
-            if (!passwordValid)
-                throw new InvalidOperationException("Credenciales invalidas.");
-
-            var token = _jwtTokenService.GenerateToken(user);
-
-            return new AuthResponseDto
             {
-                Token = token,
-                UserName = user.UserName,
-                Email = user.Email
-            };
+                BCrypt.Net.BCrypt.Verify(request.Password, DummyHash);
+                throw new InvalidOperationException("Credenciales invalidas.");
+            }
+
+            EnsureNotLocked(user);
+
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                await RegisterFailureAsync(user);
+                throw new InvalidOperationException("Credenciales invalidas.");
+            }
+
+            // Con MFA activo la contraseña sola no alcanza: se pide el código.
+            if (user.MfaEnabled)
+            {
+                return new AuthResponseDto
+                {
+                    MfaRequired = true,
+                    MfaToken = _jwtTokenService.GenerateMfaToken(user)
+                };
+            }
+
+            await ResetFailuresAsync(user);
+
+            return BuildSession(user);
+        }
+
+        public async Task<AuthResponseDto> LoginWithMfaAsync(MfaLoginRequestDto request)
+        {
+            var userId = _jwtTokenService.ValidateMfaToken(request.MfaToken)
+                         ?? throw new InvalidOperationException("La verificación venció. Ingresá de nuevo.");
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId)
+                       ?? throw new InvalidOperationException("La verificación venció. Ingresá de nuevo.");
+
+            EnsureNotLocked(user);
+
+            if (_mfa is null || !_mfa.TryConsumeCode(user, request.Code))
+            {
+                await RegisterFailureAsync(user);
+                throw new InvalidOperationException("El código no es correcto.");
+            }
+
+            await ResetFailuresAsync(user);
+
+            return BuildSession(user);
+        }
+
+        private AuthResponseDto BuildSession(User user) => new()
+        {
+            Token = _jwtTokenService.GenerateToken(user),
+            UserName = user.UserName,
+            Email = user.Email
+        };
+
+        private static void EnsureNotLocked(User user)
+        {
+            if (user.LockoutUntil.HasValue && user.LockoutUntil.Value > DateTime.UtcNow)
+                throw new InvalidOperationException("Demasiados intentos. Probá de nuevo en unos minutos.");
+        }
+
+        private async Task RegisterFailureAsync(User user)
+        {
+            user.FailedLoginCount++;
+
+            if (user.FailedLoginCount >= MaxFailedLogins)
+            {
+                user.LockoutUntil = DateTime.UtcNow.Add(LockoutDuration);
+                user.FailedLoginCount = 0;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task ResetFailuresAsync(User user)
+        {
+            user.FailedLoginCount = 0;
+            user.LockoutUntil = null;
+            await _context.SaveChangesAsync();
         }
 
         private async Task<List<string>> GenerateUsernameSuggestionsAsync(string baseUserName)

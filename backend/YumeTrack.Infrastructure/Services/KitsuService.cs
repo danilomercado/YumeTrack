@@ -31,15 +31,53 @@ namespace YumeTrack.Infrastructure.Services
         {
             limit = NormalizeLimit(limit, 12);
 
-            var url = $"anime?page[limit]={limit}&sort=popularityRank";
-            return await GetTitlesListAsync(url, "Anime", cancellationToken);
+            // Lo que está al aire en la temporada actual; la temporada se calcula
+            // con la fecha, así cambia sola cada tres meses.
+            var (season, year) = GetCurrentSeason(DateTime.UtcNow);
+
+            var seasonUrl =
+                $"anime?filter[season]={season}&filter[seasonYear]={year}" +
+                $"&filter[status]=current&filter[subtype]=TV,ONA" +
+                $"&page[limit]={limit}&sort=popularityRank";
+
+            var results = await GetTitlesListAsync(seasonUrl, "Anime", cancellationToken);
+
+            if (results.Count >= limit)
+                return results;
+
+            // Al empezar la temporada hay pocos títulos al aire: se completa con
+            // los más populares que siguen en emisión.
+            var airingUrl =
+                $"anime?filter[status]=current&filter[subtype]=TV,ONA" +
+                $"&page[limit]={limit}&sort=popularityRank";
+
+            var airing = await GetTitlesListAsync(airingUrl, "Anime", cancellationToken);
+
+            return results
+                .Concat(airing.Where(a => results.All(r => r.Id != a.Id)))
+                .Take(limit)
+                .ToList();
+        }
+
+        private static (string Season, int Year) GetCurrentSeason(DateTime now)
+        {
+            var season = now.Month switch
+            {
+                >= 1 and <= 3 => "winter",
+                >= 4 and <= 6 => "spring",
+                >= 7 and <= 9 => "summer",
+                _ => "fall"
+            };
+
+            return (season, now.Year);
         }
 
         public async Task<List<TitleSearchResultDto>> GetTrendingMangaAsync(int limit = 12, CancellationToken cancellationToken = default)
         {
             limit = NormalizeLimit(limit, 12);
 
-            var url = $"manga?page[limit]={limit}&sort=popularityRank";
+            // Manga que se está publicando ahora.
+            var url = $"manga?filter[status]=current&page[limit]={limit}&sort=popularityRank";
             return await GetTitlesListAsync(url, "Manga", cancellationToken);
         }
 
@@ -73,6 +111,93 @@ namespace YumeTrack.Infrastructure.Services
             var url = $"manga?page[limit]={limit}&page[offset]={offset}&sort=popularityRank";
             return await GetTitlesListAsync(url, "Manga", cancellationToken);
         }
+        public async Task<List<TitleCharacterDto>> GetCharactersAsync(
+            string id,
+            string mediaType,
+            CancellationToken cancellationToken = default)
+        {
+            var kind = mediaType.Equals("manga", StringComparison.OrdinalIgnoreCase) ? "manga" : "anime";
+            var cacheKey = $"kitsu:characters:{kind}:{id}";
+
+            if (_cache.TryGetValue(cacheKey, out List<TitleCharacterDto>? cached) && cached is not null)
+                return cached;
+
+            var url = $"{kind}-characters?filter[{kind}Id]={id}&include=character&page[limit]=20";
+            var response = await _httpClient.GetAsync(url, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                return new List<TitleCharacterDto>();
+
+            var json = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var document = JsonDocument.Parse(json);
+            var root = document.RootElement;
+
+            // character id -> role (main / supporting)
+            var roles = new Dictionary<string, string>();
+
+            if (root.TryGetProperty("data", out var links) && links.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var link in links.EnumerateArray())
+                {
+                    var role = link.GetProperty("attributes").TryGetProperty("role", out var roleValue)
+                        ? roleValue.GetString() ?? "supporting"
+                        : "supporting";
+
+                    if (link.TryGetProperty("relationships", out var rel) &&
+                        rel.TryGetProperty("character", out var ch) &&
+                        ch.TryGetProperty("data", out var chData) &&
+                        chData.ValueKind == JsonValueKind.Object)
+                    {
+                        roles[chData.GetProperty("id").GetString() ?? ""] = role;
+                    }
+                }
+            }
+
+            var characters = new List<TitleCharacterDto>();
+
+            if (root.TryGetProperty("included", out var included) && included.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var item in included.EnumerateArray())
+                {
+                    if (item.GetProperty("type").GetString() != "characters")
+                        continue;
+
+                    var attributes = item.GetProperty("attributes");
+
+                    if (!attributes.TryGetProperty("image", out var image) || image.ValueKind != JsonValueKind.Object)
+                        continue;
+
+                    var imageUrl = image.TryGetProperty("original", out var original) ? original.GetString() : null;
+
+                    if (string.IsNullOrWhiteSpace(imageUrl))
+                        continue;
+
+                    var characterId = item.GetProperty("id").GetString() ?? "";
+
+                    characters.Add(new TitleCharacterDto
+                    {
+                        Id = characterId,
+                        Name = attributes.TryGetProperty("canonicalName", out var name) ? name.GetString() ?? "" : "",
+                        ImageUrl = imageUrl,
+                        Role = roles.GetValueOrDefault(characterId, "supporting")
+                    });
+                }
+            }
+
+            var result = characters
+                .OrderBy(c => c.Role == "main" ? 0 : 1)
+                .Where(c => c.Name != "")
+                .Take(8)
+                .ToList();
+
+            _cache.Set(cacheKey, result, new MemoryCacheEntryOptions
+            {
+                Size = 1,
+                AbsoluteExpirationRelativeToNow = ListCacheDuration
+            });
+            return result;
+        }
+
         private async Task<KitsuAnimeDto?> GetTitleByIdAsync(
             string id,
             string endpoint,

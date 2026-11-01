@@ -17,6 +17,9 @@ namespace YumeTrack.Infrastructure.Persistence
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<ReviewLike> ReviewLikes { get; set; }
         public DbSet<ReviewComments> ReviewComments { get; set; }
+        public DbSet<UserBlock> UserBlocks => Set<UserBlock>();
+        public DbSet<ContentReport> ContentReports => Set<ContentReport>();
+        public DbSet<ActivityEvent> ActivityEvents => Set<ActivityEvent>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -136,6 +139,53 @@ namespace YumeTrack.Infrastructure.Persistence
 
                 entity.HasIndex(mt => new { mt.KitsuId, mt.MediaType, mt.Language })
                     .IsUnique();
+            });
+
+            modelBuilder.Entity<UserBlock>(entity =>
+            {
+                entity.HasKey(b => b.Id);
+
+                entity.HasIndex(b => new { b.BlockerId, b.BlockedId }).IsUnique();
+
+                entity.HasOne(b => b.Blocker)
+                    .WithMany()
+                    .HasForeignKey(b => b.BlockerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(b => b.Blocked)
+                    .WithMany()
+                    .HasForeignKey(b => b.BlockedId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ContentReport>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+
+                entity.HasIndex(r => new { r.ReporterId, r.TargetType, r.TargetId }).IsUnique();
+                entity.HasIndex(r => r.Status);
+
+                entity.HasOne(r => r.Reporter)
+                    .WithMany()
+                    .HasForeignKey(r => r.ReporterId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ActivityEvent>(entity =>
+            {
+                entity.HasKey(a => a.Id);
+
+                entity.HasIndex(a => new { a.UserId, a.CreatedAt });
+
+                entity.HasOne(a => a.User)
+                    .WithMany()
+                    .HasForeignKey(a => a.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(a => a.Title)
+                    .WithMany()
+                    .HasForeignKey(a => a.TitleId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<UserFollow>(entity =>

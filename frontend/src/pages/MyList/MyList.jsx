@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import PageBanner from "../../components/PageBanner/PageBanner";
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import {
   deleteUserTitleRequest,
@@ -194,12 +195,12 @@ const MyList = () => {
   return (
     <>
       <main className="mx-auto max-w-7xl px-4 py-10">
-        <div className="mb-8">
-          <h1 className="mt-2 text-4xl">Mi Lista</h1>
-          <p className="mt-3 text-zinc-400">
-            Gestioná tus animes y mangas guardados.
-          </p>
-        </div>
+        <PageBanner
+          image="/art/hanami.jpg"
+          title="Mi lista"
+          subtitle="Gestioná tus animes y mangas guardados."
+          kanji="記"
+        />
 
         <div className="mb-6 flex flex-wrap items-center gap-2">
           <button
@@ -232,32 +233,32 @@ const MyList = () => {
           <button
             type="button"
             onClick={loadUserTitles}
-            className="ml-auto rounded-md bg-panel-2 px-4 py-2 text-sm text-paper transition hover:bg-white/10"
+            className="ml-auto rounded-xl bg-panel-2 px-4 py-2 text-sm text-paper transition hover:bg-white/10"
           >
             Recargar
           </button>
         </div>
 
         {successMessage && (
-          <div className="mb-6 rounded-md bg-green-500/10 px-4 py-3 text-sm text-green-300">
+          <div className="mb-6 rounded-xl bg-green-500/10 px-4 py-3 text-sm text-green-300">
             {successMessage}
           </div>
         )}
 
         {errorMessage && (
-          <div className="mb-6 rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="mb-6 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-300">
             {errorMessage}
           </div>
         )}
 
         {isLoading && (
-          <div className="rounded-md bg-panel-2 px-4 py-3 text-sm text-zinc-300">
+          <div className="rounded-xl bg-panel-2 px-4 py-3 text-sm text-zinc-300">
             Cargando tu lista...
           </div>
         )}
 
         {!isLoading && filteredItems.length === 0 && (
-          <div className="rounded-md bg-panel-2 px-4 py-3 text-sm text-zinc-400">
+          <div className="rounded-xl bg-panel-2 px-4 py-3 text-sm text-zinc-400">
             No tenés títulos en esta vista.
           </div>
         )}
@@ -274,13 +275,13 @@ const MyList = () => {
               return (
                 <article
                   key={item.id}
-                  className="grid gap-4 rounded-lg bg-panel-2 p-4 md:grid-cols-[120px_1fr]"
+                  className="grid gap-4 rounded-2xl bg-panel-2 p-4 md:grid-cols-[120px_1fr]"
                 >
                   <div>
                     <img
                       src={item.posterImageUrl}
                       alt={item.canonicalTitle}
-                      className="h-40 w-full rounded-md object-cover md:h-full"
+                      className="h-40 w-full rounded-xl object-cover md:h-full"
                     />
                   </div>
 
@@ -341,7 +342,7 @@ const MyList = () => {
                               Number(event.target.value),
                             )
                           }
-                          className="w-full rounded-md bg-panel px-3 py-2 text-sm text-paper"
+                          className="w-full rounded-xl bg-panel px-3 py-2 text-sm text-paper"
                         >
                           {statusOptions.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -377,7 +378,7 @@ const MyList = () => {
 
                             handleFieldChange(item.id, "progress", nextValue);
                           }}
-                          className="w-full rounded-md bg-panel px-3 py-2 text-sm text-paper"
+                          className="w-full rounded-xl bg-panel px-3 py-2 text-sm text-paper"
                         />
 
                         <p className="mt-1 text-[13px] text-zinc-500">
@@ -414,7 +415,7 @@ const MyList = () => {
 
                             handleFieldChange(item.id, "score", nextValue);
                           }}
-                          className="w-full rounded-md bg-panel px-3 py-2 text-sm text-paper"
+                          className="w-full rounded-xl bg-panel px-3 py-2 text-sm text-paper"
                         />
 
                         <p className="mt-1 text-[13px] text-zinc-500">
@@ -438,7 +439,7 @@ const MyList = () => {
                         }
                         maxLength={2000}
                         placeholder="Escribí tu opinión sobre este título..."
-                        className="w-full rounded-md bg-panel px-3 py-2 text-sm text-paper"
+                        className="w-full rounded-xl bg-panel px-3 py-2 text-sm text-paper"
                       />
                       <p className="mt-1 text-[13px] text-zinc-500">
                         {(item.notes ?? "").length}/2000
@@ -449,7 +450,7 @@ const MyList = () => {
                         type="button"
                         onClick={() => handleSave(item)}
                         disabled={isSaving || isDeleting || !hasChanges}
-                        className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isSaving
                           ? "Guardando..."
@@ -462,7 +463,7 @@ const MyList = () => {
                         type="button"
                         onClick={() => openDeleteModal(item.id)}
                         disabled={isDeleting || isSaving}
-                        className="rounded-md bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-xl bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isDeleting ? "Eliminando..." : "Eliminar"}
                       </button>

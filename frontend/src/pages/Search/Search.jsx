@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import PageBanner from "../../components/PageBanner/PageBanner";
 import { Link, useNavigate } from "react-router-dom";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import TitleGrid from "../../components/TitleGrid/TitleGrid";
@@ -183,12 +184,12 @@ const Search = () => {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-      <div className="mb-8">
-        <h1 className="mt-2 text-4xl">Buscar anime, manga o usuarios</h1>
-        <p className="mt-3 text-zinc-400">
-          Encontrá personas y títulos para descubrir más dentro de YumeTrack.
-        </p>
-      </div>
+      <PageBanner
+        image="/art/red-fuji.jpg"
+        title="Buscar anime, manga o usuarios"
+        subtitle="Encontrá personas y títulos para descubrir más dentro de YumeTrack."
+        kanji="探"
+      />
 
       <SearchBar
         value={query}
@@ -196,31 +197,31 @@ const Search = () => {
       />
 
       {successMessage && (
-        <div className="mt-6 rounded-md bg-green-500/10 px-4 py-3 text-sm text-green-300">
+        <div className="mt-6 rounded-xl bg-green-500/10 px-4 py-3 text-sm text-green-300">
           {successMessage}
         </div>
       )}
 
       {errorMessage && (
-        <div className="mt-6 rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="mt-6 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {errorMessage}
         </div>
       )}
 
       {isLoading && (
-        <div className="mt-6 rounded-md bg-panel-2 px-4 py-3 text-sm text-zinc-300">
+        <div className="mt-6 rounded-xl bg-panel-2 px-4 py-3 text-sm text-zinc-300">
           Buscando usuarios y títulos...
         </div>
       )}
 
       {showEmptyState && (
-        <div className="mt-6 rounded-md bg-panel-2 px-4 py-3 text-sm text-zinc-400">
+        <div className="mt-6 rounded-xl bg-panel-2 px-4 py-3 text-sm text-zinc-400">
           No se encontraron resultados.
         </div>
       )}
 
       {!query.trim() && (
-        <div className="mt-6 rounded-md bg-panel-2 px-4 py-3 text-sm text-zinc-400">
+        <div className="mt-6 rounded-xl bg-panel-2 px-4 py-3 text-sm text-zinc-400">
           Escribí el nombre de un anime, manga o usuario para buscar.
         </div>
       )}
@@ -239,10 +240,10 @@ const Search = () => {
               <Link
                 key={searchedUser.userName}
                 to={`/profile/${searchedUser.userName}`}
-                className="rounded-lg bg-panel p-4 transition hover:-translate-y-1"
+                className="rounded-2xl bg-panel p-4 transition hover:-translate-y-1"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-lg font-bold text-paper">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-lg font-bold text-paper">
                     {searchedUser.userName?.charAt(0)?.toUpperCase() || "U"}
                   </div>
 

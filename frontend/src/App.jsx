@@ -1,13 +1,16 @@
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { ToastProvider } from "./context/ToastContext";
 import AppRouter from "./router/AppRouter";
 
 const App = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRouter />
+        <ToastProvider>
+          <AppRouter />
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   );

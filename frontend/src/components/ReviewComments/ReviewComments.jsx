@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import ReportMenu from "../ReportMenu/ReportMenu";
 import {
   getCommentsRequest,
   createCommentRequest,
@@ -70,13 +71,13 @@ const ReviewComments = ({ userTitleId }) => {
               if (e.key === "Enter") handleCreate();
             }}
             placeholder="Escribí un comentario..."
-            className="flex-1 rounded-md bg-panel-2 px-4 py-2 text-sm text-paper"
+            className="flex-1 rounded-xl bg-panel-2 px-4 py-2 text-sm text-paper"
             disabled={isSubmitting}
           />
           <button
             onClick={handleCreate}
             disabled={!content.trim() || isSubmitting}
-            className="rounded-md bg-accent px-4 py-2 text-sm text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl bg-accent px-4 py-2 text-sm text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
             Enviar
           </button>
@@ -87,7 +88,10 @@ const ReviewComments = ({ userTitleId }) => {
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="animate-pulse rounded-lg bg-ground p-4">
+            <div
+              key={index}
+              className="animate-pulse rounded-2xl bg-ground p-4"
+            >
               <div className="mb-3 flex items-center gap-3">
                 <div className="h-9 w-9 rounded-full bg-white/10" />
                 <div className="space-y-2">
@@ -100,13 +104,13 @@ const ReviewComments = ({ userTitleId }) => {
           ))}
         </div>
       ) : comments.length === 0 ? (
-        <div className="rounded-lg bg-ground p-4 text-sm text-zinc-400">
+        <div className="rounded-2xl bg-ground p-4 text-sm text-zinc-400">
           Todavía no hay comentarios.
         </div>
       ) : (
         <div className="space-y-4">
           {comments.map((c) => (
-            <div key={c.id} className="flex gap-3 rounded-lg bg-ground p-4">
+            <div key={c.id} className="flex gap-3 rounded-2xl bg-ground p-4">
               {/* Avatar */}
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-sm font-bold text-paper">
                 {c.userName.charAt(0).toUpperCase()}
@@ -129,6 +133,20 @@ const ReviewComments = ({ userTitleId }) => {
                       </span>
                     )}
                   </div>
+
+                  {user?.userName !== c.userName && (
+                    <ReportMenu
+                      targetType="comment"
+                      targetId={c.id}
+                      userId={c.userId}
+                      userName={c.userName}
+                      onBlocked={() =>
+                        setComments((prev) =>
+                          prev.filter((item) => item.userId !== c.userId),
+                        )
+                      }
+                    />
+                  )}
 
                   {/* Delete */}
                   {user?.userName === c.userName && (

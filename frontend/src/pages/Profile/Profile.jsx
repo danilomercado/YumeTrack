@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import ProfileStats from "../../components/ProfileStats/ProfileStats";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getUserTitlesRequest } from "../../services/userTitleService";
@@ -248,7 +249,7 @@ const Profile = () => {
   if (isLoading) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10 text-paper">
-        <div className="animate-pulse rounded-lg bg-panel p-8">
+        <div className="animate-pulse rounded-2xl bg-panel p-8">
           <div className="mb-3 h-4 w-36 rounded bg-white/10" />
           <div className="h-3 w-24 rounded bg-white/10" />
         </div>
@@ -259,23 +260,23 @@ const Profile = () => {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 text-paper">
       {successMessage && (
-        <div className="mb-6 rounded-md bg-green-500/10 px-4 py-3 text-sm text-green-300">
+        <div className="mb-6 rounded-xl bg-green-500/10 px-4 py-3 text-sm text-green-300">
           {successMessage}
         </div>
       )}
 
       {errorMessage && (
-        <div className="mb-6 rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="mb-6 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {errorMessage}
         </div>
       )}
 
-      <section className="overflow-hidden rounded-lg bg-panel">
+      <section className="overflow-hidden rounded-2xl bg-panel">
         <div className="h-28 bg-accent/25" />
         <div className="relative px-6 pb-8">
           <div className="-mt-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-accent text-3xl font-black">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-accent text-3xl font-black">
                 {(
                   profile?.userName?.charAt(0) ||
                   user?.userName?.charAt(0) ||
@@ -315,20 +316,20 @@ const Profile = () => {
           <div className="mt-6 flex flex-wrap gap-3">
             {/* <Link
               to={`/profile/${profile?.userName || user?.userName}`}
-              className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-paper transition hover:opacity-90"
+              className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-paper transition hover:opacity-90"
             >
               Ver perfil público
             </Link> */}
 
             <Link
               to="/my-list"
-              className="rounded-md bg-panel-2 px-4 py-2 text-sm font-medium text-paper transition hover:bg-white/10"
+              className="rounded-xl bg-panel-2 px-4 py-2 text-sm font-medium text-paper transition hover:bg-white/10"
             >
               Ir a mi lista
             </Link>
           </div>
 
-          <div className="mt-6 rounded-lg bg-panel-2 p-4">
+          <div className="mt-6 rounded-2xl bg-panel-2 p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <p className="mt-1 text-sm text-zinc-400">
@@ -340,7 +341,7 @@ const Profile = () => {
                 type="button"
                 onClick={handleSaveBio}
                 disabled={isSavingBio || !hasBioChanges}
-                className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSavingBio
                   ? "Guardando..."
@@ -356,7 +357,7 @@ const Profile = () => {
               onChange={(event) => setBio(event.target.value)}
               maxLength={300}
               placeholder="Contá algo de vos, tus gustos o qué tipo de anime/manga te gusta..."
-              className="w-full rounded-lg bg-ground px-4 py-3 text-sm text-paper placeholder:text-zinc-500"
+              className="w-full rounded-2xl bg-ground px-4 py-3 text-sm text-paper placeholder:text-zinc-500"
             />
 
             <div className="mt-2 flex items-center justify-between text-[13px] text-zinc-500">
@@ -367,9 +368,11 @@ const Profile = () => {
         </div>
       </section>
 
+      <ProfileStats username={profile?.userName || user?.userName} />
+
       <section className="mt-8 grid gap-6 lg:grid-cols-[320px_1fr]">
         <div className="space-y-6">
-          <div className="rounded-lg bg-panel p-4">
+          <div className="rounded-2xl bg-panel p-4">
             <div className="mt-4 grid grid-cols-2 gap-3">
               <SmallStat label="Total" value={total} />
               <SmallStat label="Favoritos" value={favorites} />
@@ -384,7 +387,7 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="rounded-lg bg-panel p-4">
+          <div className="rounded-2xl bg-panel p-4">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-[13px] text-zinc-500">
                 {favoriteTitles.length}
@@ -400,7 +403,7 @@ const Profile = () => {
                 {favoriteTitles.map((title) => (
                   <div
                     key={title.id}
-                    className="overflow-hidden rounded-md bg-ground"
+                    className="overflow-hidden rounded-xl bg-ground"
                   >
                     <img
                       src={title.posterImageUrl}
@@ -419,7 +422,7 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="rounded-lg bg-panel p-4">
+        <div className="rounded-2xl bg-panel p-4">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="mt-1 text-2xl">Lo que otros ven</h2>
@@ -430,7 +433,7 @@ const Profile = () => {
           </div>
 
           {titles.length === 0 ? (
-            <div className="rounded-md bg-ground p-4 text-zinc-400">
+            <div className="rounded-xl bg-ground p-4 text-zinc-400">
               Todavía no tenés títulos en tu lista.
             </div>
           ) : (
@@ -438,7 +441,7 @@ const Profile = () => {
               {titles.slice(0, 6).map((title) => (
                 <article
                   key={title.id}
-                  className="overflow-hidden rounded-lg bg-ground"
+                  className="overflow-hidden rounded-2xl bg-ground"
                 >
                   <img
                     src={title.posterImageUrl}
@@ -453,7 +456,7 @@ const Profile = () => {
                       </h3>
 
                       {title.score !== null && title.score !== undefined && (
-                        <div className="rounded-md bg-gold/15 px-2.5 py-1 text-[13px] font-bold text-gold">
+                        <div className="rounded-xl bg-gold/15 px-2.5 py-1 text-[13px] font-bold text-gold">
                           ★ {title.score}
                         </div>
                       )}
@@ -479,7 +482,7 @@ const Profile = () => {
           )}
         </div>
       </section>
-      <section className="mt-8 rounded-lg bg-panel p-4">
+      <section className="mt-8 rounded-2xl bg-panel p-4">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="mt-1 text-2xl">Últimas reseñas</h2>
@@ -487,7 +490,7 @@ const Profile = () => {
         </div>
 
         {reviewItems.length === 0 ? (
-          <div className="rounded-md bg-ground p-4 text-zinc-400">
+          <div className="rounded-xl bg-ground p-4 text-zinc-400">
             Todavía no escribiste ninguna reseña.
           </div>
         ) : (
@@ -500,7 +503,7 @@ const Profile = () => {
       </section>
       {followModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="max-h-[80vh] w-full max-w-md overflow-hidden rounded-lg bg-panel">
+          <div className="max-h-[80vh] w-full max-w-md overflow-hidden rounded-2xl bg-panel">
             <div className="flex items-center justify-between   px-5 py-4">
               <h3 className="text-lg font-bold text-paper">
                 {followModalTitle}
@@ -530,7 +533,7 @@ const Profile = () => {
                     return (
                       <div
                         key={followUser.id}
-                        className="flex items-center justify-between gap-3 rounded-lg bg-ground p-4"
+                        className="flex items-center justify-between gap-3 rounded-2xl bg-ground p-4"
                       >
                         <Link
                           to={`/profile/${followUser.userName}`}
@@ -551,7 +554,7 @@ const Profile = () => {
                               handleToggleFollowUser(followUser.id)
                             }
                             disabled={isLoadingButton}
-                            className={`shrink-0 rounded-md px-4 py-2 text-sm font-semibold ${
+                            className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold ${
                               followUser.isFollowing
                                 ? "  bg-panel-2 text-paper"
                                 : "bg-accent   text-paper"
@@ -585,7 +588,7 @@ const ProfileStat = ({ label, value, onClick }) => {
       type="button"
       onClick={onClick}
       disabled={!isClickable}
-      className={`min-w-[120px] rounded-lg   bg-ground px-4 py-3 text-left  transition ${
+      className={`min-w-[120px] rounded-2xl   bg-ground px-4 py-3 text-left  transition ${
         isClickable ? "cursor-pointer  hover:bg-panel" : "cursor-default"
       }`}
     >
@@ -596,7 +599,7 @@ const ProfileStat = ({ label, value, onClick }) => {
 };
 
 const SmallStat = ({ label, value }) => (
-  <div className="rounded-md bg-ground p-3">
+  <div className="rounded-xl bg-ground p-3">
     <p className="text-lg font-bold text-paper">{value}</p>
     <p className="text-[13px] text-zinc-400">{label}</p>
   </div>

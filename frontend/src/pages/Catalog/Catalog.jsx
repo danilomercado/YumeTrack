@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import PageBanner from "../../components/PageBanner/PageBanner";
 import SectionHeader from "../../components/SectionHeader/SectionHeader";
 import TitleGrid from "../../components/TitleGrid/TitleGrid";
 import TitleDetailModal from "../../components/TitleDetailModal/TitleDetailModal";
@@ -193,7 +194,7 @@ const Catalog = () => {
     setTitleDetail(null);
   };
 
-  const handleAddToList = async (title) => {
+  const handleAddToList = async (title, options = {}) => {
     if (!isAuthenticated) {
       navigate("/login");
       return;
@@ -202,8 +203,8 @@ const Catalog = () => {
     await createUserTitleRequest({
       kitsuId: title.id,
       mediaType: title.mediaType?.toLowerCase() || "anime",
-      status: USER_TITLE_STATUS.PLANNED,
-      isFavorite: false,
+      status: options.status ?? USER_TITLE_STATUS.PLANNED,
+      isFavorite: options.isFavorite ?? false,
     });
   };
 
@@ -214,7 +215,7 @@ const Catalog = () => {
       <button
         type="button"
         onClick={() => setActiveTab(tabKey)}
-        className={`rounded-md px-4 py-2 text-sm font-medium transition ${
+        className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
           isActive
             ? "bg-accent text-paper"
             : "bg-panel-2 text-zinc-300 hover:bg-white/10"
@@ -226,17 +227,14 @@ const Catalog = () => {
   };
 
   return (
-    <main className="min-h-screen bg-ground text-paper">
+    <main className="min-h-dvh text-paper">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <section className="mb-8">
-          <div className="rounded-lg bg-panel p-6">
-            <h1 className="text-3xl sm:text-5xl">Anime, manga y comunidad</h1>
-
-            <p className="mt-3 max-w-2xl text-sm text-zinc-400 sm:text-base">
-              {currentTabConfig.heroSubtitle}
-            </p>
-          </div>
-        </section>
+        <PageBanner
+          image="/art/great-wave.jpg"
+          title="Anime, manga y comunidad"
+          subtitle={currentTabConfig.heroSubtitle}
+          kanji="図"
+        />
 
         <section className="space-y-4">
           <SectionHeader
@@ -259,7 +257,7 @@ const Catalog = () => {
                 {Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={index}
-                    className="animate-pulse rounded-lg bg-panel p-4"
+                    className="animate-pulse rounded-2xl bg-panel p-4"
                   >
                     <div className="mb-4 flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-white/10" />
@@ -283,7 +281,7 @@ const Catalog = () => {
               </div>
             )
           ) : error ? (
-            <div className="rounded-lg bg-red-500/10 p-4 text-sm text-red-300">
+            <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-300">
               {error}
             </div>
           ) : isCatalogTab ? (
@@ -291,7 +289,7 @@ const Catalog = () => {
               {titles.length > 0 ? (
                 <TitleGrid titles={titles} onSelectTitle={handleSelectTitle} />
               ) : (
-                <div className="rounded-lg bg-panel p-6 text-sm text-zinc-400">
+                <div className="rounded-2xl bg-panel p-6 text-sm text-zinc-400">
                   {currentTabConfig.emptyMessage}
                 </div>
               )}
@@ -302,7 +300,7 @@ const Catalog = () => {
                     type="button"
                     onClick={handleLoadMore}
                     disabled={isLoadingMore}
-                    className="rounded-md bg-accent px-5 py-3 text-sm font-medium text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl bg-accent px-5 py-3 text-sm font-medium text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isLoadingMore ? "Cargando..." : "Cargar más"}
                   </button>
@@ -314,14 +312,14 @@ const Catalog = () => {
               ) : null}
             </>
           ) : activeTab === "following" && !isAuthenticated ? (
-            <div className="rounded-lg bg-panel p-6 text-center">
+            <div className="rounded-2xl bg-panel p-6 text-center">
               <p className="text-sm text-zinc-300">
                 Iniciá sesión para ver el feed de usuarios que seguís.
               </p>
               <button
                 type="button"
                 onClick={() => navigate("/login")}
-                className="mt-4 rounded-md bg-accent px-5 py-3 text-sm font-medium text-paper transition hover:bg-accent-hover"
+                className="mt-4 rounded-xl bg-accent px-5 py-3 text-sm font-medium text-paper transition hover:bg-accent-hover"
               >
                 Ir a login
               </button>
@@ -333,7 +331,7 @@ const Catalog = () => {
               ))}
             </div>
           ) : (
-            <div className="rounded-lg bg-panel p-6 text-sm text-zinc-400">
+            <div className="rounded-2xl bg-panel p-6 text-sm text-zinc-400">
               {currentTabConfig.emptyMessage}
             </div>
           )}

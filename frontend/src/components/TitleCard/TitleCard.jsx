@@ -1,4 +1,4 @@
-const TitleCard = ({ title, onClick }) => {
+const TitleCard = ({ title, onClick, index = 0 }) => {
   const isManga = title.mediaType?.toLowerCase() === "manga";
 
   const metaText = isManga
@@ -13,7 +13,8 @@ const TitleCard = ({ title, onClick }) => {
     <button
       type="button"
       onClick={onClick}
-      className="group flex flex-col overflow-hidden rounded-lg bg-panel text-left transition duration-200 hover:-translate-y-1 hover:bg-panel-2"
+      style={{ "--i": Math.min(index, 9) }}
+      className="stagger-item group flex flex-col overflow-hidden rounded-2xl bg-panel text-left springy hover:-translate-y-2 hover:-rotate-1 hover:scale-[1.03] hover:bg-panel-2"
     >
       <div className="relative aspect-[2/3] overflow-hidden bg-panel-2">
         {title.posterImage ? (
@@ -31,8 +32,8 @@ const TitleCard = ({ title, onClick }) => {
         )}
 
         <span
-          className={`absolute bottom-0 left-0 py-1 pl-2 pr-5 text-[13px] font-bold text-paper [clip-path:polygon(0_0,100%_0,calc(100%-10px)_100%,0_100%)] ${
-            isManga ? "bg-ground" : "bg-accent"
+          className={`absolute bottom-0 left-0 py-1 pl-2 pr-5 text-[13px] font-bold [clip-path:polygon(0_0,100%_0,calc(100%-10px)_100%,0_100%)] ${
+            isManga ? "bg-ai text-ground" : "bg-accent text-paper"
           }`}
         >
           {isManga ? "Manga" : "Anime"}

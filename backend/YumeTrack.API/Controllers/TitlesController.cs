@@ -56,6 +56,17 @@ namespace YumeTrack.API.Controllers
             return Ok(manga);
         }
 
+        [HttpGet("{kind:regex(^(anime|manga)$)}/{id}/characters")]
+        [EnableRateLimiting("title-detail")]
+        public async Task<IActionResult> GetCharacters(string kind, string id, CancellationToken cancellationToken)
+        {
+            if (!int.TryParse(id, out _))
+                return NotFound();
+
+            var characters = await _kitsuService.GetCharactersAsync(id, kind, cancellationToken);
+            return Ok(characters);
+        }
+
         [HttpGet("trending")]
         public async Task<IActionResult> GetTrending([FromQuery] int limit = 12, CancellationToken cancellationToken = default)
         {

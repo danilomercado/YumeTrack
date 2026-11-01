@@ -23,7 +23,7 @@ class ErrorBoundary extends Component {
         <button
           type="button"
           onClick={() => window.location.assign("/")}
-          className="mt-6 rounded-md bg-accent px-5 py-3 text-sm font-medium text-paper transition hover:bg-accent-hover"
+          className="mt-6 rounded-xl bg-accent px-5 py-3 text-sm font-medium text-paper transition hover:bg-accent-hover"
         >
           Volver al inicio
         </button>

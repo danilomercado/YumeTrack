@@ -19,12 +19,24 @@ public class ReviewCommentsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetComments(int userTitleId)
     {
+        var blocked = new List<int>();
+
+        if (int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var me))
+        {
+            blocked = await _context.UserBlocks
+                .Where(b => b.BlockerId == me || b.BlockedId == me)
+                .Select(b => b.BlockerId == me ? b.BlockedId : b.BlockerId)
+                .ToListAsync();
+        }
+
         var comments = await _context.ReviewComments
             .Where(c => c.UserTitleId == userTitleId)
+            .Where(c => !blocked.Contains(c.UserId))
             .OrderByDescending(c => c.CreatedAt)
             .Select(c => new ReviewCommentsDto
             {
                 Id = c.Id,
+                UserId = c.UserId,
                 UserName = c.User.UserName,
                 Content = c.Content,
                 CreatedAt = c.CreatedAt

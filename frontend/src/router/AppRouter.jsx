@@ -1,8 +1,10 @@
 import { lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
 import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 import ServerWakingBanner from "../components/ServerWakingBanner/ServerWakingBanner";
+import PetalField from "../components/PetalField/PetalField";
+import Footer from "../components/Footer/Footer";
 import ErrorBoundary from "../components/ErrorBoundary/ErrorBoundary";
 
 const Home = lazy(() => import("../pages/Home/Home"));
@@ -17,57 +19,86 @@ const PublicProfile = lazy(
 );
 const Feed = lazy(() => import("../pages/Feed/Feed"));
 const ReviewDetail = lazy(() => import("../pages/ReviewDetail/ReviewDetail"));
+const ForgotPassword = lazy(
+  () => import("../pages/ForgotPassword/ForgotPassword"),
+);
+const ResetPassword = lazy(
+  () => import("../pages/ResetPassword/ResetPassword"),
+);
+const SecuritySettings = lazy(
+  () => import("../pages/SecuritySettings/SecuritySettings"),
+);
 const NotFound = lazy(() => import("../pages/NotFound/NotFound"));
 
 const PageFallback = () => (
   <div className="flex min-h-[40vh] items-center justify-center px-4">
-    <div className="w-full max-w-md animate-pulse rounded-lg bg-panel p-6">
-      <div className="mb-3 h-4 w-36 rounded bg-white/10" />
-      <div className="h-3 w-24 rounded bg-white/10" />
-    </div>
+    <span
+      role="status"
+      aria-label="Cargando"
+      className="ink-pulse kanji select-none text-7xl text-accent"
+    >
+      夢
+    </span>
   </div>
 );
 
 const AppRouter = () => {
+  const location = useLocation();
+
   return (
     <>
+      <PetalField />
       <Navbar />
       <ServerWakingBanner />
 
       <ErrorBoundary>
         <Suspense fallback={<PageFallback />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/feed" element={<Feed />} />
-            <Route path="/reviews/:id" element={<ReviewDetail />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/catalog" element={<Catalog />} />
+          <div key={location.pathname} className="page-enter">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route
+                path="/settings/security"
+                element={
+                  <ProtectedRoute>
+                    <SecuritySettings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/feed" element={<Feed />} />
+              <Route path="/reviews/:id" element={<ReviewDetail />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/catalog" element={<Catalog />} />
 
-            <Route
-              path="/my-list"
-              element={
-                <ProtectedRoute>
-                  <MyList />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/my-list"
+                element={
+                  <ProtectedRoute>
+                    <MyList />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route path="/profile/:username" element={<PublicProfile />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="/profile/:username" element={<PublicProfile />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
         </Suspense>
       </ErrorBoundary>
+
+      <Footer />
     </>
   );
 };

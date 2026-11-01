@@ -16,3 +16,15 @@ export const toggleLikeRequest = async (userTitleId) => {
 export const getReviewDetailRequest = (id) => {
   return api.get(`/feed/${id}`);
 };
+
+export const getTitleReviewsRequest = async (
+  externalId,
+  mediaType = "anime",
+) => {
+  const res = await api.get(`/feed/title/${externalId}`, {
+    params: {
+      mediaType: mediaType?.toLowerCase() === "manga" ? "manga" : "anime",
+    },
+  });
+  return res.data;
+};
