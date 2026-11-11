@@ -12,6 +12,7 @@ namespace YumeTrack.Infrastructure.Services
         private readonly ITranslationService _translationService;
         private readonly IMemoryCache _cache;
         private const int KitsuMaxLimit = 20;
+        private const int TranslatedSynopsisCount = 6;
         private static readonly TimeSpan ListCacheDuration = TimeSpan.FromMinutes(10);
 
         public KitsuService(HttpClient httpClient, ITranslationService translationService, IMemoryCache cache)
@@ -43,7 +44,7 @@ namespace YumeTrack.Infrastructure.Services
             var results = await GetTitlesListAsync(seasonUrl, "Anime", cancellationToken);
 
             if (results.Count >= limit)
-                return results;
+                return await TranslateSynopsesAsync(results, "anime", cancellationToken);
 
             // Al empezar la temporada hay pocos títulos al aire: se completa con
             // los más populares que siguen en emisión.
@@ -53,10 +54,49 @@ namespace YumeTrack.Infrastructure.Services
 
             var airing = await GetTitlesListAsync(airingUrl, "Anime", cancellationToken);
 
-            return results
+            var combined = results
                 .Concat(airing.Where(a => results.All(r => r.Id != a.Id)))
                 .Take(limit)
                 .ToList();
+
+            return await TranslateSynopsesAsync(combined, "anime", cancellationToken);
+        }
+
+        // El destacado de inicio muestra las primeras sinopsis: se traducen al español
+        // (con caché en base de datos) sobre una copia, sin tocar la lista cacheada.
+        private async Task<List<TitleSearchResultDto>> TranslateSynopsesAsync(
+            List<TitleSearchResultDto> titles,
+            string mediaType,
+            CancellationToken cancellationToken)
+        {
+            var translated = new List<TitleSearchResultDto>(titles.Count);
+
+            for (var position = 0; position < titles.Count; position++)
+            {
+                var title = titles[position];
+
+                if (position >= TranslatedSynopsisCount)
+                {
+                    translated.Add(title);
+                    continue;
+                }
+
+                translated.Add(new TitleSearchResultDto
+                {
+                    Id = title.Id,
+                    Title = title.Title,
+                    Synopsis = await _translationService.GetTranslatedSynopsisAsync(
+                        title.Id.ToString(), mediaType, title.Synopsis, "es", cancellationToken),
+                    PosterImage = title.PosterImage,
+                    MediaType = title.MediaType,
+                    Status = title.Status,
+                    StartDate = title.StartDate,
+                    EpisodeCount = title.EpisodeCount,
+                    ChapterCount = title.ChapterCount
+                });
+            }
+
+            return translated;
         }
 
         private static (string Season, int Year) GetCurrentSeason(DateTime now)

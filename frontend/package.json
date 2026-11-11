@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@microsoft/signalr": "^11.0.0",
     "axios": "^1.13.6",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",

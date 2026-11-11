@@ -9,6 +9,7 @@ import {
   followUserRequest,
   unfollowUserRequest,
 } from "../../services/followService";
+import { startConversationRequest } from "../../services/chatService";
 
 const STATUS_LABELS = {
   0: "Planificado",
@@ -27,6 +28,7 @@ const PublicProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
+  const [messageLoading, setMessageLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const isOwnPublicProfile =
@@ -68,6 +70,20 @@ const PublicProfile = () => {
     const date = new Date(profile.createdAt);
     return Number.isNaN(date.getTime()) ? null : date;
   }, [profile]);
+
+  const handleMessage = async () => {
+    if (!profile?.id || messageLoading) return;
+
+    try {
+      setMessageLoading(true);
+      const conversation = await startConversationRequest(profile.id);
+      navigate(`/chat/${conversation.id}`, { state: { other: conversation } });
+    } catch (error) {
+      setErrorMessage(error.message || "No se pudo abrir el chat.");
+    } finally {
+      setMessageLoading(false);
+    }
+  };
 
   const handleToggleFollow = async () => {
     if (!profile?.id || followLoading) return;
@@ -186,6 +202,17 @@ const PublicProfile = () => {
                   userName={profile.userName}
                   onBlocked={() => navigate("/")}
                 />
+              )}
+
+              {isAuthenticated && !isOwnPublicProfile && (
+                <button
+                  type="button"
+                  onClick={handleMessage}
+                  disabled={messageLoading}
+                  className="rounded-xl bg-panel-2 px-4 py-2 text-sm font-semibold text-paper transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {messageLoading ? "Abriendo..." : "Mensaje"}
+                </button>
               )}
 
               {isAuthenticated && !isOwnPublicProfile && (

@@ -24,6 +24,9 @@ namespace YumeTrack.Infrastructure.Persistence
         public DbSet<EpisodeComment> EpisodeComments => Set<EpisodeComment>();
         public DbSet<ContentReport> ContentReports => Set<ContentReport>();
         public DbSet<ActivityEvent> ActivityEvents => Set<ActivityEvent>();
+        public DbSet<Conversation> Conversations => Set<Conversation>();
+        public DbSet<ConversationParticipant> ConversationParticipants => Set<ConversationParticipant>();
+        public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -251,6 +254,55 @@ namespace YumeTrack.Infrastructure.Persistence
                 entity.HasOne(a => a.Title)
                     .WithMany()
                     .HasForeignKey(a => a.TitleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Conversation>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+
+                entity.Property(c => c.DirectKey).HasMaxLength(50);
+
+                // Varias conversaciones pueden tener DirectKey nulo (grupos); las 1 a 1 son únicas.
+                entity.HasIndex(c => c.DirectKey).IsUnique();
+            });
+
+            modelBuilder.Entity<ConversationParticipant>(entity =>
+            {
+                entity.HasKey(p => p.Id);
+
+                entity.HasIndex(p => new { p.ConversationId, p.UserId }).IsUnique();
+                entity.HasIndex(p => p.UserId);
+
+                entity.HasOne(p => p.Conversation)
+                    .WithMany(c => c.Participants)
+                    .HasForeignKey(p => p.ConversationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(p => p.User)
+                    .WithMany()
+                    .HasForeignKey(p => p.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ChatMessage>(entity =>
+            {
+                entity.HasKey(m => m.Id);
+
+                entity.Property(m => m.Content)
+                    .IsRequired()
+                    .HasMaxLength(2000);
+
+                entity.HasIndex(m => new { m.ConversationId, m.Id });
+
+                entity.HasOne(m => m.Conversation)
+                    .WithMany(c => c.Messages)
+                    .HasForeignKey(m => m.ConversationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(m => m.Sender)
+                    .WithMany()
+                    .HasForeignKey(m => m.SenderId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 

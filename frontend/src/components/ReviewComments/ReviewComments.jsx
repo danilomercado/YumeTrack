@@ -30,6 +30,8 @@ const Comment = ({
   onReact,
   onDelete,
   onBlocked,
+  replyingId,
+  composer,
 }) => {
   const [pickerOpen, setPickerOpen] = useState(false);
   const pickerRef = useRef(null);
@@ -173,6 +175,8 @@ const Comment = ({
             Responder
           </button>
         </div>
+
+        {replyingId === comment.id && <div className="mt-3">{composer}</div>}
       </div>
     </div>
   );
@@ -274,6 +278,7 @@ const ReviewComments = ({ userTitleId }) => {
 
     // Responder a una respuesta cuelga del comentario original.
     setReplyTo({
+      commentId: comment.id,
       parentId: comment.parentCommentId ?? comment.id,
       userName: comment.userName,
     });
@@ -292,57 +297,63 @@ const ReviewComments = ({ userTitleId }) => {
     user,
     deletingId,
     setDeletingId,
+    composer,
     onReply: handleReply,
     onReact: handleReact,
     onDelete: handleDelete,
     onBlocked: (userId) =>
       setComments((list) => list.filter((item) => item.userId !== userId)),
+    replyingId: replyTo?.commentId,
   };
+
+  // La caja de escritura va arriba para comentar y debajo del comentario al responder.
+  const composer = (
+    <div>
+      {replyTo && (
+        <p className="mb-2 flex items-center gap-2 text-[13px] text-zinc-400">
+          Respondiendo a{" "}
+          <span className="font-bold text-paper">{replyTo.userName}</span>
+          <button
+            type="button"
+            onClick={() => setReplyTo(null)}
+            aria-label="Cancelar respuesta"
+            className="rounded-full px-2 text-zinc-400 hover:bg-white/10 hover:text-paper"
+          >
+            ✕
+          </button>
+        </p>
+      )}
+
+      <div className="flex gap-2">
+        <input
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleCreate();
+          }}
+          autoFocus={Boolean(replyTo)}
+          maxLength={1000}
+          placeholder={
+            replyTo ? "Escribí tu respuesta..." : "Escribí un comentario..."
+          }
+          className="min-w-0 flex-1 rounded-xl bg-panel-2 px-4 py-2 text-sm text-paper"
+          disabled={isSubmitting}
+        />
+        <button
+          type="button"
+          onClick={handleCreate}
+          disabled={!content.trim() || isSubmitting}
+          className="rounded-full bg-accent px-5 py-2 text-sm font-bold text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Enviar
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-5">
-      {isAuthenticated && (
-        <div>
-          {replyTo && (
-            <p className="mb-2 flex items-center gap-2 text-[13px] text-zinc-400">
-              Respondiendo a{" "}
-              <span className="font-bold text-paper">{replyTo.userName}</span>
-              <button
-                type="button"
-                onClick={() => setReplyTo(null)}
-                aria-label="Cancelar respuesta"
-                className="rounded-full px-2 text-zinc-400 hover:bg-white/10 hover:text-paper"
-              >
-                ✕
-              </button>
-            </p>
-          )}
-
-          <div className="flex gap-2">
-            <input
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleCreate();
-              }}
-              maxLength={1000}
-              placeholder={
-                replyTo ? "Escribí tu respuesta..." : "Escribí un comentario..."
-              }
-              className="flex-1 rounded-xl bg-panel-2 px-4 py-2 text-sm text-paper"
-              disabled={isSubmitting}
-            />
-            <button
-              type="button"
-              onClick={handleCreate}
-              disabled={!content.trim() || isSubmitting}
-              className="rounded-full bg-accent px-5 py-2 text-sm font-bold text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Enviar
-            </button>
-          </div>
-        </div>
-      )}
+      {isAuthenticated && !replyTo && composer}
 
       {loading ? (
         <div className="space-y-3">

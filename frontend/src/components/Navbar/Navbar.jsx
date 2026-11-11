@@ -123,6 +123,13 @@ const Navbar = () => {
     navigate("/login");
   };
 
+  // Cualquier link o botón del header lleva arriba, esté donde esté la página.
+  const handleHeaderClick = (event) => {
+    if (event.target.closest("a, button")) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const renderNavItem = (to, label) => (
     <NavLink to={to} end={to === "/"} className={navLinkClass}>
       <span className="flex items-center gap-1.5">
@@ -135,7 +142,10 @@ const Navbar = () => {
   );
 
   return (
-    <header className="sticky top-0 z-50 px-3 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:px-6">
+    <header
+      onClick={handleHeaderClick}
+      className="sticky top-0 z-50 px-3 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:px-6"
+    >
       <div
         className={`header-bar mx-auto flex max-w-7xl items-center justify-between rounded-full bg-panel px-3 sm:px-5 ${
           scrolled ? "h-14" : "h-16"
@@ -330,11 +340,16 @@ const Navbar = () => {
               {/* PROFILE */}
               <NavLink
                 to="/profile"
-                className="springy hidden items-center gap-2 rounded-full bg-panel-2 py-1.5 pl-1.5 pr-4 text-sm font-bold text-paper hover:scale-105 hover:bg-white/10 sm:inline-flex"
+                className={`springy hidden items-center gap-2 rounded-full py-1.5 pl-1.5 pr-4 text-sm font-bold text-paper hover:scale-105 sm:inline-flex ${
+                  location.pathname === "/profile" ||
+                  location.pathname.startsWith("/settings")
+                    ? "bg-accent"
+                    : "bg-panel-2 hover:bg-white/10"
+                }`}
               >
                 <span
                   aria-hidden="true"
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[13px] text-paper"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-panel-2 text-[13px] text-paper"
                 >
                   {(user?.userName || "P").charAt(0).toUpperCase()}
                 </span>

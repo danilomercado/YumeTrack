@@ -70,11 +70,15 @@ builder.Services.AddRateLimiter(options =>
     AddPerIpPolicy("auth", 10);
     AddPerIpPolicy("titles", 120);
     AddPerIpPolicy("social", 60);
+    AddPerIpPolicy("chat", 180);
     // Cada detalle nuevo puede gastar cuota de DeepL.
     AddPerIpPolicy("title-detail", 30);
 });
 
 builder.Services.AddHealthChecks();
+
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IChatNotifier, YumeTrack.API.Hubs.SignalRChatNotifier>();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -141,6 +145,23 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ClockSkew = TimeSpan.Zero
     };
+
+    // Los WebSockets del navegador no pueden mandar headers: el token viaja en la query.
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            if (!string.IsNullOrEmpty(accessToken) &&
+                context.HttpContext.Request.Path.StartsWithSegments("/hubs/chat"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
 
 var app = builder.Build();
@@ -190,6 +211,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<YumeTrack.API.Hubs.ChatHub>("/hubs/chat");
 app.MapHealthChecks("/health");
 
 app.Run();

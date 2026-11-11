@@ -20,6 +20,11 @@ const Spotlight = ({ titles, onOpen }) => {
   const isManga = current.mediaType?.toLowerCase() === "manga";
 
   const next = () => setIndex((value) => (value + 1) % items.length);
+  const previous = () =>
+    setIndex((value) => (value - 1 + items.length) % items.length);
+
+  const arrowClass =
+    "springy absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-panel-2/90 text-paper hover:scale-110 hover:bg-accent";
 
   return (
     <section
@@ -90,6 +95,31 @@ const Spotlight = ({ titles, onOpen }) => {
           </div>
         </div>
       </div>
+
+      {items.length > 1 && (
+        <>
+          <button
+            type="button"
+            aria-label="Anterior"
+            onClick={previous}
+            className={`${arrowClass} left-2 sm:left-3`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 5l-7 7 7 7" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            aria-label="Siguiente"
+            onClick={next}
+            className={`${arrowClass} right-2 sm:right-3`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </>
+      )}
 
       <div className="relative flex gap-2 px-6 pb-6 sm:px-10">
         {items.map((item, position) => (
