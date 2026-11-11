@@ -5,7 +5,7 @@ import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 import ServerWakingBanner from "../components/ServerWakingBanner/ServerWakingBanner";
 import PetalField from "../components/PetalField/PetalField";
 import Footer from "../components/Footer/Footer";
-import ChatButton from "../components/ChatButton/ChatButton";
+import ChatDock from "../components/ChatDock/ChatDock";
 import ErrorBoundary from "../components/ErrorBoundary/ErrorBoundary";
 
 const Home = lazy(() => import("../pages/Home/Home"));
@@ -32,7 +32,6 @@ const SecuritySettings = lazy(
 const Lists = lazy(() => import("../pages/Lists/Lists"));
 const ListDetail = lazy(() => import("../pages/ListDetail/ListDetail"));
 const AdminReports = lazy(() => import("../pages/AdminReports/AdminReports"));
-const Chat = lazy(() => import("../pages/Chat/Chat"));
 const NotFound = lazy(() => import("../pages/NotFound/NotFound"));
 
 const PageFallback = () => (
@@ -58,10 +57,7 @@ const AppRouter = () => {
 
       <ErrorBoundary>
         <Suspense fallback={<PageFallback />}>
-          <div
-            key={location.pathname.startsWith("/chat") ? "/chat" : location.pathname}
-            className="page-enter"
-          >
+          <div key={location.pathname} className="page-enter">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
@@ -90,14 +86,6 @@ const AppRouter = () => {
                 element={
                   <ProtectedRoute>
                     <SecuritySettings />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/chat/:conversationId?"
-                element={
-                  <ProtectedRoute>
-                    <Chat />
                   </ProtectedRoute>
                 }
               />
@@ -131,8 +119,8 @@ const AppRouter = () => {
         </Suspense>
       </ErrorBoundary>
 
-      {!location.pathname.startsWith("/chat") && <Footer />}
-      <ChatButton />
+      <Footer />
+      <ChatDock />
     </>
   );
 };

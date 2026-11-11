@@ -2,17 +2,19 @@
 
 Estado al 2026-11-11. El sitio ya está publicado y funcionando:
 - Frontend en Vercel: `https://yume-track.vercel.app`
-- Backend en Render: `https://yumetrack-hue2.onrender.com`
+- Backend en Render: `https://yumetrack-hue2.onrender.com` (ya con el chat desplegado: `/api/chat/*` y `/hubs/chat` piden sesión).
 - Base de datos en Neon (São Paulo).
 
-Hay cambios **sin commitear ni subir** (no están en producción todavía):
-- Scroll arriba al navegar y al tocar cualquier botón del header (`ScrollToTop`, `Navbar.jsx`, `App.jsx`).
-- Caja de respuesta debajo del comentario (`ReviewComments.jsx`).
-- Destacados del inicio: flechas anterior/siguiente (`Spotlight.jsx`) y sinopsis en español (`KitsuService.cs`).
+Todo lo hecho hasta ahora está commiteado y subido (último commit `166ebc9`). Lo último que se hizo:
+- Scroll arriba al navegar y al tocar cualquier botón del header; caja de respuesta debajo del comentario; flechas y sinopsis en español en los destacados.
+- **Chat 1 a 1** en tiempo real (SignalR) con botón flotante abajo a la derecha, buscador de personas ("+ Nuevo"; si no seguís a alguien pregunta si querés seguirlo), no leídos y bloqueo que corta mensajes.
+- Notificaciones de mensajes de chat y de likes a reseñas, y el nombre ya no sale pegado a la acción.
+- El chat ahora es una **ventana emergente** desde el botón flotante (abajo a la derecha en la compu, pantalla completa en el celular), no una página. Las notificaciones de mensajes y el botón "Mensaje" del perfil la abren directo en esa conversación. Se vio en capturas con un navegador a 390×844 y a 1280×800.
+
+**Nada de lo anterior se vio todavía en pantalla ni en el celular**: ver la sección 3.
 
 ## 1. Antes de abrirlo a usuarios reales
 
-- [ ] **Commitear y subir** los cambios de arriba (Render y Vercel redeployan solos).
 - [ ] **Rotar secretos expuestos**
   - [x] Contraseña de la base de datos (nueva, ya en Neon).
   - [x] Clave JWT de producción nueva, cargada en Render. La de desarrollo y la de producción se pegaron en un chat: si hace falta, generar otras.
@@ -43,6 +45,7 @@ Hay cambios **sin commitear ni subir** (no están en producción todavía):
 
 ## 3. Antes de mostrar el sitio
 
+- [ ] **Probar el chat con dos cuentas** (dos navegadores, uno en el celular real; el teclado del teléfono puede tapar el campo de escribir): mensajes en vivo, no leídos, botón flotante, "+ Nuevo" con buscador, aviso de "seguir y escribir", bloqueo, notificaciones en la campana (mensaje y like) y cómo se ve en el celular. Con el backend dormido (~30 s) la conexión en vivo tarda en volver.
 - [ ] Recorrer con una cuenta real todo lo que requiere sesión (no se probó en pantalla):
   - Comentar, responder y reaccionar (la respuesta ahora abre la caja debajo del comentario).
   - Crear una lista, agregar títulos y abrir su enlace público (`/l/...`).
@@ -53,6 +56,7 @@ Hay cambios **sin commitear ni subir** (no están en producción todavía):
   - Recuperar contraseña por correo.
 - [ ] Revisar el diseño de las pantallas con sesión (Mi lista, Perfil, Reseña): solo se verificaron las públicas.
 - [x] Notificaciones: el nombre salía pegado a la acción ("betote siguió"). Corregido con un espacio; además ahora avisan de mensajes de chat y de likes a reseñas. Falta verlo en pantalla.
+- [ ] El contador de la campana se actualiza cada 60 s (el del chat sí es instantáneo). Evaluar empujarlo también por SignalR.
 - [ ] Revisar `kanji` chicos del menú (声, 図 a 15 px se leen justos).
 - [ ] "Que se note dónde estás parado": el menú ya marca la página activa y ahora también el botón de usuario. Falta marcar algo en páginas que no están en el menú (`/reviews/:id`, perfiles ajenos).
 
@@ -78,9 +82,10 @@ Hay cambios **sin commitear ni subir** (no están en producción todavía):
 
 ## 5. Ideas a futuro
 
-- [x] **Chat 1 a 1** hecho (SignalR, historial, no leídos, el bloqueo corta mensajes). Falta probarlo en pantalla y en producción. Pendiente del chat:
+- [x] **Chat 1 a 1** hecho (ver arriba). Pendiente del chat:
   - [ ] **Grupos**: el modelo ya los admite (`Conversation` + `ConversationParticipant`, `DirectKey` nulo); falta nombre del grupo, alta/baja de integrantes, y adaptar `ChatController` (hoy asume un solo "otro").
-  - [ ] Iniciar chat desde más lugares (lista de seguidores, resultados de búsqueda).
+  - [ ] Iniciar chat desde más lugares (lista de seguidores, resultados de búsqueda). Hoy se puede desde el perfil ("Mensaje") y desde "+ Nuevo".
+  - [ ] Decidir si cualquiera puede escribirle a cualquiera (hoy sí, salvo bloqueo) o solo a quien te sigue/aceptó. Es lo más abierto al spam.
   - [ ] Denunciar un mensaje o conversación (hoy solo se puede denunciar al usuario desde su perfil).
   - [ ] Indicador "escribiendo...", estado en línea, borrar mensajes.
   - [ ] Si el backend pasa a más de una instancia, SignalR necesita un backplane (Redis); con una sola instancia en Render no hace falta.
@@ -95,5 +100,5 @@ Hay cambios **sin commitear ni subir** (no están en producción todavía):
 
 - Backend: `cd backend/YumeTrack.API` y `ASPNETCORE_ENVIRONMENT=Development dotnet run --no-launch-profile --urls http://localhost:5044`. Lee `backend/YumeTrack.API/.env` solo en desarrollo; al arrancar aplica las migraciones.
 - Frontend: `cd frontend` y `npm run dev -- --host localhost --port 5173`.
-- Tests: `cd backend && dotnet test YumeTrack.Tests` (54) y `cd frontend && npm test` (13). Con el backend corriendo, `dotnet test` falla porque la DLL queda bloqueada; hay que frenarlo antes.
+- Tests: `cd backend && dotnet test YumeTrack.Tests` (67) y `cd frontend && npm test` (13). Con el backend corriendo, `dotnet test` falla porque la DLL queda bloqueada; hay que frenarlo antes.
 - Copia de plantilla de configuración: `backend/YumeTrack.API/.env.example`.

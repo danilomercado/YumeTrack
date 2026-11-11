@@ -9,6 +9,7 @@ import {
   followUserRequest,
   unfollowUserRequest,
 } from "../../services/followService";
+import { useChat } from "../../context/ChatContext";
 import { startConversationRequest } from "../../services/chatService";
 
 const STATUS_LABELS = {
@@ -29,6 +30,7 @@ const PublicProfile = () => {
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
   const [messageLoading, setMessageLoading] = useState(false);
+  const { openChat } = useChat();
   const [errorMessage, setErrorMessage] = useState("");
 
   const isOwnPublicProfile =
@@ -77,7 +79,7 @@ const PublicProfile = () => {
     try {
       setMessageLoading(true);
       const conversation = await startConversationRequest(profile.id);
-      navigate(`/chat/${conversation.id}`, { state: { other: conversation } });
+      openChat({ id: conversation.id, other: conversation });
     } catch (error) {
       setErrorMessage(error.message || "No se pudo abrir el chat.");
     } finally {

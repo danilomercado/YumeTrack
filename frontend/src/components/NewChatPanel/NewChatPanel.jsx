@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import {
   getChatPeopleRequest,
@@ -11,8 +10,7 @@ const SEARCH_DELAY_MS = 300;
 
 // Elegir con quién hablar: al abrirse muestra a quienes seguís y te siguen, y
 // escribiendo se busca por nombre. Si no seguís a la persona, se pregunta antes.
-const NewChatPanel = ({ onClose }) => {
-  const navigate = useNavigate();
+const NewChatPanel = ({ onClose, onStart }) => {
   const { toast } = useToast();
 
   const [query, setQuery] = useState("");
@@ -53,8 +51,7 @@ const NewChatPanel = ({ onClose }) => {
       if (follow) await followUserRequest(person.id);
 
       const conversation = await startConversationRequest(person.id);
-      onClose();
-      navigate(`/chat/${conversation.id}`, { state: { other: conversation } });
+      onStart(conversation);
     } catch (error) {
       toast(error.message || "No se pudo abrir el chat.", "error");
       setStarting(false);

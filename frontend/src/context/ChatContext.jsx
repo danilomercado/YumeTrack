@@ -16,6 +16,10 @@ const ChatContext = createContext({
   refreshUnread: () => {},
   subscribe: () => () => {},
   setActiveConversation: () => {},
+  panelOpen: false,
+  panelTarget: null,
+  openChat: () => {},
+  closeChat: () => {},
 });
 
 // La API vive en /api; el hub de SignalR cuelga de la raíz del servidor.
@@ -25,6 +29,8 @@ const hubUrl = () =>
 export const ChatProvider = ({ children }) => {
   const { token, user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelTarget, setPanelTarget] = useState(null);
   const listeners = useRef(new Set());
   const activeConversation = useRef(null);
   const userRef = useRef(user);
@@ -49,6 +55,24 @@ export const ChatProvider = ({ children }) => {
   const setActiveConversation = useCallback((id) => {
     activeConversation.current = id;
   }, []);
+
+  // Abre la ventana de chat; con un destino ({ id, other }) entra directo a esa conversación.
+  const openChat = useCallback((target = null) => {
+    setPanelTarget(target);
+    setPanelOpen(true);
+  }, []);
+
+  const closeChat = useCallback(() => {
+    setPanelOpen(false);
+    setPanelTarget(null);
+  }, []);
+
+  useEffect(() => {
+    if (!token) {
+      setPanelOpen(false);
+      setPanelTarget(null);
+    }
+  }, [token]);
 
   useEffect(() => {
     if (!token) {
@@ -91,8 +115,26 @@ export const ChatProvider = ({ children }) => {
   }, [token, refreshUnread]);
 
   const value = useMemo(
-    () => ({ unreadCount, refreshUnread, subscribe, setActiveConversation }),
-    [unreadCount, refreshUnread, subscribe, setActiveConversation],
+    () => ({
+      unreadCount,
+      refreshUnread,
+      subscribe,
+      setActiveConversation,
+      panelOpen,
+      panelTarget,
+      openChat,
+      closeChat,
+    }),
+    [
+      unreadCount,
+      refreshUnread,
+      subscribe,
+      setActiveConversation,
+      panelOpen,
+      panelTarget,
+      openChat,
+      closeChat,
+    ],
   );
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

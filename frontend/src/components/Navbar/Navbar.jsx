@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useChat } from "../../context/ChatContext";
 import {
   getNotificationsRequest,
   getUnreadCountRequest,
@@ -36,8 +37,6 @@ const NOTIFICATION_TEXT = {
 
 const notificationLink = (n) => {
   if (n.type === "follow") return `/profile/${n.actorUserName}`;
-  if (n.type === "chat_message" && n.conversationId)
-    return `/chat/${n.conversationId}`;
   if (n.userTitleId) return `/reviews/${n.userTitleId}`;
   return "#";
 };
@@ -52,6 +51,7 @@ const navLinkClass = ({ isActive }) =>
 const Navbar = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
+  const { openChat } = useChat();
 
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -279,13 +279,8 @@ const Navbar = () => {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {notifications.map((n) => (
-                          <Link
-                            key={n.id}
-                            to={notificationLink(n)}
-                            onClick={() => setOpen(false)}
-                            className="block rounded-2xl bg-ground p-3 transition hover:bg-ground"
-                          >
+                        {notifications.map((n) => {
+                          const content = (
                             <div className="flex items-start gap-3">
                               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-paper">
                                 {n.actorUserName?.charAt(0)?.toUpperCase() ||
@@ -307,8 +302,42 @@ const Navbar = () => {
                                 )}
                               </div>
                             </div>
-                          </Link>
-                        ))}
+                          );
+
+                          // Los mensajes se leen en la ventana de chat, no en otra página.
+                          if (n.type === "chat_message" && n.conversationId) {
+                            return (
+                              <button
+                                key={n.id}
+                                type="button"
+                                onClick={() => {
+                                  setOpen(false);
+                                  openChat({
+                                    id: n.conversationId,
+                                    other: {
+                                      id: n.conversationId,
+                                      otherUserName: n.actorUserName,
+                                    },
+                                  });
+                                }}
+                                className="block w-full rounded-2xl bg-ground p-3 text-left transition hover:bg-ground"
+                              >
+                                {content}
+                              </button>
+                            );
+                          }
+
+                          return (
+                            <Link
+                              key={n.id}
+                              to={notificationLink(n)}
+                              onClick={() => setOpen(false)}
+                              className="block rounded-2xl bg-ground p-3 transition hover:bg-ground"
+                            >
+                              {content}
+                            </Link>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

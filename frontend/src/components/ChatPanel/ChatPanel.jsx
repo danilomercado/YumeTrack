@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import NewChatPanel from "../../components/NewChatPanel/NewChatPanel";
-import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { Link } from "react-router-dom";
+import NewChatPanel from "../NewChatPanel/NewChatPanel";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
 import { useToast } from "../../context/ToastContext";
@@ -25,7 +24,10 @@ const Avatar = ({ name, size = "h-10 w-10" }) => (
   </span>
 );
 
-const ConversationList = ({ conversations, loading, activeId }) => {
+const iconButton =
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-panel-2 text-paper hover:bg-white/10";
+
+const ConversationList = ({ conversations, loading, onSelect }) => {
   if (loading) {
     return (
       <div className="space-y-2 p-3">
@@ -53,14 +55,10 @@ const ConversationList = ({ conversations, loading, activeId }) => {
     <ul className="space-y-1 p-2">
       {conversations.map((conversation) => (
         <li key={conversation.id}>
-          <Link
-            to={`/chat/${conversation.id}`}
-            aria-current={conversation.id === activeId ? "page" : undefined}
-            className={`flex items-center gap-3 rounded-2xl p-3 transition ${
-              conversation.id === activeId
-                ? "bg-accent"
-                : "hover:bg-panel-2"
-            }`}
+          <button
+            type="button"
+            onClick={() => onSelect(conversation)}
+            className="flex w-full items-center gap-3 rounded-2xl p-3 text-left transition hover:bg-panel-2"
           >
             <Avatar name={conversation.otherUserName} />
 
@@ -82,30 +80,34 @@ const ConversationList = ({ conversations, loading, activeId }) => {
                   {conversation.lastMessage}
                 </span>
                 {conversation.unreadCount > 0 && (
-                  <span className="flex min-h-[20px] min-w-[20px] shrink-0 items-center justify-center rounded-full bg-paper px-1.5 text-[13px] font-bold text-ground">
+                  <span className="flex min-h-[20px] min-w-[20px] shrink-0 items-center justify-center rounded-full bg-accent px-1.5 text-[13px] font-bold text-paper">
                     {conversation.unreadCount}
                   </span>
                 )}
               </span>
             </span>
-          </Link>
+          </button>
         </li>
       ))}
     </ul>
   );
 };
 
-const Chat = () => {
-  useDocumentTitle("Chat");
-
-  const { conversationId } = useParams();
-  const activeId = conversationId ? Number(conversationId) : null;
-  const location = useLocation();
-  const navigate = useNavigate();
+// Ventana de chat: lista de conversaciones y, al elegir una, el hilo de mensajes.
+// En el celular ocupa toda la pantalla; en la compu flota sobre el botón.
+const ChatPanel = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { subscribe, setActiveConversation, refreshUnread } = useChat();
+  const {
+    subscribe,
+    setActiveConversation,
+    refreshUnread,
+    panelTarget,
+    closeChat,
+  } = useChat();
 
+  const [activeId, setActiveId] = useState(panelTarget?.id ?? null);
+  const [hint, setHint] = useState(panelTarget?.other ?? null);
   const [conversations, setConversations] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
   const [messages, setMessages] = useState([]);
@@ -119,6 +121,13 @@ const Chat = () => {
   const scrollRef = useRef(null);
   const scrollMode = useRef("bottom");
   const previousHeight = useRef(0);
+
+  // Abrir el chat desde una notificación o un perfil lleva directo a esa conversación.
+  useEffect(() => {
+    setActiveId(panelTarget?.id ?? null);
+    setHint(panelTarget?.other ?? null);
+    setNewChatOpen(false);
+  }, [panelTarget]);
 
   const isMine = useCallback(
     (message) =>
@@ -216,7 +225,7 @@ const Chat = () => {
       .catch((error) => {
         if (cancelled) return;
         toast(error.message || "No se pudo abrir la conversación.", "error");
-        navigate("/chat", { replace: true });
+        setActiveId(null);
       })
       .finally(() => {
         if (!cancelled) setLoadingMessages(false);
@@ -226,7 +235,7 @@ const Chat = () => {
       cancelled = true;
       setActiveConversation(null);
     };
-  }, [activeId, markRead, navigate, setActiveConversation, toast]);
+  }, [activeId, markRead, setActiveConversation, toast]);
 
   // Mensajes en vivo: se agregan al hilo abierto y actualizan la lista.
   useEffect(
@@ -298,19 +307,67 @@ const Chat = () => {
     }
   };
 
+  const selectConversation = (conversation) => {
+    setHint(conversation);
+    setActiveId(conversation.id);
+  };
+
+  const startConversation = (conversation) => {
+    setHint(conversation);
+    setActiveId(conversation.id);
+    setNewChatOpen(false);
+    loadConversations();
+  };
+
   const current =
     conversations.find((item) => item.id === activeId) ??
-    (location.state?.other?.id === activeId ? location.state.other : null);
+    (hint?.id === activeId ? hint : null);
+
   return (
-    <main className="mx-auto max-w-6xl px-2 py-2 text-paper sm:px-6 md:py-6">
-      <div className="grid h-[calc(100dvh-6.75rem-env(safe-area-inset-top))] grid-rows-[minmax(0,1fr)] overflow-hidden rounded-3xl bg-panel md:h-[calc(100dvh-8.5rem)] md:min-h-[28rem] md:grid-cols-[320px_1fr] md:rounded-[2rem]">
-        <aside
-          className={`min-h-0 flex-col overflow-y-auto border-white/10 md:flex md:border-r ${
-            activeId ? "hidden" : "flex"
-          }`}
-        >
-          <div className="flex items-center justify-between px-5 pb-2 pt-5">
-            <h1 className="text-2xl">Chat</h1>
+    <div
+      role="dialog"
+      aria-label="Chat"
+      className="fixed inset-x-0 top-0 z-[60] flex h-dvh flex-col bg-panel pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] sm:inset-x-auto sm:bottom-24 sm:right-6 sm:top-auto sm:h-[min(36rem,calc(100dvh-8rem))] sm:w-[26rem] sm:rounded-3xl sm:py-0 sm:shadow-2xl sm:ring-1 sm:ring-white/10"
+    >
+      <header className="flex items-center gap-3 border-b border-white/10 px-3 py-3">
+        {activeId ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setActiveId(null)}
+              aria-label="Volver a las conversaciones"
+              className={iconButton}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="h-5 w-5"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 5l-7 7 7 7" />
+              </svg>
+            </button>
+
+            {current ? (
+              <Link
+                to={`/profile/${current.otherUserName}`}
+                onClick={closeChat}
+                className="flex min-w-0 flex-1 items-center gap-3"
+              >
+                <Avatar name={current.otherUserName} size="h-9 w-9" />
+                <span className="truncate font-bold text-paper">
+                  {current.otherUserName}
+                </span>
+              </Link>
+            ) : (
+              <span className="flex-1 font-bold text-paper">Conversación</span>
+            )}
+          </>
+        ) : (
+          <>
+            <h2 className="flex-1 pl-2 text-xl">Chat</h2>
             {!newChatOpen && (
               <button
                 type="button"
@@ -320,156 +377,135 @@ const Chat = () => {
                 + Nuevo
               </button>
             )}
-          </div>
+          </>
+        )}
 
-          {newChatOpen ? (
-            <NewChatPanel onClose={() => setNewChatOpen(false)} />
-          ) : (
+        <button
+          type="button"
+          onClick={closeChat}
+          aria-label="Cerrar chat"
+          className={iconButton}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="h-5 w-5"
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </header>
+
+      {!activeId ? (
+        newChatOpen ? (
+          <div className="flex min-h-0 flex-1 flex-col pt-3">
+            <NewChatPanel
+              onClose={() => setNewChatOpen(false)}
+              onStart={startConversation}
+            />
+          </div>
+        ) : (
+          <div className="min-h-0 flex-1 overflow-y-auto">
             <ConversationList
               conversations={conversations}
               loading={loadingList}
-              activeId={activeId}
+              onSelect={selectConversation}
             />
-          )}
-        </aside>
-
-        <section
-          className={`min-h-0 flex-col md:flex ${activeId ? "flex" : "hidden"}`}
-        >
-          {!activeId ? (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-              <span aria-hidden="true" className="kanji text-7xl text-zinc-700">
-                話
-              </span>
-              <p className="max-w-xs text-sm text-zinc-400">
-                Elegí una conversación o escribile a alguien desde su perfil.
-              </p>
-            </div>
-          ) : (
-            <>
-              <header className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
-                <Link
-                  to="/chat"
-                  aria-label="Volver a las conversaciones"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-panel-2 hover:bg-white/10 md:hidden"
+          </div>
+        )
+      ) : (
+        <>
+          <div
+            ref={scrollRef}
+            className="min-h-0 flex-1 space-y-2 overflow-y-auto px-3 py-4"
+          >
+            {hasMore && (
+              <div className="pb-2 text-center">
+                <button
+                  type="button"
+                  onClick={loadOlder}
+                  disabled={loadingOlder}
+                  className="rounded-full bg-panel-2 px-4 py-1.5 text-[13px] text-zinc-300 hover:bg-white/10 disabled:opacity-60"
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="h-5 w-5"
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 5l-7 7 7 7" />
-                  </svg>
-                </Link>
-
-                {current ? (
-                  <Link
-                    to={`/profile/${current.otherUserName}`}
-                    className="flex min-w-0 items-center gap-3"
-                  >
-                    <Avatar name={current.otherUserName} />
-                    <span className="truncate font-bold text-paper">
-                      {current.otherUserName}
-                    </span>
-                  </Link>
-                ) : (
-                  <span className="font-bold text-paper">Conversación</span>
-                )}
-              </header>
-
-              <div
-                ref={scrollRef}
-                className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 py-4"
-              >
-                {hasMore && (
-                  <div className="pb-2 text-center">
-                    <button
-                      type="button"
-                      onClick={loadOlder}
-                      disabled={loadingOlder}
-                      className="rounded-full bg-panel-2 px-4 py-1.5 text-[13px] text-zinc-300 hover:bg-white/10 disabled:opacity-60"
-                    >
-                      {loadingOlder ? "Cargando..." : "Ver mensajes anteriores"}
-                    </button>
-                  </div>
-                )}
-
-                {loadingMessages ? (
-                  <p className="py-10 text-center text-sm text-zinc-400">
-                    Cargando mensajes...
-                  </p>
-                ) : messages.length === 0 ? (
-                  <p className="py-10 text-center text-sm text-zinc-400">
-                    Todavía no hay mensajes. Escribí el primero.
-                  </p>
-                ) : (
-                  messages.map((message) => {
-                    const mine = isMine(message);
-
-                    return (
-                      <div
-                        key={message.id}
-                        className={`flex ${mine ? "justify-end" : "justify-start"}`}
-                      >
-                        <div
-                          className={`max-w-[85%] rounded-2xl px-4 py-2 md:max-w-[80%] ${
-                            mine
-                              ? "rounded-br-md bg-accent text-paper"
-                              : "rounded-bl-md bg-panel-2 text-paper"
-                          }`}
-                        >
-                          <p className="whitespace-pre-line break-words text-sm">
-                            {message.content}
-                          </p>
-                          <p className="mt-1 text-right text-[13px] text-paper/60">
-                            {formatTime(message.createdAt)}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+                  {loadingOlder ? "Cargando..." : "Ver mensajes anteriores"}
+                </button>
               </div>
+            )}
 
-              <form
-                onSubmit={(event) => {
+            {loadingMessages ? (
+              <p className="py-10 text-center text-sm text-zinc-400">
+                Cargando mensajes...
+              </p>
+            ) : messages.length === 0 ? (
+              <p className="py-10 text-center text-sm text-zinc-400">
+                Todavía no hay mensajes. Escribí el primero.
+              </p>
+            ) : (
+              messages.map((message) => {
+                const mine = isMine(message);
+
+                return (
+                  <div
+                    key={message.id}
+                    className={`flex ${mine ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[85%] rounded-2xl px-4 py-2 ${
+                        mine
+                          ? "rounded-br-md bg-accent text-paper"
+                          : "rounded-bl-md bg-panel-2 text-paper"
+                      }`}
+                    >
+                      <p className="whitespace-pre-line break-words text-sm">
+                        {message.content}
+                      </p>
+                      <p className="mt-1 text-right text-[13px] text-paper/60">
+                        {formatTime(message.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleSend();
+            }}
+            className="flex items-end gap-2 border-t border-white/10 p-2"
+          >
+            <textarea
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
                   handleSend();
-                }}
-                className="flex items-end gap-2 border-t border-white/10 p-2 md:p-3"
-              >
-                <textarea
-                  value={text}
-                  onChange={(event) => setText(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" && !event.shiftKey) {
-                      event.preventDefault();
-                      handleSend();
-                    }
-                  }}
-                  rows={1}
-                  maxLength={2000}
-                  placeholder="Escribí un mensaje..."
-                  aria-label="Mensaje"
-                  className="max-h-32 min-h-[44px] min-w-0 flex-1 resize-none rounded-2xl bg-panel-2 px-4 py-3 text-sm text-paper"
-                />
-                <button
-                  type="submit"
-                  disabled={!text.trim() || sending}
-                  className="h-11 rounded-full bg-accent px-5 text-sm font-bold text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Enviar
-                </button>
-              </form>
-            </>
-          )}
-        </section>
-      </div>
-    </main>
+                }
+              }}
+              rows={1}
+              maxLength={2000}
+              placeholder="Escribí un mensaje..."
+              aria-label="Mensaje"
+              className="max-h-32 min-h-[44px] min-w-0 flex-1 resize-none rounded-2xl bg-panel-2 px-4 py-3 text-sm text-paper"
+            />
+            <button
+              type="submit"
+              disabled={!text.trim() || sending}
+              className="h-11 rounded-full bg-accent px-5 text-sm font-bold text-paper transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Enviar
+            </button>
+          </form>
+        </>
+      )}
+    </div>
   );
 };
 
-export default Chat;
+export default ChatPanel;
