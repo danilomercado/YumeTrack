@@ -218,4 +218,39 @@ public class ChatTests
         Assert.Equal(new[] { "m1", "m2", "m3" }, secondPage.Select(m => m.Content));
         Assert.IsType<NotFoundResult>(outsider);
     }
+
+    [Fact]
+    public async Task People_WithoutQueryListsFollowersAndFollowing_WithQuerySearchesByName()
+    {
+        var (db, a, b, c) = await SeedAsync();
+        var d = new User { UserName = "dani", NormalizedUserName = "dani", Email = "d@mail.com", PasswordHash = "x" };
+        db.Users.Add(d);
+        db.UserFollows.AddRange(
+            new UserFollow { FollowerId = a.Id, FollowingId = b.Id },
+            new UserFollow { FollowerId = c.Id, FollowingId = a.Id });
+        await db.SaveChangesAsync();
+        var controller = ControllerFor(db, a.Id);
+
+        var known = ((IEnumerable<ChatPersonDto>)((OkObjectResult)await controller.GetPeople()).Value!).ToList();
+        var search = ((IEnumerable<ChatPersonDto>)((OkObjectResult)await controller.GetPeople("DA")).Value!).ToList();
+
+        Assert.Equal(new[] { "beto", "cami" }, known.Select(p => p.UserName));
+        Assert.True(known.Single(p => p.UserName == "beto").IsFollowing);
+        Assert.True(known.Single(p => p.UserName == "cami").FollowsMe);
+        var found = Assert.Single(search);
+        Assert.Equal("dani", found.UserName);
+        Assert.False(found.IsFollowing);
+    }
+
+    [Fact]
+    public async Task People_ExcludeSelfAndBlockedUsers()
+    {
+        var (db, a, b, c) = await SeedAsync();
+        db.UserBlocks.Add(new UserBlock { BlockerId = b.Id, BlockedId = a.Id });
+        await db.SaveChangesAsync();
+
+        var result = ((IEnumerable<ChatPersonDto>)((OkObjectResult)await ControllerFor(db, a.Id).GetPeople("a")).Value!).ToList();
+
+        Assert.Equal(new[] { "cami" }, result.Select(p => p.UserName));
+    }
 }

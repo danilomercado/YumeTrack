@@ -25,6 +25,14 @@ namespace YumeTrack.Application.DTOs.Chat
         public int UnreadCount { get; set; }
     }
 
+    public class ChatPersonDto
+    {
+        public int Id { get; set; }
+        public string UserName { get; set; } = string.Empty;
+        public bool IsFollowing { get; set; }
+        public bool FollowsMe { get; set; }
+    }
+
     public class ChatMessageDto
     {
         public int Id { get; set; }

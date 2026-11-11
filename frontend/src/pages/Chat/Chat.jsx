@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import NewChatPanel from "../../components/NewChatPanel/NewChatPanel";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
@@ -41,8 +42,9 @@ const ConversationList = ({ conversations, loading, activeId }) => {
   if (conversations.length === 0) {
     return (
       <div className="p-6 text-sm text-zinc-400">
-        Todavía no tenés conversaciones. Entrá al perfil de alguien y tocá{" "}
-        <span className="font-bold text-paper">Mensaje</span> para empezar.
+        Todavía no tenés conversaciones. Tocá{" "}
+        <span className="font-bold text-paper">Nuevo</span> para escribirle a
+        alguien.
       </div>
     );
   }
@@ -112,6 +114,7 @@ const Chat = () => {
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [newChatOpen, setNewChatOpen] = useState(false);
 
   const scrollRef = useRef(null);
   const scrollMode = useRef("bottom");
@@ -306,12 +309,28 @@ const Chat = () => {
             activeId ? "hidden" : "flex"
           }`}
         >
-          <h1 className="px-5 pb-1 pt-5 text-2xl">Chat</h1>
-          <ConversationList
-            conversations={conversations}
-            loading={loadingList}
-            activeId={activeId}
-          />
+          <div className="flex items-center justify-between px-5 pb-2 pt-5">
+            <h1 className="text-2xl">Chat</h1>
+            {!newChatOpen && (
+              <button
+                type="button"
+                onClick={() => setNewChatOpen(true)}
+                className="springy rounded-full bg-accent px-4 py-2 text-[13px] font-bold text-paper hover:scale-105 hover:bg-accent-hover"
+              >
+                + Nuevo
+              </button>
+            )}
+          </div>
+
+          {newChatOpen ? (
+            <NewChatPanel onClose={() => setNewChatOpen(false)} />
+          ) : (
+            <ConversationList
+              conversations={conversations}
+              loading={loadingList}
+              activeId={activeId}
+            />
+          )}
         </aside>
 
         <section

@@ -28,6 +28,13 @@ export const markConversationReadRequest = async (conversationId) => {
   await api.post(`/chat/conversations/${conversationId}/read`);
 };
 
+export const getChatPeopleRequest = async (query) => {
+  const res = await api.get("/chat/people", {
+    params: query ? { q: query } : undefined,
+  });
+  return res.data;
+};
+
 export const getChatUnreadCountRequest = async () => {
   const res = await api.get("/chat/unread-count");
   return res.data;

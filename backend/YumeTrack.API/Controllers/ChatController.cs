@@ -38,6 +38,51 @@ public class ChatController : ControllerBase
 
     private static string DirectKey(int a, int b) => $"{Math.Min(a, b)}-{Math.Max(a, b)}";
 
+    // ---------- Personas ----------
+
+    // Sin texto devuelve a quienes seguís y te siguen; con texto busca por nombre de usuario.
+    [HttpGet("people")]
+    public async Task<IActionResult> GetPeople([FromQuery] string? q = null)
+    {
+        var me = RequireUserId();
+        var term = q?.Trim().ToLower() ?? string.Empty;
+
+        var blocked = await _context.UserBlocks
+            .Where(b => b.BlockerId == me || b.BlockedId == me)
+            .Select(b => b.BlockerId == me ? b.BlockedId : b.BlockerId)
+            .ToListAsync();
+
+        var iFollow = await _context.UserFollows
+            .Where(f => f.FollowerId == me)
+            .Select(f => f.FollowingId)
+            .ToListAsync();
+
+        var followMe = await _context.UserFollows
+            .Where(f => f.FollowingId == me)
+            .Select(f => f.FollowerId)
+            .ToListAsync();
+
+        var people = _context.Users.Where(u => u.Id != me && !blocked.Contains(u.Id));
+
+        people = term.Length == 0
+            ? people.Where(u => iFollow.Contains(u.Id) || followMe.Contains(u.Id))
+            : people.Where(u => u.UserName.ToLower().Contains(term));
+
+        var users = await people
+            .OrderBy(u => u.UserName)
+            .Take(term.Length == 0 ? 30 : 15)
+            .Select(u => new { u.Id, u.UserName })
+            .ToListAsync();
+
+        return Ok(users.Select(u => new ChatPersonDto
+        {
+            Id = u.Id,
+            UserName = u.UserName,
+            IsFollowing = iFollow.Contains(u.Id),
+            FollowsMe = followMe.Contains(u.Id)
+        }));
+    }
+
     // ---------- Conversaciones ----------
 
     [HttpGet("conversations")]
