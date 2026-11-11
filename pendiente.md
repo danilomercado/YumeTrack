@@ -52,6 +52,7 @@ Hay cambios **sin commitear ni subir** (no están en producción todavía):
   - Verificación en dos pasos (activar, entrar con código, códigos de recuperación, desactivar). Con la clave JWT nueva hay que reconfigurarla.
   - Recuperar contraseña por correo.
 - [ ] Revisar el diseño de las pantallas con sesión (Mi lista, Perfil, Reseña): solo se verificaron las públicas.
+- [x] Notificaciones: el nombre salía pegado a la acción ("betote siguió"). Corregido con un espacio; además ahora avisan de mensajes de chat y de likes a reseñas. Falta verlo en pantalla.
 - [ ] Revisar `kanji` chicos del menú (声, 図 a 15 px se leen justos).
 - [ ] "Que se note dónde estás parado": el menú ya marca la página activa y ahora también el botón de usuario. Falta marcar algo en páginas que no están en el menú (`/reviews/:id`, perfiles ajenos).
 

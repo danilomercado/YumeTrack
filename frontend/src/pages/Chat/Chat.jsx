@@ -302,8 +302,8 @@ const Chat = () => {
     conversations.find((item) => item.id === activeId) ??
     (location.state?.other?.id === activeId ? location.state.other : null);
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6 text-paper sm:px-6">
-      <div className="grid h-[calc(100dvh-8.5rem)] min-h-[28rem] overflow-hidden rounded-[2rem] bg-panel md:grid-cols-[320px_1fr]">
+    <main className="mx-auto max-w-6xl px-2 py-2 text-paper sm:px-6 md:py-6">
+      <div className="grid h-[calc(100dvh-6.75rem-env(safe-area-inset-top))] grid-rows-[minmax(0,1fr)] overflow-hidden rounded-3xl bg-panel md:h-[calc(100dvh-8.5rem)] md:min-h-[28rem] md:grid-cols-[320px_1fr] md:rounded-[2rem]">
         <aside
           className={`min-h-0 flex-col overflow-y-auto border-white/10 md:flex md:border-r ${
             activeId ? "hidden" : "flex"
@@ -415,7 +415,7 @@ const Chat = () => {
                         className={`flex ${mine ? "justify-end" : "justify-start"}`}
                       >
                         <div
-                          className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                          className={`max-w-[85%] rounded-2xl px-4 py-2 md:max-w-[80%] ${
                             mine
                               ? "rounded-br-md bg-accent text-paper"
                               : "rounded-bl-md bg-panel-2 text-paper"
@@ -439,7 +439,7 @@ const Chat = () => {
                   event.preventDefault();
                   handleSend();
                 }}
-                className="flex items-end gap-2 border-t border-white/10 p-3"
+                className="flex items-end gap-2 border-t border-white/10 p-2 md:p-3"
               >
                 <textarea
                   value={text}

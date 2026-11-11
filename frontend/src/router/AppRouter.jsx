@@ -131,7 +131,7 @@ const AppRouter = () => {
         </Suspense>
       </ErrorBoundary>
 
-      <Footer />
+      {!location.pathname.startsWith("/chat") && <Footer />}
       <ChatButton />
     </>
   );

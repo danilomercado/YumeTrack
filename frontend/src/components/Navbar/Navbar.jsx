@@ -26,6 +26,22 @@ const NAV_KANJI = {
   "/lists": "集",
 };
 
+const NOTIFICATION_TEXT = {
+  follow: "te siguió",
+  review_comment: "comentó tu reseña",
+  comment_reply: "respondió tu comentario",
+  review_like: "le dio like a tu reseña",
+  chat_message: "te mandó un mensaje",
+};
+
+const notificationLink = (n) => {
+  if (n.type === "follow") return `/profile/${n.actorUserName}`;
+  if (n.type === "chat_message" && n.conversationId)
+    return `/chat/${n.conversationId}`;
+  if (n.userTitleId) return `/reviews/${n.userTitleId}`;
+  return "#";
+};
+
 const navLinkClass = ({ isActive }) =>
   `springy relative rounded-full px-3.5 py-2 text-sm font-bold hover:-translate-y-0.5 ${
     isActive
@@ -266,69 +282,31 @@ const Navbar = () => {
                         {notifications.map((n) => (
                           <Link
                             key={n.id}
-                            to={
-                              n.type === "follow"
-                                ? `/profile/${n.actorUserName}`
-                                : (n.type === "review_comment" ||
-                                      n.type === "comment_reply") &&
-                                    n.userTitleId
-                                  ? `/reviews/${n.userTitleId}`
-                                  : "#"
-                            }
+                            to={notificationLink(n)}
                             onClick={() => setOpen(false)}
                             className="block rounded-2xl bg-ground p-3 transition hover:bg-ground"
                           >
-                            {n.type === "follow" && (
-                              <div className="flex items-start gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent font-bold text-paper">
-                                  {n.actorUserName?.charAt(0)?.toUpperCase() ||
-                                    "U"}
-                                </div>
-
-                                <div className="min-w-0">
-                                  <p className="text-sm text-paper">
-                                    <span className="font-semibold">
-                                      {n.actorUserName}
-                                    </span>
-                                    {""}
-                                    te siguió
-                                  </p>
-
-                                  {n.createdAt && (
-                                    <p className="mt-1 text-[13px] text-zinc-400">
-                                      {formatRelativeTime(n.createdAt)}
-                                    </p>
-                                  )}
-                                </div>
+                            <div className="flex items-start gap-3">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-paper">
+                                {n.actorUserName?.charAt(0)?.toUpperCase() ||
+                                  "U"}
                               </div>
-                            )}
-                            {(n.type === "review_comment" ||
-                              n.type === "comment_reply") && (
-                              <div className="flex items-start gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent font-bold text-paper">
-                                  {n.actorUserName?.charAt(0)?.toUpperCase() ||
-                                    "U"}
-                                </div>
 
-                                <div className="min-w-0">
-                                  <p className="text-sm text-paper">
-                                    <span className="font-semibold">
-                                      {n.actorUserName}
-                                    </span>
-                                    {""}
-                                    {n.type === "comment_reply"
-                                      ? "respondió tu comentario"
-                                      : "comentó tu reseña"}
+                              <div className="min-w-0">
+                                <p className="text-sm text-paper">
+                                  <span className="font-semibold">
+                                    {n.actorUserName}
+                                  </span>{" "}
+                                  {NOTIFICATION_TEXT[n.type] ?? "tuvo actividad"}
+                                </p>
+
+                                {n.createdAt && (
+                                  <p className="mt-1 text-[13px] text-zinc-400">
+                                    {formatRelativeTime(n.createdAt)}
                                   </p>
-
-                                  {n.createdAt && (
-                                    <p className="mt-1 text-[13px] text-zinc-400">
-                                      {formatRelativeTime(n.createdAt)}
-                                    </p>
-                                  )}
-                                </div>
+                                )}
                               </div>
-                            )}
+                            </div>
                           </Link>
                         ))}
                       </div>

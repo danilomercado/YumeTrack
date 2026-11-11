@@ -25,6 +25,7 @@ namespace YumeTrack.Infrastructure.Services
                     IsRead = n.IsRead,
                     ActorUserName = n.ActorUser.UserName,
                     UserTitleId = n.UserTitleId,
+                    ConversationId = n.ConversationId,
                     CreatedAt = n.CreatedAt
                 })
                 .ToListAsync();

@@ -8,6 +8,7 @@
 
         public string ActorUserName { get; set; } = string.Empty;
         public int? UserTitleId { get; set; }
+        public int? ConversationId { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

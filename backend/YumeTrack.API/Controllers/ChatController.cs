@@ -260,6 +260,29 @@ public class ChatController : ControllerBase
         var message = new ChatMessage { ConversationId = id, SenderId = me, Content = content };
         _context.ChatMessages.Add(message);
 
+        // Un solo aviso por conversación mientras no lo lea: los mensajes siguientes lo suben al tope.
+        var pendingNotice = await _context.Notifications.FirstOrDefaultAsync(n =>
+            n.UserId == otherId.Value &&
+            n.ActorUserId == me &&
+            n.Type == "chat_message" &&
+            n.ConversationId == id &&
+            !n.IsRead);
+
+        if (pendingNotice is null)
+        {
+            _context.Notifications.Add(new Notification
+            {
+                UserId = otherId.Value,
+                ActorUserId = me,
+                Type = "chat_message",
+                ConversationId = id
+            });
+        }
+        else
+        {
+            pendingNotice.CreatedAt = message.CreatedAt;
+        }
+
         // Quien escribe ya leyó todo lo anterior.
         var mine = await _context.ConversationParticipants
             .FirstAsync(p => p.ConversationId == id && p.UserId == me);
@@ -301,6 +324,15 @@ public class ChatController : ControllerBase
             return NotFound();
 
         participant.LastReadAt = DateTime.UtcNow;
+
+        // Leer la conversación también apaga sus avisos en la campana.
+        var notices = await _context.Notifications
+            .Where(n => n.UserId == me && n.Type == "chat_message" && n.ConversationId == id && !n.IsRead)
+            .ToListAsync();
+
+        foreach (var notice in notices)
+            notice.IsRead = true;
+
         await _context.SaveChangesAsync();
 
         return NoContent();

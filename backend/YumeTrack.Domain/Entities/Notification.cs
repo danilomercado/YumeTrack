@@ -16,6 +16,8 @@
 
         public int ? UserTitleId { get; set; } // para notificaciones relacionadas con títulos
 
+        public int? ConversationId { get; set; } // para avisos de mensajes de chat
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -305,6 +305,9 @@ namespace YumeTrack.Infrastructure.Migrations
                     b.Property<int>("ActorUserId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ConversationId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 

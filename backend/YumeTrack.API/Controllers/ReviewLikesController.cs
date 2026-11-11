@@ -54,6 +54,32 @@ namespace YumeTrack.API.Controllers
             };
 
             _context.ReviewLikes.Add(like);
+
+            // Avisar al dueño de la reseña; dar y quitar el like varias veces no repite el aviso.
+            if (userTitle.UserId != userId)
+            {
+                var blocked = await _context.UserBlocks.AnyAsync(b =>
+                    (b.BlockerId == userId && b.BlockedId == userTitle.UserId) ||
+                    (b.BlockerId == userTitle.UserId && b.BlockedId == userId));
+
+                var alreadyNotified = await _context.Notifications.AnyAsync(n =>
+                    n.UserId == userTitle.UserId &&
+                    n.ActorUserId == userId &&
+                    n.Type == "review_like" &&
+                    n.UserTitleId == userTitleId);
+
+                if (!blocked && !alreadyNotified)
+                {
+                    _context.Notifications.Add(new Notification
+                    {
+                        UserId = userTitle.UserId,
+                        ActorUserId = userId,
+                        Type = "review_like",
+                        UserTitleId = userTitleId
+                    });
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             return Ok(new { liked = true });
