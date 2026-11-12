@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import UserAvatar from "../UserAvatar/UserAvatar";
 import { useChat } from "../../context/ChatContext";
 import {
   getNotificationsRequest,
@@ -354,12 +355,13 @@ const Navbar = () => {
                     : "bg-panel-2 hover:bg-white/10"
                 }`}
               >
-                <span
-                  aria-hidden="true"
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-panel-2 text-[13px] text-paper"
-                >
-                  {(user?.userName || "P").charAt(0).toUpperCase()}
-                </span>
+                <UserAvatar
+                  name={user?.userName || "P"}
+                  src={user?.avatarUrl}
+                  size="h-8 w-8"
+                  text="text-[13px]"
+                  tone="bg-panel-2 text-paper"
+                />
                 {user?.userName || "Perfil"}
               </NavLink>
 

@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { getMyProfileRequest } from "../services/userService";
 
 const AuthContext = createContext();
 
@@ -21,6 +29,7 @@ const normalizeUser = (rawUser) => {
     userName: rawUser.userName ?? rawUser.username ?? rawUser.name ?? "",
     email: rawUser.email ?? "",
     isAdmin: Boolean(rawUser.isAdmin),
+    avatarUrl: rawUser.avatarUrl ?? null,
   };
 };
 
@@ -55,6 +64,37 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
+  // El login no trae la foto de perfil: se pide una vez por sesión y se
+  // guarda junto al usuario para que la barra y el resto la muestren.
+  useEffect(() => {
+    if (!token) return undefined;
+
+    let cancelled = false;
+    getMyProfileRequest()
+      .then((profile) => {
+        if (cancelled) return;
+        setUser((current) =>
+          current
+            ? { ...current, avatarUrl: profile?.avatarUrl ?? null }
+            : current,
+        );
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  const updateUser = useCallback((patch) => {
+    setUser((current) => {
+      if (!current) return current;
+      const next = { ...current, ...patch };
+      localStorage.setItem("user", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const login = (authData) => {
     const newToken = authData.token;
 
@@ -82,8 +122,9 @@ export const AuthProvider = ({ children }) => {
       isLoading,
       login,
       logout,
+      updateUser,
     };
-  }, [token, user, isLoading]);
+  }, [token, user, isLoading, updateUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

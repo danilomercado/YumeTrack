@@ -27,7 +27,7 @@ const STATUS_LABELS = {
 
 const Profile = () => {
   useDocumentTitle("Mi perfil");
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const [titles, setTitles] = useState([]);
   const [profile, setProfile] = useState(null);
@@ -153,6 +153,7 @@ const Profile = () => {
       });
 
       setAvatarUrl(response?.avatarUrl ?? null);
+      updateUser({ avatarUrl: response?.avatarUrl ?? null });
       setAvatarPickerOpen(false);
       setSuccessMessage("Foto de perfil actualizada.");
     } catch (error) {
