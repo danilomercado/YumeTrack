@@ -53,6 +53,9 @@ namespace YumeTrack.Infrastructure.Persistence
                 entity.Property(u => u.Bio)
                     .HasMaxLength(300);
 
+                entity.Property(u => u.AvatarUrl)
+                    .HasMaxLength(500);
+
                 entity.Property(u => u.CreatedAt)
                     .IsRequired();
 

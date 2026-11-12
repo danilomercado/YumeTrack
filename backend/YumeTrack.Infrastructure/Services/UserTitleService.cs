@@ -249,6 +249,7 @@ namespace YumeTrack.Infrastructure.Services
                 Id = user.Id,
                 UserName = user.UserName,
                 Bio = user.Bio,
+                AvatarUrl = user.AvatarUrl,
                 CreatedAt = user.CreatedAt,
                 TotalTitles = totalTitles,
                 FavoritesCount = favoritesCount,
@@ -273,6 +274,7 @@ namespace YumeTrack.Infrastructure.Services
                 .Select(u => new PublicUserSearchItemDto
                 {
                     UserName = u.UserName,
+                    AvatarUrl = u.AvatarUrl,
                     TotalTitles = u.UserTitles.Count
                 })
                 .Take(8)

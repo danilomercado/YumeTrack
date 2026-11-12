@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import UserAvatar from "../../components/UserAvatar/UserAvatar";
 import ProfileStats from "../../components/ProfileStats/ProfileStats";
 import ReportMenu from "../../components/ReportMenu/ReportMenu";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
@@ -165,9 +166,12 @@ const PublicProfile = () => {
         <div className="relative px-6 pb-8">
           <div className="-mt-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-accent text-3xl font-black">
-                {profile.userName?.charAt(0)?.toUpperCase() || "U"}
-              </div>
+              <UserAvatar
+                name={profile.userName || "U"}
+                src={profile.avatarUrl}
+                size="h-20 w-20"
+                text="text-3xl"
+              />
 
               <div>
                 <h1 className="mt-1 text-3xl md:text-4xl">

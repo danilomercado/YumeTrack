@@ -10,7 +10,7 @@ const TitleGrid = ({ titles = [], onSelectTitle }) => {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
       {titles.map((title, index) => (
         <TitleCard
           key={`${title.mediaType}-${title.id}`}

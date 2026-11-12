@@ -1,3 +1,4 @@
+import UserAvatar from "../UserAvatar/UserAvatar";
 import { useState } from "react";
 import ReportMenu from "../ReportMenu/ReportMenu";
 import { Link, useNavigate } from "react-router-dom";
@@ -103,11 +104,7 @@ const FeedCard = ({ item, index = 0 }) => {
       className="stagger-item springy group cursor-pointer rounded-2xl bg-panel p-4 hover:-translate-y-1 hover:bg-panel-2"
     >
       <div className="mb-3 flex items-center gap-3">
-        <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-bold ${avatarTone}`}
-        >
-          {userName.charAt(0).toUpperCase()}
-        </div>
+        <UserAvatar name={userName} src={item.avatarUrl} tone={avatarTone} />
 
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm text-zinc-400">

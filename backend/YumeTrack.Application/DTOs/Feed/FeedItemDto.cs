@@ -6,6 +6,7 @@
         public int UserId { get; set; }
 
         public string UserName { get; set; } = string.Empty;
+        public string? AvatarUrl { get; set; }
 
         public string CanonicalTitle { get; set; } = string.Empty;
         public string? PosterImageUrl { get; set; }

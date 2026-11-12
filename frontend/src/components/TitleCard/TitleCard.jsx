@@ -1,4 +1,6 @@
-const TitleCard = ({ title, onClick, index = 0 }) => {
+// showType: el badge Anime/Manga solo aporta donde se mezclan los dos tipos
+// (búsqueda, catálogo). En un rail de un solo tipo se omite.
+const TitleCard = ({ title, onClick, index = 0, showType = true }) => {
   const isManga = title.mediaType?.toLowerCase() === "manga";
 
   const metaText = isManga
@@ -9,47 +11,47 @@ const TitleCard = ({ title, onClick, index = 0 }) => {
       ? `${title.episodeCount} eps`
       : null;
 
+  const meta = [title.status, metaText].filter(Boolean).join(" · ");
+
   return (
     <button
       type="button"
       onClick={onClick}
       style={{ "--i": Math.min(index, 9) }}
-      className="stagger-item group flex flex-col overflow-hidden rounded-2xl bg-panel text-left springy hover:-translate-y-2 hover:-rotate-1 hover:scale-[1.03] hover:bg-panel-2"
+      className="stagger-item poster-card group flex w-full flex-col gap-3 rounded-2xl text-left"
     >
-      <div className="relative aspect-[2/3] overflow-hidden bg-panel-2">
+      <div className="poster aspect-[2/3] bg-panel-2">
         {title.posterImage ? (
           <img
             src={title.posterImage}
-            alt={title.title}
+            alt=""
             loading="lazy"
             decoding="async"
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center kanji text-6xl text-zinc-600">
+          <div className="flex h-full items-center justify-center kanji text-6xl text-zinc-500">
             夢
           </div>
         )}
 
-        <span
-          className={`absolute bottom-0 left-0 py-1 pl-2 pr-5 text-[13px] font-bold [clip-path:polygon(0_0,100%_0,calc(100%-10px)_100%,0_100%)] ${
-            isManga ? "bg-ai text-ground" : "bg-accent text-paper"
-          }`}
-        >
-          {isManga ? "Manga" : "Anime"}
-        </span>
+        {showType && (
+          <span
+            className={`absolute left-2 top-2 z-10 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
+              isManga ? "bg-paper text-ground" : "bg-accent text-paper"
+            }`}
+          >
+            {isManga ? "Manga" : "Anime"}
+          </span>
+        )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-3">
-        <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-bold leading-snug text-paper sm:text-base">
+      <div className="px-0.5">
+        <h3 className="poster-title line-clamp-2 text-sm font-bold leading-snug text-paper transition-colors duration-200 sm:text-[15px]">
           {title.title}
         </h3>
 
-        {(title.status || metaText) && (
-          <p className="text-[13px] text-zinc-400">
-            {[title.status, metaText].filter(Boolean).join(" · ")}
-          </p>
-        )}
+        {meta && <p className="mt-1 text-[13px] text-zinc-400">{meta}</p>}
       </div>
     </button>
   );

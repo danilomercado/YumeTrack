@@ -93,6 +93,7 @@ namespace YumeTrack.Infrastructure.Services
                 Id = u.Id,
                 UserName = u.UserName,
                 Bio = u.Bio,
+                AvatarUrl = u.AvatarUrl,
                 IsFollowing = followingIds.Contains(u.Id)
             }).ToList();
         }
@@ -110,6 +111,7 @@ namespace YumeTrack.Infrastructure.Services
                 Id = u.Id,
                 UserName = u.UserName,
                 Bio = u.Bio,
+                AvatarUrl = u.AvatarUrl,
                 IsFollowing = true
             }).ToList();
         }

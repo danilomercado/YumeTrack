@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import UserAvatar from "../../components/UserAvatar/UserAvatar";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   getReviewDetailRequest,
@@ -114,9 +115,14 @@ const ReviewDetail = () => {
             <div className="flex items-start gap-3">
               <Link
                 to={`/profile/${userName}`}
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent text-lg font-bold text-paper"
+                aria-label={userName}
               >
-                {userName.charAt(0).toUpperCase()}{" "}
+                <UserAvatar
+                  name={userName}
+                  src={data.avatarUrl}
+                  size="h-12 w-12"
+                  text="text-lg"
+                />
               </Link>{" "}
               <div className="min-w-0 flex-1">
                 <Link

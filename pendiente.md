@@ -45,6 +45,7 @@ Todo lo hecho hasta ahora está commiteado y subido (último commit `166ebc9`). 
 
 ## 3. Antes de mostrar el sitio
 
+- [ ] **BUG: el chat desde el celular se "buguea todo"** (reportado con el sitio en producción, sin detalle de qué falla). En un navegador de escritorio emulando 390×844 se ve bien, así que hay que reproducirlo en el teléfono real: pedir captura o descripción (¿se corta, el teclado tapa el campo, no abre, no llegan mensajes?). Sospechas: el teclado del teléfono con `h-dvh`, la conexión en vivo con el backend dormido, o que el celular tenga todavía una versión vieja en caché.
 - [ ] **Probar el chat con dos cuentas** (dos navegadores, uno en el celular real; el teclado del teléfono puede tapar el campo de escribir): mensajes en vivo, no leídos, botón flotante, "+ Nuevo" con buscador, aviso de "seguir y escribir", bloqueo, notificaciones en la campana (mensaje y like) y cómo se ve en el celular. Con el backend dormido (~30 s) la conexión en vivo tarda en volver.
 - [ ] Recorrer con una cuenta real todo lo que requiere sesión (no se probó en pantalla):
   - Comentar, responder y reaccionar (la respuesta ahora abre la caja debajo del comentario).

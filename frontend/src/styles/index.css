@@ -185,14 +185,14 @@
   }
 
   .stagger-item {
-    animation: pop-up 560ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
-    animation-delay: calc(var(--i, 0) * 55ms);
+    animation: pop-up 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 30ms);
   }
 
   @keyframes pop-up {
     from {
       opacity: 0;
-      transform: translateY(28px) scale(0.9) rotate(-2deg);
+      transform: translateY(12px);
     }
   }
 
@@ -279,7 +279,7 @@
   .springy {
     transition-property: transform, translate, rotate, scale, background-color;
     transition-duration: 320ms;
-    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   /* Brillo diagonal que cruza el botón principal al pasar el mouse. */
@@ -311,7 +311,6 @@
       transparent 1.4px
     );
     background-size: 16px 16px;
-    background-attachment: fixed;
   }
 
   .banner-slant {
@@ -372,7 +371,7 @@
   }
 
   .toast-in {
-    animation: toast-in 380ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    animation: toast-in 380ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
   }
 
   .toast-out {
@@ -398,7 +397,7 @@
   }
 
   .heart-pop {
-    animation: heart-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: heart-pop 420ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .rail {
@@ -447,7 +446,7 @@
   }
 
   .stamp-in {
-    animation: stamp-in 650ms cubic-bezier(0.34, 1.56, 0.64, 1) 150ms backwards;
+    animation: stamp-in 650ms cubic-bezier(0.22, 1, 0.36, 1) 150ms backwards;
   }
 
   .bell-ring {
@@ -617,5 +616,84 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Tarjeta de póster: el póster es la tarjeta. El título vive debajo, sin panel. */
+.poster {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--color-panel);
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.poster img {
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgb(11 11 12 / 0.7), transparent 40%);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .poster-card:hover .poster {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 32px -14px rgb(0 0 0 / 0.7);
+  }
+
+  .poster-card:hover .poster img {
+    transform: scale(1.04);
+  }
+
+  .poster-card:hover .poster-title {
+    color: var(--color-accent-soft);
+  }
+}
+
+.poster-card:active .poster {
+  transform: scale(0.98);
+  transition-duration: 100ms;
+}
+
+/* El rail se desvanece en el borde derecho en vez de cortarse en seco. */
+.rail-fade {
+  mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poster:hover,
+  .poster img {
+    transform: none !important;
+  }
+}
+
+/* Spotlight y hero: conservan la entrada y el hover con rebote originales. */
+.spot-pop {
+  animation: spot-pop 560ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+@keyframes spot-pop {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.9) rotate(-2deg);
+  }
+}
+
+.springy-bounce {
+  transition-property: transform, translate, rotate, scale, background-color;
+  transition-duration: 320ms;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spot-pop {
+    animation: none;
   }
 }

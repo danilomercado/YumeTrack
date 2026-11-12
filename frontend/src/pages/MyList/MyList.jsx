@@ -44,6 +44,7 @@ const MyList = () => {
   const [savingMap, setSavingMap] = useState({});
   const [deletingMap, setDeletingMap] = useState({});
   const [statusFilter, setStatusFilter] = useState("all");
+  const [expandedId, setExpandedId] = useState(null);
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
     id: null,
@@ -264,187 +265,243 @@ const MyList = () => {
         )}
 
         {!isLoading && filteredItems.length > 0 && (
-          <div className="grid gap-4">
-            {filteredItems.map((item) => {
+          <div className="grid gap-3">
+            {filteredItems.map((item, index) => {
               const isSaving = !!savingMap[item.id];
               const isDeleting = !!deletingMap[item.id];
               const hasChanges = hasItemChanged(item);
+              const isOpen = expandedId === item.id;
               const maxProgress =
                 item.episodeCount || item.chapterCount || null;
+              const progressPct = maxProgress
+                ? Math.min(
+                    100,
+                    ((Number(item.progress) || 0) / maxProgress) * 100,
+                  )
+                : 0;
+              const unit =
+                item.chapterCount && !item.episodeCount ? "cap" : "ep";
+              const hasScore =
+                item.score !== null &&
+                item.score !== undefined &&
+                item.score !== "";
 
               return (
                 <article
                   key={item.id}
-                  className="grid gap-4 rounded-2xl bg-panel-2 p-4 md:grid-cols-[120px_1fr]"
+                  style={{ "--i": Math.min(index, 9) }}
+                  className="stagger-item rounded-2xl bg-panel p-3 sm:p-4"
                 >
-                  <div>
+                  <div className="flex gap-4">
                     <img
                       src={item.posterImageUrl}
-                      alt={item.canonicalTitle}
-                      className="h-40 w-full rounded-xl object-cover md:h-full"
+                      alt=""
+                      loading="lazy"
+                      className="h-28 w-[76px] shrink-0 rounded-xl bg-panel-2 object-cover sm:h-32 sm:w-[88px]"
                     />
-                  </div>
 
-                  <div>
-                    <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <h2 className="text-xl text-paper">
-                          {item.canonicalTitle}
-                        </h2>
-
-                        {hasChanges && (
-                          <span className="mt-2 inline-block rounded-full bg-orange-500/20 px-2 py-1 text-[13px] font-semibold text-orange-300">
-                            Cambios sin guardar
-                          </span>
-                        )}
-
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <span className="text-sm text-zinc-400">
-                            {item.mediaType}
-                          </span>
-
-                          <span
-                            className={`rounded-full px-3 py-1 text-[13px] font-semibold ${getStatusBadgeClass(
-                              item.status,
-                            )}`}
-                          >
-                            {statusLabels[item.status] ?? "Sin definir"}
-                          </span>
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h2 className="line-clamp-2 text-base text-paper sm:text-lg">
+                            {item.canonicalTitle}
+                          </h2>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-[12px] font-semibold ${getStatusBadgeClass(
+                                item.status,
+                              )}`}
+                            >
+                              {statusLabels[item.status] ?? "Sin definir"}
+                            </span>
+                            <span className="text-[13px] capitalize text-zinc-400">
+                              {item.mediaType}
+                            </span>
+                            {hasChanges && (
+                              <span className="rounded-full bg-accent/15 px-2.5 py-0.5 text-[12px] font-semibold text-accent-soft">
+                                Sin guardar
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
-                        <input
-                          type="checkbox"
-                          checked={item.isFavorite}
-                          onChange={(event) =>
+
+                        <button
+                          type="button"
+                          aria-pressed={!!item.isFavorite}
+                          aria-label={
+                            item.isFavorite
+                              ? "Quitar de favoritos"
+                              : "Marcar como favorito"
+                          }
+                          onClick={() =>
                             handleFieldChange(
                               item.id,
                               "isFavorite",
-                              event.target.checked,
+                              !item.isFavorite,
                             )
                           }
-                          className="h-4 w-4 rounded bg-panel text-accent"
-                        />
-                        Favorito{" "}
-                      </label>{" "}
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-panel-2 transition-colors duration-200 hover:bg-white/10 active:scale-95"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            className={`h-5 w-5 ${item.isFavorite ? "fill-accent stroke-accent" : "fill-none stroke-zinc-400"}`}
+                            strokeWidth="2"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M12 20.5s-7.5-4.6-9.2-9.3C1.7 8 3.6 5 6.7 5c1.9 0 3.3 1 4.3 2.6h2C14 6 15.4 5 17.3 5c3.1 0 5 3 3.9 6.2-1.7 4.7-9.2 9.3-9.2 9.3z" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      <div className="mt-auto pt-3">
+                        <div className="flex items-baseline justify-between text-[13px] text-zinc-400">
+                          <span>
+                            {item.progress || 0}
+                            {maxProgress ? ` / ${maxProgress}` : ""} {unit}
+                          </span>
+                          <span className="font-semibold text-paper">
+                            {hasScore ? `${item.score} / 10` : "Sin puntaje"}
+                          </span>
+                        </div>
+                        <div
+                          className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-panel-2"
+                          role="progressbar"
+                          aria-valuemin={0}
+                          aria-valuemax={maxProgress || 100}
+                          aria-valuenow={Number(item.progress) || 0}
+                          aria-label="Progreso"
+                        >
+                          <div
+                            className="h-full rounded-full bg-accent transition-[width] duration-500 ease-out"
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div className="grid gap-3 md:grid-cols-3">
-                      <div>
+                  </div>
+
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    onClick={() => setExpandedId(isOpen ? null : item.id)}
+                    className="mt-3 w-full rounded-xl bg-panel-2 py-2 text-sm font-semibold text-zinc-200 transition-colors duration-200 hover:bg-white/10"
+                  >
+                    {isOpen ? "Cerrar edición" : "Editar"}
+                  </button>
+
+                  {isOpen && (
+                    <div className="fade-in mt-4">
+                      <div className="grid gap-3 md:grid-cols-3">
+                        <div>
+                          <label className="mb-1 block text-sm text-zinc-400">
+                            Estado
+                          </label>
+                          <select
+                            value={item.status}
+                            onChange={(event) =>
+                              handleFieldChange(
+                                item.id,
+                                "status",
+                                Number(event.target.value),
+                              )
+                            }
+                            className="w-full rounded-xl bg-panel-2 px-3 py-2 text-sm text-paper"
+                          >
+                            {statusOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="mb-1 block text-sm text-zinc-400">
+                            Progreso
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            max={maxProgress || undefined}
+                            value={item.progress ?? 0}
+                            onChange={(event) => {
+                              let nextValue = event.target.value;
+
+                              if (nextValue === "") {
+                                handleFieldChange(item.id, "progress", "");
+                                return;
+                              }
+
+                              nextValue = Number(nextValue);
+
+                              if (nextValue < 0) nextValue = 0;
+                              if (maxProgress && nextValue > maxProgress) {
+                                nextValue = maxProgress;
+                              }
+
+                              handleFieldChange(item.id, "progress", nextValue);
+                            }}
+                            className="w-full rounded-xl bg-panel-2 px-3 py-2 text-sm text-paper"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-1 block text-sm text-zinc-400">
+                            Puntaje (0 a 10)
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="10"
+                            step="1"
+                            value={item.score ?? ""}
+                            onChange={(event) => {
+                              let nextValue = event.target.value;
+
+                              if (nextValue === "") {
+                                handleFieldChange(item.id, "score", "");
+                                return;
+                              }
+
+                              nextValue = Number(nextValue);
+
+                              if (nextValue < 0) nextValue = 0;
+                              if (nextValue > 10) nextValue = 10;
+
+                              handleFieldChange(item.id, "score", nextValue);
+                            }}
+                            className="w-full rounded-xl bg-panel-2 px-3 py-2 text-sm text-paper"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
                         <label className="mb-1 block text-sm text-zinc-400">
-                          Estado
+                          Review
                         </label>
-                        <select
-                          value={item.status}
+                        <textarea
+                          rows={3}
+                          value={item.notes ?? ""}
                           onChange={(event) =>
                             handleFieldChange(
                               item.id,
-                              "status",
-                              Number(event.target.value),
+                              "notes",
+                              event.target.value,
                             )
                           }
-                          className="w-full rounded-xl bg-panel px-3 py-2 text-sm text-paper"
-                        >
-                          {statusOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="mb-1 block text-sm text-zinc-400">
-                          Progreso
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          max={maxProgress || undefined}
-                          value={item.progress ?? 0}
-                          onChange={(event) => {
-                            let nextValue = event.target.value;
-
-                            if (nextValue === "") {
-                              handleFieldChange(item.id, "progress", "");
-                              return;
-                            }
-
-                            nextValue = Number(nextValue);
-
-                            if (nextValue < 0) nextValue = 0;
-                            if (maxProgress && nextValue > maxProgress) {
-                              nextValue = maxProgress;
-                            }
-
-                            handleFieldChange(item.id, "progress", nextValue);
-                          }}
-                          className="w-full rounded-xl bg-panel px-3 py-2 text-sm text-paper"
+                          maxLength={2000}
+                          placeholder="Escribí tu opinión sobre este título..."
+                          className="w-full rounded-xl bg-panel-2 px-3 py-2 text-sm text-paper"
                         />
-
-                        <p className="mt-1 text-[13px] text-zinc-500">
-                          {item.episodeCount
-                            ? `Total episodios: ${item.episodeCount}`
-                            : item.chapterCount
-                              ? `Total capítulos: ${item.chapterCount}`
-                              : "Total no disponible"}
-                        </p>
-                      </div>
-
-                      <div>
-                        <label className="mb-1 block text-sm text-zinc-400">
-                          Score
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="10"
-                          step="1"
-                          value={item.score ?? ""}
-                          onChange={(event) => {
-                            let nextValue = event.target.value;
-
-                            if (nextValue === "") {
-                              handleFieldChange(item.id, "score", "");
-                              return;
-                            }
-
-                            nextValue = Number(nextValue);
-
-                            if (nextValue < 0) nextValue = 0;
-                            if (nextValue > 10) nextValue = 10;
-
-                            handleFieldChange(item.id, "score", nextValue);
-                          }}
-                          className="w-full rounded-xl bg-panel px-3 py-2 text-sm text-paper"
-                        />
-
-                        <p className="mt-1 text-[13px] text-zinc-500">
-                          Puntaje de 0 a 10
+                        <p className="mt-1 text-[13px] text-zinc-400">
+                          {(item.notes ?? "").length}/2000
                         </p>
                       </div>
                     </div>
-                    <div className="mt-4">
-                      <label className="mb-1 block text-sm text-zinc-400">
-                        Review
-                      </label>
-                      <textarea
-                        rows={4}
-                        value={item.notes ?? ""}
-                        onChange={(event) =>
-                          handleFieldChange(
-                            item.id,
-                            "notes",
-                            event.target.value,
-                          )
-                        }
-                        maxLength={2000}
-                        placeholder="Escribí tu opinión sobre este título..."
-                        className="w-full rounded-xl bg-panel px-3 py-2 text-sm text-paper"
-                      />
-                      <p className="mt-1 text-[13px] text-zinc-500">
-                        {(item.notes ?? "").length}/2000
-                      </p>
-                    </div>
+                  )}
+
+                  {(isOpen || hasChanges) && (
                     <div className="mt-4 flex flex-wrap gap-3">
                       <button
                         type="button"
@@ -463,12 +520,12 @@ const MyList = () => {
                         type="button"
                         onClick={() => openDeleteModal(item.id)}
                         disabled={isDeleting || isSaving}
-                        className="rounded-xl bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-xl bg-panel-2 px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:bg-white/10 hover:text-accent-soft disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isDeleting ? "Eliminando..." : "Eliminar"}
                       </button>
                     </div>
-                  </div>
+                  )}
                 </article>
               );
             })}
@@ -492,18 +549,16 @@ const MyList = () => {
 
 const getStatusBadgeClass = (status) => {
   switch (Number(status)) {
-    case USER_TITLE_STATUS.PLANNED:
-      return "bg-zinc-700/70 text-zinc-200";
     case USER_TITLE_STATUS.WATCHING:
-      return "bg-blue-500/20 text-blue-300";
+      return "bg-accent text-paper";
     case USER_TITLE_STATUS.COMPLETED:
-      return "bg-green-500/20 text-green-300";
+      return "bg-paper text-ground";
     case USER_TITLE_STATUS.ON_HOLD:
-      return "bg-gold/20 text-gold";
+      return "bg-white/15 text-paper";
     case USER_TITLE_STATUS.DROPPED:
-      return "bg-red-500/20 text-red-300";
+      return "bg-panel-2 text-zinc-400 line-through";
     default:
-      return "bg-zinc-700/70 text-zinc-200";
+      return "bg-panel-2 text-zinc-300";
   }
 };
 

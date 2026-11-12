@@ -12,5 +12,8 @@ namespace YumeTrack.Application.DTOs.Users
     {
         [MaxLength(300)]
         public string? Bio { get; set; }
+
+        [MaxLength(500)]
+        public string? AvatarUrl { get; set; }
     }
 }

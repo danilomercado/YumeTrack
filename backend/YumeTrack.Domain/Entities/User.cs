@@ -24,6 +24,10 @@ namespace YumeTrack.Domain.Entities
         [MaxLength(300)]
         public string? Bio { get; set; }
 
+        // Imagen elegida (portada de un anime/manga o cara de un personaje, de Kitsu).
+        [MaxLength(500)]
+        public string? AvatarUrl { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Autenticación en dos pasos (opcional, TOTP).

@@ -60,7 +60,7 @@ const Home = () => {
         setIsLoadingAnime(true);
         setAnimeError("");
 
-        const data = await getTrendingTitlesRequest(10);
+        const data = await getTrendingTitlesRequest(16);
         setTrendingAnime(data);
       } catch (error) {
         console.error("Error cargando trending anime:", error);
@@ -196,7 +196,7 @@ const Home = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/catalog")}
-                  className="springy shine rounded-full bg-accent px-7 py-3.5 text-sm font-bold text-paper hover:-rotate-2 hover:scale-105 hover:bg-accent-hover"
+                  className="springy-bounce shine rounded-full bg-accent px-7 py-3.5 text-sm font-bold text-paper hover:-rotate-2 hover:scale-105 hover:bg-accent-hover"
                 >
                   Explorar catálogo
                 </button>
@@ -204,7 +204,7 @@ const Home = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/search")}
-                  className="springy rounded-full bg-panel-2 px-7 py-3.5 text-sm font-bold text-paper hover:rotate-2 hover:scale-105 hover:bg-white/10"
+                  className="springy-bounce rounded-full bg-panel-2 px-7 py-3.5 text-sm font-bold text-paper hover:rotate-2 hover:scale-105 hover:bg-white/10"
                 >
                   Buscar títulos
                 </button>
@@ -301,7 +301,74 @@ const Home = () => {
           <Spotlight titles={trendingAnime} onOpen={handleSelectTitle} />
         )}
 
-        <section className="mb-12 space-y-4">
+        <section className="mt-14 space-y-4">
+          <SectionHeader
+            title={`Más en emisión · ${currentSeasonLabel()}`}
+            kanji="動"
+            subtitle="Los animes de la temporada que se están emitiendo ahora, los más vistos primero."
+            actionLabel="Ver catálogo"
+            onAction={() => navigate("/catalog")}
+          />
+
+          {isLoadingAnime ? (
+            <TitleGridSkeleton count={10} />
+          ) : animeError ? (
+            <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-300">
+              {animeError}
+            </div>
+          ) : (
+            <Rail>
+              {trendingAnime.slice(6).map((title, index) => (
+                <div
+                  key={`${title.mediaType}-${title.id}`}
+                  className="w-36 shrink-0 snap-start sm:w-44"
+                >
+                  <TitleCard
+                    showType={false}
+                    title={title}
+                    index={index}
+                    onClick={() => handleSelectTitle(title)}
+                  />
+                </div>
+              ))}
+            </Rail>
+          )}
+        </section>
+
+        <section className="mt-14 space-y-4">
+          <SectionHeader
+            title="Manga en publicación"
+            kanji="漫"
+            subtitle="Los mangas que siguen publicando capítulos nuevos."
+            actionLabel="Ver catálogo"
+            onAction={() => navigate("/catalog")}
+          />
+
+          {isLoadingManga ? (
+            <TitleGridSkeleton count={10} />
+          ) : mangaError ? (
+            <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-300">
+              {mangaError}
+            </div>
+          ) : (
+            <Rail>
+              {trendingManga.map((title, index) => (
+                <div
+                  key={`${title.mediaType}-${title.id}`}
+                  className="w-36 shrink-0 snap-start sm:w-44"
+                >
+                  <TitleCard
+                    showType={false}
+                    title={title}
+                    index={index}
+                    onClick={() => handleSelectTitle(title)}
+                  />
+                </div>
+              ))}
+            </Rail>
+          )}
+        </section>
+        <section className="mt-14 space-y-4">
           <SectionHeader
             title="Actividad de la comunidad"
             live
@@ -342,69 +409,6 @@ const Home = () => {
           )}
         </section>
 
-        <section className="space-y-4">
-          <SectionHeader
-            title={`En emisión · ${currentSeasonLabel()}`}
-            kanji="動"
-            subtitle="Los animes de la temporada que se están emitiendo ahora, los más vistos primero."
-            actionLabel="Ver catálogo"
-            onAction={() => navigate("/catalog")}
-          />
-
-          {isLoadingAnime ? (
-            <TitleGridSkeleton count={10} />
-          ) : animeError ? (
-            <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-300">
-              {animeError}
-            </div>
-          ) : (
-            <Rail>
-              {trendingAnime.map((title, index) => (
-                <div
-                  key={`${title.mediaType}-${title.id}`}
-                  className="w-40 shrink-0 snap-start sm:w-48"
-                >
-                  <TitleCard
-                    title={title}
-                    index={index}
-                    onClick={() => handleSelectTitle(title)}
-                  />
-                </div>
-              ))}
-            </Rail>
-          )}
-        </section>
-
-        <section className="mt-12 space-y-4 pt-8">
-          <SectionHeader
-            title="Manga en publicación"
-            kanji="漫"
-            subtitle="Los mangas que siguen publicando capítulos nuevos."
-          />
-
-          {isLoadingManga ? (
-            <TitleGridSkeleton count={10} />
-          ) : mangaError ? (
-            <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-300">
-              {mangaError}
-            </div>
-          ) : (
-            <Rail>
-              {trendingManga.map((title, index) => (
-                <div
-                  key={`${title.mediaType}-${title.id}`}
-                  className="w-40 shrink-0 snap-start sm:w-48"
-                >
-                  <TitleCard
-                    title={title}
-                    index={index}
-                    onClick={() => handleSelectTitle(title)}
-                  />
-                </div>
-              ))}
-            </Rail>
-          )}
-        </section>
       </div>
 
       <TitleDetailModal

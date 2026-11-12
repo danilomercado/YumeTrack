@@ -24,7 +24,7 @@ const Spotlight = ({ titles, onOpen }) => {
     setIndex((value) => (value - 1 + items.length) % items.length);
 
   const arrowClass =
-    "springy absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-panel-2/90 text-paper hover:scale-110 hover:bg-accent";
+    "springy-bounce absolute top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-panel-2/90 text-paper hover:scale-110 hover:bg-accent";
 
   return (
     <section
@@ -53,7 +53,7 @@ const Spotlight = ({ titles, onOpen }) => {
           <img
             src={current.posterImage}
             alt={current.title}
-            className="stagger-item mx-auto w-40 rounded-2xl object-cover md:w-full"
+            className="spot-pop mx-auto w-40 rounded-2xl object-cover md:w-full"
           />
         ) : (
           <div className="kanji mx-auto flex aspect-[2/3] w-40 items-center justify-center rounded-2xl bg-panel-2 text-6xl text-zinc-600 md:w-full">
@@ -61,7 +61,7 @@ const Spotlight = ({ titles, onOpen }) => {
           </div>
         )}
 
-        <div className="stagger-item [animation-delay:120ms]">
+        <div className="spot-pop [animation-delay:120ms]">
           <span className="inline-flex items-center rounded-full bg-accent px-3 py-1 text-[13px] font-bold text-paper">
             #{index + 1} de la temporada
           </span>
@@ -78,7 +78,7 @@ const Spotlight = ({ titles, onOpen }) => {
             <button
               type="button"
               onClick={() => onOpen(current)}
-              className="springy shine rounded-full bg-accent px-7 py-3.5 text-sm font-bold text-paper hover:-rotate-2 hover:scale-105 hover:bg-accent-hover"
+              className="springy-bounce shine rounded-full bg-accent px-7 py-3.5 text-sm font-bold text-paper hover:-rotate-2 hover:scale-105 hover:bg-accent-hover"
             >
               {isManga ? "Ver ficha del manga" : "Ver ficha del anime"}
             </button>

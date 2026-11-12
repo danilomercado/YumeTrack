@@ -5,8 +5,9 @@ export const getMyProfileRequest = async () => {
   return response.data;
 };
 
-export const updateMyProfileRequest = async ({ bio }) => {
-  const response = await api.put("/me", { bio });
+// El PUT reemplaza bio y avatar a la vez: siempre se mandan los dos.
+export const updateMyProfileRequest = async ({ bio, avatarUrl }) => {
+  const response = await api.put("/me", { bio, avatarUrl });
   return response.data;
 };
 

@@ -56,6 +56,7 @@ namespace YumeTrack.API.Controllers
                 UserName = user.UserName,
                 Email = user.Email,
                 Bio = user.Bio,
+                AvatarUrl = user.AvatarUrl,
                 CreatedAt = user.CreatedAt,
                 FollowersCount = followersCount,
                 FollowingCount = followingCount
@@ -72,11 +73,17 @@ namespace YumeTrack.API.Controllers
             if (!string.IsNullOrWhiteSpace(dto.Bio) && dto.Bio.Trim().Length > 300)
                 return BadRequest(new { message = "La biografía no puede superar los 300 caracteres." });
 
+            var avatarUrl = string.IsNullOrWhiteSpace(dto.AvatarUrl) ? null : dto.AvatarUrl.Trim();
+
+            if (avatarUrl != null && !IsAllowedAvatarUrl(avatarUrl))
+                return BadRequest(new { message = "La imagen de perfil no es válida." });
+
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
                 return NotFound(new { message = "Usuario no encontrado." });
 
+            user.AvatarUrl = avatarUrl;
             user.Bio = string.IsNullOrWhiteSpace(dto.Bio) ? null : dto.Bio.Trim();
 
             await _context.SaveChangesAsync();
@@ -84,8 +91,19 @@ namespace YumeTrack.API.Controllers
             return Ok(new
             {
                 message = "Perfil actualizado correctamente.",
-                bio = user.Bio
+                bio = user.Bio,
+                avatarUrl = user.AvatarUrl
             });
+        }
+
+        private static bool IsAllowedAvatarUrl(string url)
+        {
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+                return false;
+
+            var host = uri.Host.ToLowerInvariant();
+            return host == "kitsu.app" || host.EndsWith(".kitsu.app") ||
+                   host == "kitsu.io" || host.EndsWith(".kitsu.io");
         }
     }
 }

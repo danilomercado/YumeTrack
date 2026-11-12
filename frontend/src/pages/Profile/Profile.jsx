@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import AvatarPicker from "../../components/AvatarPicker/AvatarPicker";
+import UserAvatar from "../../components/UserAvatar/UserAvatar";
 import ProfileStats from "../../components/ProfileStats/ProfileStats";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -31,6 +33,9 @@ const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [bio, setBio] = useState("");
   const [originalBio, setOriginalBio] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingBio, setIsSavingBio] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -56,6 +61,7 @@ const Profile = () => {
         setProfile(profileData);
         setBio(profileData?.bio ?? "");
         setOriginalBio(profileData?.bio ?? "");
+        setAvatarUrl(profileData?.avatarUrl ?? null);
       } catch (error) {
         setErrorMessage(error.message || "No se pudo cargar el perfil.");
       } finally {
@@ -119,6 +125,7 @@ const Profile = () => {
 
       const payload = {
         bio: bio.trim().length > 0 ? bio.trim() : null,
+        avatarUrl,
       };
 
       const response = await updateMyProfileRequest(payload);
@@ -133,6 +140,28 @@ const Profile = () => {
       setIsSavingBio(false);
     }
   };
+  const handleSelectAvatar = async (nextAvatarUrl) => {
+    try {
+      setIsSavingAvatar(true);
+      setErrorMessage("");
+      setSuccessMessage("");
+
+      // Se manda la bio ya guardada: lo que se está tipeando sin guardar no se toca.
+      const response = await updateMyProfileRequest({
+        bio: originalBio.trim().length > 0 ? originalBio.trim() : null,
+        avatarUrl: nextAvatarUrl,
+      });
+
+      setAvatarUrl(response?.avatarUrl ?? null);
+      setAvatarPickerOpen(false);
+      setSuccessMessage("Foto de perfil actualizada.");
+    } catch (error) {
+      setErrorMessage(error.message || "No se pudo actualizar la foto.");
+    } finally {
+      setIsSavingAvatar(false);
+    }
+  };
+
   const loadFollowers = async () => {
     try {
       setFollowModalTitle("Seguidores");
@@ -276,13 +305,22 @@ const Profile = () => {
         <div className="relative px-6 pb-8">
           <div className="-mt-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-accent text-3xl font-black">
-                {(
-                  profile?.userName?.charAt(0) ||
-                  user?.userName?.charAt(0) ||
-                  "U"
-                ).toUpperCase()}
-              </div>
+              <button
+                type="button"
+                onClick={() => setAvatarPickerOpen(true)}
+                aria-label="Cambiar foto de perfil"
+                className="group relative shrink-0 rounded-full"
+              >
+                <UserAvatar
+                  name={profile?.userName || user?.userName || "U"}
+                  src={avatarUrl}
+                  size="h-20 w-20"
+                  text="text-3xl"
+                />
+                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-ground/70 text-[12px] font-bold text-paper opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
+                  Cambiar
+                </span>
+              </button>
 
               <div>
                 <h1 className="mt-1 text-3xl md:text-4xl">
@@ -540,12 +578,22 @@ const Profile = () => {
                           onClick={() => setFollowModalOpen(false)}
                           className="min-w-0 flex-1"
                         >
-                          <p className="truncate font-semibold text-paper">
-                            {followUser.userName}
-                          </p>
-                          <p className="mt-1 text-sm text-zinc-400">
-                            {followUser.bio || "Sin biografía"}
-                          </p>
+                          <div className="flex items-center gap-3">
+                            <UserAvatar
+                              name={followUser.userName}
+                              src={followUser.avatarUrl}
+                              size="h-10 w-10"
+                              text="text-sm"
+                            />
+                            <div className="min-w-0">
+                              <p className="truncate font-semibold text-paper">
+                                {followUser.userName}
+                              </p>
+                              <p className="mt-0.5 truncate text-sm text-zinc-400">
+                                {followUser.bio || "Sin biografía"}
+                              </p>
+                            </div>
+                          </div>
                         </Link>
 
                         {!isOwnUser && (
@@ -576,6 +624,13 @@ const Profile = () => {
           </div>
         </div>
       )}
+      <AvatarPicker
+        isOpen={avatarPickerOpen}
+        currentAvatar={avatarUrl}
+        isSaving={isSavingAvatar}
+        onSelect={handleSelectAvatar}
+        onClose={() => setAvatarPickerOpen(false)}
+      />
     </main>
   );
 };
