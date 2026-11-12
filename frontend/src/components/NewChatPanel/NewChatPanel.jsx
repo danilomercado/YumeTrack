@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import UserAvatar from "../UserAvatar/UserAvatar";
 import { useToast } from "../../context/ToastContext";
 import {
   getChatPeopleRequest,
@@ -150,12 +151,12 @@ const NewChatPanel = ({ onClose, onStart }) => {
                     onClick={() => choose(person)}
                     className="flex w-full items-center gap-3 rounded-2xl p-3 text-left transition hover:bg-panel-2 disabled:opacity-60"
                   >
-                    <span
-                      aria-hidden="true"
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-paper"
-                    >
-                      {person.userName.charAt(0).toUpperCase()}
-                    </span>
+                    <UserAvatar
+                      name={person.userName}
+                      src={person.avatarUrl}
+                      size="h-10 w-10"
+                      text="text-sm"
+                    />
                     <span className="min-w-0 flex-1 truncate text-sm font-bold text-paper">
                       {person.userName}
                     </span>

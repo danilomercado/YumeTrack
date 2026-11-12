@@ -19,6 +19,7 @@ namespace YumeTrack.Application.DTOs.Chat
         public int Id { get; set; }
         public int OtherUserId { get; set; }
         public string OtherUserName { get; set; } = string.Empty;
+        public string? OtherAvatarUrl { get; set; }
         public string? LastMessage { get; set; }
         public DateTime? LastMessageAt { get; set; }
         public bool LastMessageIsMine { get; set; }
@@ -29,6 +30,7 @@ namespace YumeTrack.Application.DTOs.Chat
     {
         public int Id { get; set; }
         public string UserName { get; set; } = string.Empty;
+        public string? AvatarUrl { get; set; }
         public bool IsFollowing { get; set; }
         public bool FollowsMe { get; set; }
     }

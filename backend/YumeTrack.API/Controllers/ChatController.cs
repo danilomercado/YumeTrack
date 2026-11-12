@@ -71,13 +71,14 @@ public class ChatController : ControllerBase
         var users = await people
             .OrderBy(u => u.UserName)
             .Take(term.Length == 0 ? 30 : 15)
-            .Select(u => new { u.Id, u.UserName })
+            .Select(u => new { u.Id, u.UserName, u.AvatarUrl })
             .ToListAsync();
 
         return Ok(users.Select(u => new ChatPersonDto
         {
             Id = u.Id,
             UserName = u.UserName,
+            AvatarUrl = u.AvatarUrl,
             IsFollowing = iFollow.Contains(u.Id),
             FollowsMe = followMe.Contains(u.Id)
         }));
@@ -97,7 +98,7 @@ public class ChatController : ControllerBase
                 p.ConversationId,
                 Other = p.Conversation.Participants
                     .Where(o => o.UserId != me)
-                    .Select(o => new { o.UserId, o.User.UserName })
+                    .Select(o => new { o.UserId, o.User.UserName, o.User.AvatarUrl })
                     .FirstOrDefault(),
                 Last = p.Conversation.Messages
                     .OrderByDescending(m => m.CreatedAt)
@@ -122,6 +123,7 @@ public class ChatController : ControllerBase
                 Id = r.ConversationId,
                 OtherUserId = r.Other!.UserId,
                 OtherUserName = r.Other.UserName,
+                OtherAvatarUrl = r.Other.AvatarUrl,
                 LastMessage = r.Last!.Content,
                 LastMessageAt = r.Last.CreatedAt,
                 LastMessageIsMine = r.Last.SenderId == me,
@@ -142,7 +144,7 @@ public class ChatController : ControllerBase
 
         var other = await _context.Users
             .Where(u => u.Id == dto.UserId)
-            .Select(u => new { u.Id, u.UserName })
+            .Select(u => new { u.Id, u.UserName, u.AvatarUrl })
             .FirstOrDefaultAsync();
 
         if (other is null)
@@ -191,7 +193,8 @@ public class ChatController : ControllerBase
         {
             Id = conversationId!.Value,
             OtherUserId = other.Id,
-            OtherUserName = other.UserName
+            OtherUserName = other.UserName,
+            OtherAvatarUrl = other.AvatarUrl
         });
     }
 

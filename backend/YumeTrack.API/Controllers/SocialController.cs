@@ -209,6 +209,7 @@ public class SocialController : ControllerBase
             {
                 Id = u.Id,
                 UserName = u.UserName,
+                AvatarUrl = u.AvatarUrl,
                 FollowersCount = u.Followers.Count(),
                 TitlesCount = u.UserTitles.Count()
             })

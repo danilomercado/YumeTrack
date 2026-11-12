@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import NewChatPanel from "../NewChatPanel/NewChatPanel";
+import UserAvatar from "../UserAvatar/UserAvatar";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
 import { useToast } from "../../context/ToastContext";
@@ -15,13 +16,8 @@ import { formatRelativeTime } from "../../utils/formatRelativeTime";
 const formatTime = (value) =>
   new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-const Avatar = ({ name, size = "h-10 w-10" }) => (
-  <span
-    aria-hidden="true"
-    className={`flex shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-paper ${size}`}
-  >
-    {(name || "?").charAt(0).toUpperCase()}
-  </span>
+const Avatar = ({ name, src, size = "h-10 w-10" }) => (
+  <UserAvatar name={name} src={src} size={size} text="text-sm" />
 );
 
 const iconButton =
@@ -60,7 +56,10 @@ const ConversationList = ({ conversations, loading, onSelect }) => {
             onClick={() => onSelect(conversation)}
             className="flex w-full items-center gap-3 rounded-2xl p-3 text-left transition hover:bg-panel-2"
           >
-            <Avatar name={conversation.otherUserName} />
+            <Avatar
+              name={conversation.otherUserName}
+              src={conversation.otherAvatarUrl}
+            />
 
             <span className="min-w-0 flex-1">
               <span className="flex items-baseline justify-between gap-2">
@@ -356,7 +355,11 @@ const ChatPanel = () => {
                 onClick={closeChat}
                 className="flex min-w-0 flex-1 items-center gap-3"
               >
-                <Avatar name={current.otherUserName} size="h-9 w-9" />
+                <Avatar
+                  name={current.otherUserName}
+                  src={current.otherAvatarUrl}
+                  size="h-9 w-9"
+                />
                 <span className="truncate font-bold text-paper">
                   {current.otherUserName}
                 </span>

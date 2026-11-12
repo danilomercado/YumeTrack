@@ -64,6 +64,7 @@ public class EpisodesController : ControllerBase
                 c.Id,
                 c.UserId,
                 UserName = c.User.UserName,
+                AvatarUrl = c.User.AvatarUrl,
                 c.Content,
                 c.CreatedAt
             })

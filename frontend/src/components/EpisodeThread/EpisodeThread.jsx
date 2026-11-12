@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import UserAvatar from "../UserAvatar/UserAvatar";
 import {
   createEpisodeCommentRequest,
   deleteEpisodeCommentRequest,
@@ -159,7 +160,13 @@ const EpisodeThread = ({ kitsuId, mediaType, total, onNavigate }) => {
           comments.map((comment) => (
             <div key={comment.id} className="rounded-2xl bg-panel-2 p-3">
               <div className="flex items-center justify-between gap-2 text-sm">
-                <span>
+                <span className="flex items-center gap-2">
+                  <UserAvatar
+                    name={comment.userName}
+                    src={comment.avatarUrl}
+                    size="h-7 w-7"
+                    text="text-[13px]"
+                  />
                   <Link
                     to={`/profile/${comment.userName}`}
                     onClick={onNavigate}

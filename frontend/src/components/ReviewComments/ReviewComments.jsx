@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ReportMenu from "../ReportMenu/ReportMenu";
+import UserAvatar from "../UserAvatar/UserAvatar";
 import {
   getCommentsRequest,
   createCommentRequest,
@@ -52,13 +53,12 @@ const Comment = ({
 
   return (
     <div className="flex gap-3">
-      <div
-        className={`flex shrink-0 items-center justify-center rounded-full bg-accent font-bold text-paper ${
-          isReply ? "h-7 w-7 text-[13px]" : "h-9 w-9 text-sm"
-        }`}
-      >
-        {comment.userName.charAt(0).toUpperCase()}
-      </div>
+      <UserAvatar
+        name={comment.userName}
+        src={comment.avatarUrl}
+        size={isReply ? "h-7 w-7" : "h-9 w-9"}
+        text={isReply ? "text-[13px]" : "text-sm"}
+      />
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">

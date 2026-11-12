@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import UserAvatar from "../UserAvatar/UserAvatar";
 import { getSuggestionsRequest } from "../../services/socialService";
 import {
   followUserRequest,
@@ -57,13 +58,13 @@ const SuggestedUsers = () => {
             style={{ "--i": index }}
             className="stagger-item flex items-center gap-3 rounded-2xl bg-panel-2 p-3"
           >
-            <span
-              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-bold ${
+            <UserAvatar
+              name={user.userName}
+              src={user.avatarUrl}
+              tone={
                 user.id % 2 ? "bg-accent text-paper" : "bg-paper text-ground"
-              }`}
-            >
-              {user.userName.charAt(0).toUpperCase()}
-            </span>
+              }
+            />
 
             <div className="min-w-0 flex-1">
               <Link
